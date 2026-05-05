@@ -1,0 +1,17 @@
+{
+  "name": "abc-english",
+  "version": "1.0.0",
+  "description": "ABCEnglish landing page with AI voice lesson call",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.103.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "retell-sdk": "^4.8.0"
+  }
+}
