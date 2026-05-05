@@ -33,6 +33,82 @@ At the end of the lesson always review what the student has learned today and en
 
 --- LESSON SCRIPT ---`;
 
+// Expose public Supabase config to the browser (anon key only — never the service key)
+app.get("/api/config", (req, res) => {
+  res.json({
+    supabaseUrl: process.env.SUPABASE_URL,
+    supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
+  });
+});
+
+// Register a new user: creates Supabase Auth account + inserts call_triggers row
+app.post("/api/register", async (req, res) => {
+  const { name, email, phone, password } = req.body;
+  if (!name || !email || !phone || !password) {
+    return res.status(400).json({ error: "name, email, phone, and password are required" });
+  }
+
+  // Create auth user with email pre-confirmed so they can sign in immediately
+  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { name, phone },
+  });
+
+  if (authError) {
+    if (authError.message?.toLowerCase().includes("already")) {
+      return res.status(409).json({ error: "An account with this email already exists." });
+    }
+    return res.status(400).json({ error: authError.message });
+  }
+
+  // Insert into call_triggers to fire an onboarding call
+  const { error: triggerError } = await supabase.from("call_triggers").insert({
+    phone_number: phone,
+    name,
+    email,
+    call_status: "pending",
+    scheduled_time: new Date().toISOString(),
+  });
+
+  if (triggerError) {
+    console.error("call_triggers insert error:", triggerError);
+    // Auth user was created — don't fail the whole registration, just log
+  }
+
+  res.json({ success: true });
+});
+
+// Check whether a signed-in user has completed phone onboarding
+// Expects: Authorization: Bearer <supabase_access_token>
+app.post("/api/check-onboarding", async (req, res) => {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+
+  const phone = user.user_metadata?.phone;
+  if (!phone) return res.json({ status: "pending" });
+
+  const { data, error } = await supabase
+    .from("users")
+    .select("english_level")
+    .eq("phone", phone)
+    .maybeSingle();
+
+  if (error) {
+    console.error("users lookup error:", error);
+    return res.status(500).json({ error: "Lookup failed" });
+  }
+
+  if (data && data.english_level) {
+    return res.json({ status: "complete" });
+  }
+  return res.json({ status: "pending" });
+});
+
 app.post("/create-call", async (req, res) => {
   const { level, lesson_number, instruction } = req.body;
 
@@ -41,11 +117,12 @@ app.post("/create-call", async (req, res) => {
   }
 
   let finalInstruction = instruction;
+  let lessonName = null;
 
   if (!finalInstruction) {
     const { data, error } = await supabase
       .from("lessons")
-      .select("lesson_instruction")
+      .select("lesson_instruction, title")
       .eq("level", level)
       .eq("lesson_number", Number(lesson_number))
       .single();
@@ -54,6 +131,7 @@ app.post("/create-call", async (req, res) => {
       return res.status(404).json({ error: `No lesson found for ${level} lesson ${lesson_number}` });
     }
     finalInstruction = data.lesson_instruction;
+    lessonName = data.title || null;
   }
 
   try {
@@ -61,7 +139,12 @@ app.post("/create-call", async (req, res) => {
       agent_id: process.env.RETELL_AGENT_ID,
       retell_llm_dynamic_variables: { instruction: `${LESSON_PREAMBLE}\n\n${finalInstruction}` },
     });
-    res.json({ access_token: webCallResponse.access_token });
+    res.json({
+      access_token: webCallResponse.access_token,
+      lesson_name: lessonName,
+      level,
+      lesson_number,
+    });
   } catch (err) {
     console.error("Retell error:", err);
     res.status(500).json({ error: err.message || "Failed to create call" });

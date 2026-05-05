@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Create Account — ABCEnglish</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --white: #ffffff;
+    --off: #f7f6f3;
+    --border: #e8e6e0;
+    --text: #1a1a1a;
+    --muted: #6b6b6b;
+    --accent: #2563eb;
+    --accent-dark: #1d4ed8;
+    --accent-light: #eff4ff;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --radius: 10px;
+  }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    background: var(--white);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── LEFT PANEL ── */
+  .auth-left {
+    flex: 0 0 42%;
+    background: linear-gradient(145deg, #1e3a8a 0%, #2563eb 60%, #1d4ed8 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 48px 52px;
+    position: relative;
+    overflow: hidden;
+  }
+  .auth-left::before {
+    content: '';
+    position: absolute;
+    width: 480px; height: 480px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.07);
+    top: -120px; right: -160px;
+  }
+  .auth-left::after {
+    content: '';
+    position: absolute;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.07);
+    bottom: 60px; left: -100px;
+  }
+  .auth-logo {
+    font-size: 18px; font-weight: 600;
+    color: white; text-decoration: none;
+    letter-spacing: -0.3px; position: relative; z-index: 1;
+  }
+  .auth-logo span { color: rgba(255,255,255,0.55); }
+
+  .auth-left-body { position: relative; z-index: 1; }
+  .auth-left-body h2 {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic; font-weight: 400;
+    font-size: clamp(2rem, 3.2vw, 2.8rem);
+    color: white; line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin-bottom: 24px;
+  }
+  .auth-left-body p {
+    font-size: 15px; color: rgba(255,255,255,0.6);
+    line-height: 1.7; max-width: 320px;
+  }
+  .auth-bullets {
+    list-style: none; display: flex; flex-direction: column;
+    gap: 12px; margin-top: 36px;
+  }
+  .auth-bullets li {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 14px; color: rgba(255,255,255,0.8);
+  }
+  .auth-bullet-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: rgba(255,255,255,0.4); flex-shrink: 0;
+  }
+
+  .auth-testimonial {
+    position: relative; z-index: 1;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 20px 22px;
+  }
+  .auth-testimonial p {
+    font-size: 13px; color: rgba(255,255,255,0.75);
+    line-height: 1.65; margin-bottom: 12px; max-width: none;
+  }
+  .auth-testimonial-author {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .auth-testimonial-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; color: white;
+  }
+  .auth-testimonial-name {
+    font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.9);
+  }
+  .auth-testimonial-meta {
+    font-size: 11px; color: rgba(255,255,255,0.4);
+  }
+
+  /* ── RIGHT PANEL ── */
+  .auth-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 40px;
+    background: var(--white);
+    overflow-y: auto;
+  }
+  .auth-form-wrap {
+    width: 100%; max-width: 420px;
+  }
+  .auth-form-header {
+    margin-bottom: 32px;
+  }
+  .auth-form-header h1 {
+    font-size: 26px; font-weight: 600;
+    letter-spacing: -0.5px; color: var(--text);
+    margin-bottom: 6px;
+  }
+  .auth-form-header p {
+    font-size: 14px; color: var(--muted);
+  }
+  .auth-form-header a {
+    color: var(--accent); text-decoration: none; font-weight: 500;
+  }
+  .auth-form-header a:hover { text-decoration: underline; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    display: block; font-size: 13px; font-weight: 500;
+    color: var(--text); margin-bottom: 7px;
+  }
+  .form-input, .form-select {
+    width: 100%; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; color: var(--text);
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 8px; padding: 11px 14px;
+    outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    appearance: none;
+  }
+  .form-input::placeholder { color: #b0aea8; }
+  .form-input:focus, .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+  }
+
+  /* Phone field: country code dropdown + number input side by side */
+  .phone-row {
+    display: flex; gap: 8px;
+  }
+  .phone-code-wrap {
+    position: relative; flex: 0 0 auto;
+  }
+  .phone-code-wrap::after {
+    content: '';
+    position: absolute; right: 10px; top: 50%;
+    transform: translateY(-50%);
+    width: 0; height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid var(--muted);
+    pointer-events: none;
+  }
+  .phone-code {
+    width: auto; min-width: 90px; padding-right: 28px;
+    font-size: 14px; cursor: pointer;
+  }
+  .phone-number { flex: 1; }
+
+  .form-hint {
+    font-size: 11px; color: var(--muted); margin-top: 5px;
+  }
+  .form-error {
+    font-size: 12px; color: #dc2626; margin-top: 6px;
+    display: none;
+  }
+  .form-error.visible { display: block; }
+
+  .btn-submit {
+    width: 100%; font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 500;
+    background: var(--accent); color: white;
+    border: none; border-radius: 9px;
+    padding: 13px; cursor: pointer; margin-top: 6px;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn-submit:hover:not(:disabled) { background: var(--accent-dark); transform: translateY(-1px); }
+  .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .auth-terms {
+    font-size: 12px; color: var(--muted); text-align: center;
+    margin-top: 14px; line-height: 1.6;
+  }
+  .auth-terms a { color: var(--accent); text-decoration: none; }
+  .auth-terms a:hover { text-decoration: underline; }
+
+  .auth-switch {
+    margin-top: 24px; text-align: center;
+    font-size: 13px; color: var(--muted);
+  }
+  .auth-switch a {
+    color: var(--accent); font-weight: 500; text-decoration: none;
+  }
+  .auth-switch a:hover { text-decoration: underline; }
+
+  /* ── SUCCESS STATE ── */
+  .success-panel {
+    display: none;
+    text-align: center;
+    padding: 8px 0;
+  }
+  .success-panel.visible { display: block; }
+  .success-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--green-light);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+  }
+  .success-icon svg { color: var(--green); }
+  .success-panel h2 {
+    font-size: 22px; font-weight: 600;
+    letter-spacing: -0.4px; margin-bottom: 10px;
+  }
+  .success-panel p {
+    font-size: 14px; color: var(--muted);
+    line-height: 1.7; margin-bottom: 8px;
+  }
+  .success-phone-badge {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 13px; font-weight: 500;
+    border-radius: 6px; padding: 4px 10px;
+    margin-bottom: 24px;
+  }
+  .success-link {
+    font-size: 13px; color: var(--muted);
+    margin-top: 20px;
+  }
+  .success-link a { color: var(--accent); text-decoration: none; font-weight: 500; }
+  .success-link a:hover { text-decoration: underline; }
+
+  @media (max-width: 768px) {
+    body { flex-direction: column; }
+    .auth-left {
+      flex: none; padding: 36px 28px 40px;
+      min-height: 220px;
+    }
+    .auth-left-body h2 { font-size: 1.8rem; }
+    .auth-testimonial { display: none; }
+    .auth-right { padding: 40px 24px; }
+    .form-row { grid-template-columns: 1fr; gap: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<div class="auth-left">
+  <a class="auth-logo" href="/">ABC<span>English</span></a>
+
+  <div class="auth-left-body">
+    <h2>Start speaking<br>English today.</h2>
+    <p>Join thousands of learners who practice daily with their AI tutor — at any level, on any schedule.</p>
+    <ul class="auth-bullets">
+      <li><div class="auth-bullet-dot"></div>Placed at the right level instantly</li>
+      <li><div class="auth-bullet-dot"></div>Real conversations, real corrections</li>
+      <li><div class="auth-bullet-dot"></div>Progress you can actually see</li>
+    </ul>
+  </div>
+
+  <div class="auth-testimonial">
+    <p>"I used to avoid speaking in English. After two weeks with ABCEnglish I had a full conversation with my manager."</p>
+    <div class="auth-testimonial-author">
+      <div class="auth-testimonial-avatar">MR</div>
+      <div>
+        <div class="auth-testimonial-name">Maria R.</div>
+        <div class="auth-testimonial-meta">B1 learner · 3 weeks in</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="auth-right">
+  <div class="auth-form-wrap">
+
+    <!-- FORM STATE -->
+    <div id="form-section">
+      <div class="auth-form-header">
+        <h1>Create your account</h1>
+        <p>Already have one? <a href="/signin.html">Sign in →</a></p>
+      </div>
+
+      <form id="signup-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="first-name">First name</label>
+            <input class="form-input" id="first-name" type="text" placeholder="Maria" autocomplete="given-name" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="last-name">Last name</label>
+            <input class="form-input" id="last-name" type="text" placeholder="Rodriguez" autocomplete="family-name" required/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email address</label>
+          <input class="form-input" id="email" type="email" placeholder="you@example.com" autocomplete="email" required/>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone number</label>
+          <div class="phone-row">
+            <div class="phone-code-wrap">
+              <select class="form-select phone-code" id="country-code">
+                <option value="1">🇺🇸 +1</option>
+                <option value="234" selected>🇳🇬 +234</option>
+                <option value="44">🇬🇧 +44</option>
+                <option value="61">🇦🇺 +61</option>
+                <option value="91">🇮🇳 +91</option>
+                <option value="27">🇿🇦 +27</option>
+                <option value="233">🇬🇭 +233</option>
+                <option value="254">🇰🇪 +254</option>
+                <option value="52">🇲🇽 +52</option>
+                <option value="55">🇧🇷 +55</option>
+                <option value="971">🇦🇪 +971</option>
+                <option value="966">🇸🇦 +966</option>
+                <option value="49">🇩🇪 +49</option>
+                <option value="33">🇫🇷 +33</option>
+              </select>
+            </div>
+            <input class="form-input phone-number" id="phone" type="tel" placeholder="8034567890" autocomplete="tel-national" required/>
+          </div>
+          <div class="form-hint">We'll call this number for your onboarding session.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input class="form-input" id="password" type="password" placeholder="At least 8 characters" autocomplete="new-password" required minlength="8"/>
+        </div>
+
+        <div id="form-error" class="form-error"></div>
+
+        <button class="btn-submit" type="submit" id="submit-btn">Create account →</button>
+
+        <p class="auth-terms">
+          By creating an account you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+        </p>
+      </form>
+
+      <div class="auth-switch">
+        Already have an account? <a href="/signin.html">Sign in</a>
+      </div>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div id="success-section" class="success-panel">
+      <div class="success-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.46 2 2 0 0 1 3.58 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6 6l1.72-1.72a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+        </svg>
+      </div>
+      <h2>Your call is on the way!</h2>
+      <p>We're about to call you at</p>
+      <div class="success-phone-badge" id="success-phone">+1 8884091905</div>
+      <p>Answer the call and speak with your AI tutor for a quick placement session. Once it's done, you'll be able to access your dashboard.</p>
+      <div class="success-link">
+        Already done your call? <a href="/signin.html">Sign in</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(async () => {
+  // Fetch public config from server (anon key only — safe to use in browser)
+  let supabase = null;
+  try {
+    const cfg = await fetch('/api/config').then(r => r.json());
+    if (cfg.supabaseUrl && cfg.supabaseAnonKey) {
+      const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+      supabase = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    }
+  } catch (e) {
+    console.warn('Supabase config unavailable:', e);
+  }
+
+  const form = document.getElementById('signup-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const errorEl = document.getElementById('form-error');
+  const formSection = document.getElementById('form-section');
+  const successSection = document.getElementById('success-section');
+  const successPhone = document.getElementById('success-phone');
+
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.classList.add('visible');
+  }
+  function clearError() {
+    errorEl.textContent = '';
+    errorEl.classList.remove('visible');
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearError();
+
+    const firstName = document.getElementById('first-name').value.trim();
+    const lastName = document.getElementById('last-name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const countryCode = document.getElementById('country-code').value;
+    const localPhone = document.getElementById('phone').value.trim().replace(/\D/g, '');
+    const password = document.getElementById('password').value;
+
+    if (!firstName || !lastName || !email || !localPhone || !password) {
+      return showError('Please fill in all fields.');
+    }
+    if (password.length < 8) {
+      return showError('Password must be at least 8 characters.');
+    }
+
+    // Format: countrycode + digits (no + prefix, as per DB convention)
+    const fullPhone = countryCode + localPhone;
+    const name = `${firstName} ${lastName}`;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating account…';
+
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, phone: fullPhone, password }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Registration failed. Please try again.');
+      }
+
+      // Show success confirmation with the phone number they'll be called on
+      successPhone.textContent = '+' + countryCode + ' ' + localPhone;
+      formSection.style.display = 'none';
+      successSection.classList.add('visible');
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Create account →';
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

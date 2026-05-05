@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard — ABCEnglish</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --white: #ffffff;
+    --off: #f7f6f3;
+    --border: #e8e6e0;
+    --text: #1a1a1a;
+    --muted: #6b6b6b;
+    --accent: #2563eb;
+    --accent-dark: #1d4ed8;
+    --accent-light: #eff4ff;
+  }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    background: var(--off);
+    min-height: 100vh;
+  }
+
+  nav {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 clamp(1.5rem, 4vw, 3rem);
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo {
+    font-size: 17px; font-weight: 600; letter-spacing: -0.3px;
+    text-decoration: none; color: var(--text);
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .nav-user {
+    font-size: 13px; color: var(--muted);
+  }
+  .btn-signout {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    color: var(--muted); background: none;
+    border: 1px solid var(--border);
+    border-radius: 7px; padding: 6px 14px;
+    cursor: pointer; transition: background 0.15s, color 0.15s;
+  }
+  .btn-signout:hover { background: var(--off); color: var(--text); }
+
+  main {
+    max-width: 960px; margin: 0 auto;
+    padding: clamp(2rem, 5vw, 4rem) clamp(1.5rem, 4vw, 3rem);
+  }
+  .greeting {
+    margin-bottom: 40px;
+  }
+  .greeting h1 {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 600; letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+  .greeting p { font-size: 15px; color: var(--muted); }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 26px;
+  }
+  .card-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .card-value {
+    font-size: 28px; font-weight: 600;
+    letter-spacing: -0.5px; color: var(--text);
+    margin-bottom: 4px;
+  }
+  .card-sub { font-size: 13px; color: var(--muted); }
+
+  .placeholder-banner {
+    margin-top: 40px;
+    background: var(--accent-light);
+    border: 1px solid #bfdbfe;
+    border-radius: 14px;
+    padding: 32px 28px;
+    text-align: center;
+  }
+  .placeholder-banner h2 {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic; font-weight: 400;
+    font-size: 1.5rem; margin-bottom: 10px;
+    color: var(--accent-dark);
+  }
+  .placeholder-banner p {
+    font-size: 14px; color: var(--muted); max-width: 480px; margin: 0 auto;
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="/">ABC<span>English</span></a>
+  <div class="nav-right">
+    <span class="nav-user" id="nav-user"></span>
+    <button class="btn-signout" id="signout-btn">Sign out</button>
+  </div>
+</nav>
+
+<main>
+  <div class="greeting">
+    <h1>Welcome back, <span id="user-name">learner</span>.</h1>
+    <p>Here's your learning overview.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-label">English Level</div>
+      <div class="card-value" id="english-level">—</div>
+      <div class="card-sub">Based on your placement call</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Lessons Completed</div>
+      <div class="card-value">—</div>
+      <div class="card-sub">Coming soon</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Practice Streak</div>
+      <div class="card-value">—</div>
+      <div class="card-sub">Coming soon</div>
+    </div>
+  </div>
+
+  <div class="placeholder-banner">
+    <h2>Your dashboard is on its way.</h2>
+    <p>Lessons, progress tracking, and live practice sessions are being built. Check back soon — your AI tutor can't wait to keep working with you.</p>
+  </div>
+</main>
+
+<script>
+(async () => {
+  let supabase = null;
+
+  try {
+    const cfg = await fetch('/api/config').then(r => r.json());
+    if (cfg.supabaseUrl && cfg.supabaseAnonKey) {
+      const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+      supabase = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    }
+  } catch (e) {
+    console.warn('Supabase config unavailable:', e);
+  }
+
+  if (!supabase) {
+    window.location.href = '/signin.html';
+    return;
+  }
+
+  // Gate: must be signed in
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    window.location.href = '/signin.html';
+    return;
+  }
+
+  // Gate: onboarding must be complete
+  const onboardRes = await fetch('/api/check-onboarding', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + session.access_token },
+  });
+  const { status } = await onboardRes.json();
+  if (status !== 'complete') {
+    window.location.href = '/signin.html';
+    return;
+  }
+
+  // Populate user info from metadata
+  const meta = session.user.user_metadata || {};
+  const displayName = (meta.name || '').split(' ')[0] || session.user.email;
+  document.getElementById('user-name').textContent = displayName;
+  document.getElementById('nav-user').textContent = session.user.email;
+
+  // Fetch english_level from users table
+  if (meta.phone) {
+    const { data } = await supabase
+      .from('users')
+      .select('english_level')
+      .eq('phone', meta.phone)
+      .maybeSingle();
+    if (data?.english_level) {
+      document.getElementById('english-level').textContent = data.english_level;
+    }
+  }
+
+  document.getElementById('signout-btn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/signin.html';
+  });
+})();
+</script>
+
+</body>
+</html>
