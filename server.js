@@ -77,6 +77,18 @@ app.post("/api/register", async (req, res) => {
     // Auth user was created — don't fail the whole registration, just log
   }
 
+  // Insert into users table
+  const { error: usersError } = await supabase.from("users").insert({
+    phone: phone,
+    name: name,
+    email: email,
+    // english_level is left null initially, will be updated after the call
+  });
+
+  if (usersError) {
+    console.error("users insert error:", usersError);
+  }
+
   res.json({ success: true });
 });
 
