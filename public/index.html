@@ -885,6 +885,9 @@
       <option value="A1">Beginner (A1)</option>
       <option value="A2">Elementary (A2)</option>
       <option value="B1">Intermediate (B1)</option>
+      <option value="B2">Upper Intermediate (B2)</option>
+      <option value="C1">Advanced (C1)</option>
+      <option value="C2">Proficient (C2)</option>
     </select>
     <div style="display: flex; gap: 12px; justify-content: center;">
       <button class="btn-secondary" id="cancelLevelBtn" style="flex: 1; justify-content: center;">Cancel</button>
@@ -924,7 +927,7 @@
 <script type="module">
   import { RetellWebClient } from "https://esm.sh/retell-client-js-sdk";
 
-  const LEVELS = ['A1', 'A2', 'B1'];
+  const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 
   const modal         = document.getElementById('callModal');
   const statusEl      = document.getElementById('callStatusText');
