@@ -60,8 +60,10 @@ app.post("/api/register", async (req, res) => {
   // Create auth user with email pre-confirmed so they can sign in immediately
   const { data: authData, error: authError } = await supabase.auth.admin.createUser({
     email,
+    phone,
     password,
     email_confirm: true,
+    phone_confirm: true,
     user_metadata: { name, phone },
   });
 
