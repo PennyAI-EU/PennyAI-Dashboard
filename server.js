@@ -4,6 +4,7 @@ const cors = require("cors");
 const path = require("path");
 const Retell = require("retell-sdk").default;
 const { createClient } = require("@supabase/supabase-js");
+const ws = require("ws");
 
 const app = express();
 app.use(cors());
@@ -11,7 +12,14 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 const retell = new Retell({ apiKey: process.env.RETELL_API_KEY });
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, {
+  auth: {
+    persistSession: false,
+  },
+  realtime: {
+    transport: ws,
+  },
+});
 
 const LESSON_PREAMBLE = `You are an AI English tutor conducting a live, interactive voice lesson with a student. The student's level will be provided (e.g. A1, A2, B1), and you must adapt your language, vocabulary, and pace to match that level. For A1 learners, use very simple words, short sentences, and lots of repetition.
 
@@ -44,6 +52,7 @@ app.get("/api/config", (req, res) => {
 // Register a new user: creates Supabase Auth account + inserts call_triggers row
 app.post("/api/register", async (req, res) => {
   const { name, email, phone, password } = req.body;
+  console.log("Registration attempt:", { name, email, phone });
   if (!name || !email || !phone || !password) {
     return res.status(400).json({ error: "name, email, phone, and password are required" });
   }
@@ -63,31 +72,33 @@ app.post("/api/register", async (req, res) => {
     return res.status(400).json({ error: authError.message });
   }
 
-  // Insert into call_triggers to fire an onboarding call
-  const { error: triggerError } = await supabase.from("call_triggers").insert({
-    phone_number: phone,
-    name,
-    email,
-    call_status: "pending",
-    scheduled_time: new Date().toISOString(),
-  });
+    console.log("Inserting into call_triggers with phone:", phone);
+    const { error: triggerError } = await supabase.from("call_triggers").insert({
+      phone_number: phone,
+      name,
+      email,
+      call_status: "pending",
+      scheduled_time: new Date().toISOString(),
+    });
 
-  if (triggerError) {
-    console.error("call_triggers insert error:", triggerError);
-    // Auth user was created — don't fail the whole registration, just log
-  }
+    if (triggerError) {
+      console.error("call_triggers insert error:", triggerError);
+    }
 
-  // Insert into users table
-  const { error: usersError } = await supabase.from("users").insert({
-    phone: phone,
-    name: name,
-    email: email,
-    // english_level is left null initially, will be updated after the call
-  });
+    const authUserId = authData.user.id;
 
-  if (usersError) {
-    console.error("users insert error:", usersError);
-  }
+    // Insert into users table
+    console.log("Inserting into users with phone:", phone, "and id:", authUserId);
+    const { error: usersError } = await supabase.from("users").insert({
+      id: authUserId,
+      phone: phone,
+      name: name,
+      email: email,
+    });
+
+    if (usersError) {
+      console.error("users insert error:", usersError);
+    }
 
   res.json({ success: true });
 });

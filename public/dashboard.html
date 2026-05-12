@@ -16,196 +16,923 @@
     --accent: #2563eb;
     --accent-dark: #1d4ed8;
     --accent-light: #eff4ff;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --radius: 12px;
+    --radius-lg: 20px;
+    --sidebar-width: 260px;
   }
   body {
     font-family: 'DM Sans', sans-serif;
     color: var(--text);
     background: var(--off);
     min-height: 100vh;
+    display: flex;
   }
 
-  nav {
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-width);
     background: var(--white);
-    border-bottom: 1px solid var(--border);
-    padding: 0 clamp(1.5rem, 4vw, 3rem);
-    height: 60px;
-    display: flex; align-items: center; justify-content: space-between;
+    border-right: 1px solid var(--border);
+    height: 100vh;
+    position: fixed;
+    left: 0; top: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    z-index: 100;
   }
   .nav-logo {
-    font-size: 17px; font-weight: 600; letter-spacing: -0.3px;
+    font-size: 18px; font-weight: 600; letter-spacing: -0.3px;
     text-decoration: none; color: var(--text);
+    padding: 0 12px 32px;
+    display: block;
   }
   .nav-logo span { color: var(--accent); }
-  .nav-right { display: flex; align-items: center; gap: 16px; }
-  .nav-user {
-    font-size: 13px; color: var(--muted);
+  
+  .nav-menu {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover {
+    background: var(--off);
+    color: var(--text);
+  }
+  .nav-item.active {
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+  .nav-item svg {
+    width: 18px; height: 18px;
+    opacity: 0.7;
+  }
+  .nav-item.active svg {
+    opacity: 1;
+  }
+
+  .nav-footer {
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .user-brief {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+  }
+  .user-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 13px;
+  }
+  .user-info { min-width: 0; }
+  .user-name {
+    font-size: 13px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .user-email {
+    font-size: 11px; color: var(--muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
   .btn-signout {
+    width: 100%;
+    text-align: left;
+    background: none; border: none;
+    padding: 10px 14px; border-radius: 8px;
     font-family: 'DM Sans', sans-serif;
-    font-size: 13px; font-weight: 500;
-    color: var(--muted); background: none;
-    border: 1px solid var(--border);
-    border-radius: 7px; padding: 6px 14px;
-    cursor: pointer; transition: background 0.15s, color 0.15s;
+    font-size: 14px; font-weight: 500;
+    color: var(--muted); cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    transition: all 0.15s;
   }
-  .btn-signout:hover { background: var(--off); color: var(--text); }
+  .btn-signout:hover { background: #fee2e2; color: #dc2626; }
+  .btn-signout svg { width: 18px; height: 18px; }
 
-  main {
-    max-width: 960px; margin: 0 auto;
-    padding: clamp(2rem, 5vw, 4rem) clamp(1.5rem, 4vw, 3rem);
+  /* MAIN CONTENT */
+  .main-content {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    min-height: 100vh;
+    padding: 40px clamp(24px, 5vw, 60px);
   }
-  .greeting {
-    margin-bottom: 40px;
+  
+  .section {
+    display: none;
+    max-width: 1000px;
+    margin: 0 auto;
+    animation: fadeIn 0.3s ease-out;
   }
-  .greeting h1 {
-    font-size: clamp(1.6rem, 3vw, 2.2rem);
-    font-weight: 600; letter-spacing: -0.5px;
-    margin-bottom: 6px;
+  .section.active { display: block; }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-  .greeting p { font-size: 15px; color: var(--muted); }
 
-  .cards {
+  .section-header { margin-bottom: 32px; }
+  .section-header h1 {
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    font-weight: 600; letter-spacing: -0.8px;
+    margin-bottom: 4px;
+  }
+  .section-header p { font-size: 15px; color: var(--muted); }
+
+  /* CARDS */
+  .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
   }
   .card {
     background: var(--white);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 28px 26px;
+    border-radius: var(--radius);
+    padding: 24px;
+    display: flex; flex-direction: column;
   }
   .card-label {
-    font-size: 11px; font-weight: 600; letter-spacing: 0.8px;
-    text-transform: uppercase; color: var(--muted);
-    margin-bottom: 12px;
+    font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--muted);
+    margin-bottom: 16px;
   }
   .card-value {
-    font-size: 28px; font-weight: 600;
-    letter-spacing: -0.5px; color: var(--text);
+    font-size: 32px; font-weight: 600; letter-spacing: -0.5px;
     margin-bottom: 4px;
   }
   .card-sub { font-size: 13px; color: var(--muted); }
 
-  .placeholder-banner {
-    margin-top: 40px;
-    background: var(--accent-light);
-    border: 1px solid #bfdbfe;
-    border-radius: 14px;
-    padding: 32px 28px;
+  /* PROGRESS BAR */
+  .progress-container { margin-top: 16px; }
+  .progress-bar {
+    height: 8px; background: var(--off); border-radius: 4px;
+    overflow: hidden; margin-bottom: 8px;
+  }
+  .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 1s ease-out; }
+  .progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+
+  /* LISTS */
+  .list-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .list-item {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 20px;
+    transition: background 0.1s;
+  }
+  .list-item:last-child { border-bottom: none; }
+  .list-item:hover { background: var(--off); }
+  
+  .item-date {
+    flex-shrink: 0; width: 60px;
     text-align: center;
   }
-  .placeholder-banner h2 {
+  .item-date .day { font-size: 18px; font-weight: 600; }
+  .item-date .month { font-size: 11px; text-transform: uppercase; color: var(--muted); }
+
+  .item-content { flex: 1; }
+  .item-title { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+  .item-meta { font-size: 13px; color: var(--muted); }
+
+  .item-score {
+    padding: 6px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 600;
+  }
+  .score-high { background: var(--green-light); color: var(--green); }
+  .score-mid { background: #fef9c3; color: #854d0e; }
+  .score-low { background: #fee2e2; color: #991b1b; }
+
+  /* BUTTONS */
+  .btn-primary {
+    background: var(--accent); color: white;
+    border: none; border-radius: 8px;
+    padding: 12px 24px; font-family: inherit;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary:hover { background: var(--accent-dark); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* PROFILE STYLES */
+  .profile-grid {
+    display: grid; grid-template-columns: 1fr 2fr; gap: 40px;
+  }
+  .profile-field { margin-bottom: 24px; }
+  .field-label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+  .field-value { font-size: 15px; color: var(--text); }
+
+  /* CALL MODAL STYLES (Copied from index.html) */
+  .call-modal {
+    position: fixed; inset: 0; z-index: 999;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+  .call-modal.open { opacity: 1; pointer-events: all; }
+  .call-modal-card {
+    background: linear-gradient(145deg, #1e3a8a 0%, #2563eb 60%, #1d4ed8 100%);
+    border-radius: 24px;
+    width: 100%; max-width: 400px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.45);
+    overflow: hidden;
+  }
+  .call-modal-inner {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 24px; text-align: center; padding: 36px 28px 32px;
+  }
+  .call-modal-brand {
+    font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.5);
+    letter-spacing: -0.2px;
+  }
+  .call-modal-brand strong { color: white; }
+  .call-vis-wrap {
+    position: relative;
+    width: 240px; height: 240px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .call-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.18);
+    width: 180px; height: 180px;
+  }
+  .call-ring-1 { animation: ring-expand 2.6s ease-out infinite; }
+  .call-ring-2 { animation: ring-expand 2.6s ease-out 0.87s infinite; }
+  .call-ring-3 { animation: ring-expand 2.6s ease-out 1.74s infinite; }
+  @keyframes ring-expand {
+    0%   { transform: scale(1);   opacity: 0.7; }
+    100% { transform: scale(1.65); opacity: 0; }
+  }
+  #callCanvas {
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    position: relative; z-index: 1;
+    backdrop-filter: blur(2px);
+  }
+  .call-identity { display: flex; flex-direction: column; gap: 5px; }
+  .call-name {
     font-family: 'Instrument Serif', serif;
-    font-style: italic; font-weight: 400;
-    font-size: 1.5rem; margin-bottom: 10px;
-    color: var(--accent-dark);
+    font-style: italic;
+    font-size: 26px; font-weight: 400;
+    color: white; letter-spacing: -0.3px;
   }
-  .placeholder-banner p {
-    font-size: 14px; color: var(--muted); max-width: 480px; margin: 0 auto;
-    line-height: 1.7;
+  .call-role { font-size: 13px; color: rgba(255,255,255,0.5); }
+  .call-status-text {
+    font-size: 13px; color: rgba(255,255,255,0.45);
+    min-height: 18px; letter-spacing: 0.2px;
   }
+  .call-status-text.live { color: #86efac; }
+  .call-end-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500;
+    padding: 13px 32px; border-radius: 50px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .call-end-btn:hover {
+    background: rgba(255,255,255,0.18);
+    border-color: rgba(255,255,255,0.3);
+  }
+  .call-lesson-info {
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .call-lesson-title { font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.9); }
+  .call-lesson-meta { font-size: 12px; color: rgba(255,255,255,0.45); }
+
+  /* MOBILE RESPONSIVENESS */
+  @media (max-width: 800px) {
+    .sidebar { width: 70px; padding: 24px 8px; }
+    .nav-logo span, .nav-item span, .user-info, .btn-signout span { display: none; }
+    .nav-logo { padding-bottom: 24px; text-align: center; }
+    .main-content { margin-left: 70px; }
+    .nav-item { justify-content: center; padding: 12px; }
+    .btn-signout { justify-content: center; }
+    .profile-grid { grid-template-columns: 1fr; }
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    padding: 60px 40px; text-align: center; color: var(--muted);
+  }
+  .empty-state h3 { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 24px; color: var(--text); margin-bottom: 8px; }
+
 </style>
 </head>
 <body>
 
-<nav>
+<aside class="sidebar">
   <a class="nav-logo" href="/">ABC<span>English</span></a>
-  <div class="nav-right">
-    <span class="nav-user" id="nav-user"></span>
-    <button class="btn-signout" id="signout-btn">Sign out</button>
-  </div>
-</nav>
-
-<main>
-  <div class="greeting">
-    <h1>Welcome back, <span id="user-name">learner</span>.</h1>
-    <p>Here's your learning overview.</p>
-  </div>
-
-  <div class="cards">
-    <div class="card">
-      <div class="card-label">English Level</div>
-      <div class="card-value" id="english-level">—</div>
-      <div class="card-sub">Based on your placement call</div>
+  
+  <nav class="nav-menu">
+    <div class="nav-item active" id="nav-overview" onclick="showSection('overview')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+      <span>Overview</span>
     </div>
-    <div class="card">
-      <div class="card-label">Lessons Completed</div>
-      <div class="card-value">—</div>
-      <div class="card-sub">Coming soon</div>
+    <div class="nav-item" id="nav-lessons" onclick="showSection('lessons')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+      <span>My Lessons</span>
     </div>
-    <div class="card">
-      <div class="card-label">Practice Streak</div>
-      <div class="card-value">—</div>
-      <div class="card-sub">Coming soon</div>
+    <div class="nav-item" id="nav-history" onclick="showSection('history')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      <span>History</span>
     </div>
-  </div>
+    <div class="nav-item" id="nav-profile" onclick="showSection('profile')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      <span>Profile</span>
+    </div>
+  </nav>
 
-  <div class="placeholder-banner">
-    <h2>Your dashboard is on its way.</h2>
-    <p>Lessons, progress tracking, and live practice sessions are being built. Check back soon — your AI tutor can't wait to keep working with you.</p>
+  <div class="nav-footer">
+    <div class="user-brief">
+      <div class="user-avatar" id="avatar-initials">—</div>
+      <div class="user-info">
+        <div class="user-name" id="user-display-name">Loading...</div>
+        <div class="user-email" id="user-display-email">...</div>
+      </div>
+    </div>
+    <button class="btn-signout" id="signout-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      <span>Sign out</span>
+    </button>
   </div>
+</aside>
+
+<main class="main-content">
+  
+  <!-- OVERVIEW SECTION -->
+  <section id="section-overview" class="section active">
+    <div class="section-header">
+      <h1>Welcome back, <span id="greet-name">learner</span>.</h1>
+      <p>Here's what's happening with your English journey.</p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-label">English Level</div>
+        <div class="card-value" id="stat-level">—</div>
+        <div class="card-sub">Your current proficiency</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Lessons Completed</div>
+        <div class="card-value" id="stat-completed">—</div>
+        <div class="card-sub">Total sessions finished</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Learning Time</div>
+        <div class="card-value" id="stat-time">— <small style="font-size: 14px; font-weight: 400; color: var(--muted)">mins</small></div>
+        <div class="progress-container">
+          <div class="progress-bar"><div class="progress-fill" id="time-progress"></div></div>
+          <div class="progress-labels">
+            <span id="time-used">0 used</span>
+            <span id="time-allocated">0 allocated</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="card-label">Next Scheduled Call</div>
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <div class="card-value" id="next-call-time">No pending calls</div>
+          <div class="card-sub" id="next-call-status">Check back later for your next session.</div>
+        </div>
+        <button class="btn-primary" onclick="showSection('lessons')">Manage Schedule</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- LESSONS SECTION -->
+  <section id="section-lessons" class="section">
+    <div class="section-header">
+      <h1>My Lessons</h1>
+      <p>Your current path and upcoming sessions.</p>
+    </div>
+
+    <div class="card" style="border-left: 4px solid var(--accent);">
+      <div class="card-label">Current Lesson</div>
+      <h2 id="lesson-title" style="font-size: 24px; margin-bottom: 8px;">—</h2>
+      <p id="lesson-instruction" style="font-size: 15px; color: var(--muted); margin-bottom: 24px; line-height: 1.6;">No lesson assigned yet.</p>
+      
+      <div style="display: flex; gap: 12px;">
+        <button class="btn-primary" id="btn-start-session" disabled onclick="startLiveSession()">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M8 5v14l11-7z"></path></svg>
+          Start Live Session
+        </button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 24px;">
+      <div class="card-label">Preferences</div>
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 0;">
+        <div>
+          <div class="field-label">Frequency</div>
+          <div class="field-value" id="pref-frequency">—</div>
+        </div>
+        <div>
+          <div class="field-label">Duration</div>
+          <div class="field-value" id="pref-duration">—</div>
+        </div>
+        <div>
+          <div class="field-label">Preferred Days</div>
+          <div class="field-value" id="pref-days">—</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HISTORY SECTION -->
+  <section id="section-history" class="section">
+    <div class="section-header">
+      <h1>Learning History</h1>
+      <p>A detailed record of your past sessions and progress.</p>
+    </div>
+
+    <div class="list-card" id="history-list">
+      <div class="empty-state">
+        <h3>No sessions yet</h3>
+        <p>Your practice history will appear here once you complete your first lesson.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROFILE SECTION -->
+  <section id="section-profile" class="section">
+    <div class="section-header">
+      <h1>Profile Settings</h1>
+      <p>Manage your personal details and learning goals.</p>
+    </div>
+
+    <div class="card">
+      <div class="profile-grid">
+        <div style="border-right: 1px solid var(--border); padding-right: 40px;">
+          <div class="profile-field">
+            <div class="field-label">Full Name</div>
+            <div class="field-value" id="profile-name">—</div>
+          </div>
+          <div class="profile-field">
+            <div class="field-label">Email Address</div>
+            <div class="field-value" id="profile-email">—</div>
+          </div>
+          <div class="profile-field">
+            <div class="field-label">Current Level</div>
+            <div class="field-value" id="profile-level">—</div>
+          </div>
+        </div>
+        <div style="padding-left: 20px;">
+          <div class="profile-field">
+            <div class="field-label">Personal Bio / Details</div>
+            <div class="field-value" id="profile-bio" style="line-height: 1.6;">—</div>
+          </div>
+          <div class="profile-field">
+            <div class="field-label">Learning Goal</div>
+            <div class="field-value" id="profile-goal" style="font-weight: 500; color: var(--accent);">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </main>
 
-<script>
-(async () => {
-  let supabase = null;
+<!-- CALL MODAL (Copied from index.html) -->
+<div id="callModal" class="call-modal" role="dialog" aria-modal="true" aria-label="Live lesson call">
+  <div class="call-modal-card">
+    <div class="call-modal-inner">
+      <div class="call-modal-brand"><strong>ABC</strong>English</div>
+      <div class="call-vis-wrap">
+        <div class="call-ring call-ring-1"></div>
+        <div class="call-ring call-ring-2"></div>
+        <div class="call-ring call-ring-3"></div>
+        <canvas id="callCanvas" width="160" height="160"></canvas>
+      </div>
+      <div class="call-identity">
+        <div class="call-name">Penny</div>
+        <div class="call-role">AI English Tutor · ABCEnglish</div>
+      </div>
+      <div class="call-lesson-info" id="callLessonInfo" style="display:none;">
+        <div class="call-lesson-title" id="callLessonTitle"></div>
+        <div class="call-lesson-meta" id="callLessonMeta"></div>
+      </div>
+      <div class="call-status-text" id="callStatusText">Connecting…</div>
+      <button class="call-end-btn" id="endCallBtn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        End Call
+      </button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { RetellWebClient } from "https://esm.sh/retell-client-js-sdk";
+
+let supabase = null;
+let dashboardData = null;
+let retellClient = null;
+let animId = null;
+let analyser = null;
+let dataArray = null;
+let micStream = null;
+let agentSpeakingUntil = 0;
+
+const modal = document.getElementById('callModal');
+const statusEl = document.getElementById('callStatusText');
+const endBtn = document.getElementById('endCallBtn');
+const canvas = document.getElementById('callCanvas');
+const ctx = canvas.getContext('2d');
+const lessonInfo = document.getElementById('callLessonInfo');
+const lessonTitle = document.getElementById('callLessonTitle');
+const lessonMeta = document.getElementById('callLessonMeta');
+
+window.showSection = function(sectionId) {
+  // Update nav UI
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  const activeItem = document.getElementById('nav-' + sectionId);
+  if (activeItem) activeItem.classList.add('active');
+
+  // Switch sections
+  document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+  document.getElementById('section-' + sectionId).classList.add('active');
+}
+
+async function getDashboardData(userId, userPhone, userEmail, authMeta) {
+  try {
+    // 1. Core Profile
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select(`*`)
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (userError) throw userError;
+
+    // Default structure using auth data
+    const result = {
+      profile: {
+        name: authMeta?.name || user?.name || 'Learner',
+        email: userEmail || user?.email,
+        bio: user?.personal_details || 'No profile details yet.',
+        goal: user?.goal || 'No goal set.',
+        englishLevel: user?.english_level || 'Pending...',
+        preferences: {
+          frequency: user?.lesson_frequency,
+          duration: user?.lesson_duration,
+          days: user?.preferred_days,
+          times: user?.preferred_times
+        }
+      },
+      timeTracking: {
+        allocated: user?.allocated_time_this_month || 0,
+        used: user?.used_time_this_month || 0,
+        total: user?.total_time_used || 0
+      },
+      lessonProgress: {
+        completedCount: 0,
+        currentLessonId: user?.current_lesson_id,
+        nextLessonDetails: null
+      },
+      scheduling: {
+        nextCallTime: null,
+        callStatus: 'No pending calls'
+      },
+      history: []
+    };
+
+    if (!user) {
+      console.warn("No user record found in 'users' table for ID:", userId);
+      return result;
+    }
+
+    // 2. Next Lesson
+    if (user.current_lesson_id && user.english_level) {
+      const { data: lessonData } = await supabase
+        .from('lessons')
+        .select('title, type, lesson_instruction')
+        .eq('lesson_number', user.current_lesson_id)
+        .eq('level', user.english_level)
+        .maybeSingle();
+      result.lessonProgress.nextLessonDetails = lessonData;
+    }
+
+    // 3. Call History
+    const { data: callHistory, error: historyError } = await supabase
+      .from('lesson_attempts')
+      .select(`
+        attempt_time, 
+        score, 
+        completion_percentage, 
+        call_summary, 
+        grading_rationale, 
+        student_feedback, 
+        lessons ( title )
+      `)
+      .eq('user_id', userId)
+      .order('attempt_time', { ascending: false });
+
+    if (!historyError) {
+      result.history = callHistory;
+      result.lessonProgress.completedCount = callHistory.filter(c => (c.completion_percentage || 0) >= 60).length;
+    }
+
+    // 4. Scheduling
+    if (userPhone) {
+      const { data: nextCall } = await supabase
+        .from('call_triggers')
+        .select('scheduled_time, call_status')
+        .eq('phone_number', userPhone)
+        .eq('call_status', 'pending')
+        .order('scheduled_time', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (nextCall) {
+        result.scheduling.nextCallTime = nextCall.scheduled_time;
+        result.scheduling.callStatus = nextCall.call_status;
+      }
+    }
+
+    return result;
+  } catch (e) {
+    console.error("Aggregation Error:", e);
+    return null;
+  }
+}
+
+function updateUI(data) {
+  if (!data) return;
+
+  // Global user info
+  const name = data.profile.name || 'Learner';
+  document.getElementById('greet-name').textContent = name.split(' ')[0];
+  document.getElementById('user-display-name').textContent = name;
+  document.getElementById('user-display-email').textContent = data.profile.email;
+  document.getElementById('avatar-initials').textContent = name.substring(0, 1).toUpperCase();
+
+  // Overview Stats
+  document.getElementById('stat-level').textContent = data.profile.englishLevel || '—';
+  document.getElementById('stat-completed').textContent = data.lessonProgress.completedCount;
+  document.getElementById('stat-time').innerHTML = `${data.timeTracking.used} <small style="font-size: 14px; font-weight: 400; color: var(--muted)">mins</small>`;
+  
+  const timeUsed = data.timeTracking.used;
+  const timeAllocated = data.timeTracking.allocated;
+  const pct = timeAllocated > 0 ? Math.min(100, (timeUsed / timeAllocated) * 100) : 0;
+  document.getElementById('time-progress').style.width = pct + '%';
+  document.getElementById('time-used').textContent = `${timeUsed} used`;
+  document.getElementById('time-allocated').textContent = `${timeAllocated} allocated`;
+
+  if (data.scheduling.nextCallTime) {
+    const d = new Date(data.scheduling.nextCallTime);
+    document.getElementById('next-call-time').textContent = d.toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    document.getElementById('next-call-status').textContent = 'Your next AI session is scheduled.';
+  }
+
+  // Lessons
+  if (data.lessonProgress.nextLessonDetails) {
+    document.getElementById('lesson-title').textContent = data.lessonProgress.nextLessonDetails.title || 'Lesson ' + data.lessonProgress.currentLessonId;
+    document.getElementById('lesson-instruction').textContent = data.lessonProgress.nextLessonDetails.lesson_instruction || 'No instructions provided.';
+    document.getElementById('btn-start-session').disabled = false;
+  }
+  document.getElementById('pref-frequency').textContent = data.profile.preferences.frequency || 'Not set';
+  document.getElementById('pref-duration').textContent = (data.profile.preferences.duration || '—') + ' mins';
+  document.getElementById('pref-days').textContent = Array.isArray(data.profile.preferences.days) ? data.profile.preferences.days.join(', ') : (data.profile.preferences.days || 'Not set');
+
+  // History
+  const historyContainer = document.getElementById('history-list');
+  if (data.history && data.history.length > 0) {
+    historyContainer.innerHTML = data.history.map(item => {
+      const d = new Date(item.attempt_time);
+      const score = item.score || 0;
+      const scoreClass = score >= 80 ? 'score-high' : (score >= 60 ? 'score-mid' : 'score-low');
+      return `
+        <div class="list-item">
+          <div class="item-date">
+            <div class="day">${d.getDate()}</div>
+            <div class="month">${d.toLocaleDateString([], { month: 'short' })}</div>
+          </div>
+          <div class="item-content">
+            <div class="item-title">${item.lessons?.title || 'Lesson Attempt'}</div>
+            <div class="item-meta">${item.call_summary || 'No summary available.'}</div>
+          </div>
+          <div class="item-score ${scoreClass}">${score}%</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Profile
+  document.getElementById('profile-name').textContent = data.profile.name || '—';
+  document.getElementById('profile-email').textContent = data.profile.email || '—';
+  document.getElementById('profile-level').textContent = data.profile.englishLevel || '—';
+  document.getElementById('profile-bio').textContent = data.profile.bio || 'No details provided.';
+  document.getElementById('profile-goal').textContent = data.profile.goal || 'No goal set yet.';
+}
+
+// CALL LOGIC
+window.startLiveSession = async function() {
+  if (!dashboardData || !dashboardData.lessonProgress.nextLessonDetails) return;
+  
+  const level = dashboardData.profile.englishLevel;
+  const lesson_number = dashboardData.lessonProgress.currentLessonId;
+
+  openCallModal('Connecting…');
 
   try {
+    const res = await fetch('/create-call', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ level, lesson_number }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Server error');
+
+    lessonMeta.textContent = `${data.level} · Lesson ${data.lesson_number}`;
+    if (data.lesson_name) {
+      lessonTitle.textContent = data.lesson_name;
+      lessonInfo.style.display = '';
+    }
+
+    retellClient = new RetellWebClient();
+    retellClient.on('call_started', async () => {
+      setCallStatus('Live session', true);
+      await startMicVisualizer();
+    });
+    retellClient.on('update', (update) => {
+      const items = update?.transcript ?? [];
+      const last = items[items.length - 1];
+      if (last?.role === 'agent' && last?.content) {
+        agentSpeakingUntil = Date.now() + 1800;
+      }
+    });
+    retellClient.on('call_ended', () => closeCallModal());
+    retellClient.on('error', () => {
+      setCallStatus('Something went wrong');
+      setTimeout(closeCallModal, 2000);
+    });
+
+    await retellClient.startCall({ accessToken: data.access_token });
+  } catch (err) {
+    setCallStatus(err.message || 'Connection failed');
+    setTimeout(closeCallModal, 2500);
+  }
+}
+
+function openCallModal(status) {
+  modal.classList.add('open');
+  setCallStatus(status, false);
+  startDrawLoop();
+}
+
+function closeCallModal() {
+  modal.classList.remove('open');
+  cancelAnimationFrame(animId);
+  micStream?.getTracks().forEach(t => t.stop());
+  analyser = null;
+  dataArray = null;
+  micStream = null;
+  retellClient = null;
+  agentSpeakingUntil = 0;
+  lessonInfo.style.display = 'none';
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function setCallStatus(msg, isLive = false) {
+  statusEl.textContent = msg;
+  statusEl.className = 'call-status-text' + (isLive ? ' live' : '');
+}
+
+async function startMicVisualizer() {
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 128;
+    analyser.smoothingTimeConstant = 0.75;
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
+    const gain = audioCtx.createGain();
+    gain.gain.value = 3.5;
+    audioCtx.createMediaStreamSource(micStream).connect(gain);
+    gain.connect(analyser);
+  } catch (_) {}
+}
+
+function startDrawLoop() {
+  cancelAnimationFrame(animId);
+  draw();
+}
+
+function draw() {
+  animId = requestAnimationFrame(draw);
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2;
+  const bars = 48;
+  const innerR = 44;
+  const t = Date.now() / 1000;
+  const agentActive = Date.now() < agentSpeakingUntil;
+
+  ctx.clearRect(0, 0, W, H);
+  if (analyser) analyser.getByteFrequencyData(dataArray);
+
+  for (let i = 0; i < bars; i++) {
+    const angle = (i / bars) * Math.PI * 2 - Math.PI / 2;
+    let val;
+    if (analyser && dataArray) {
+      val = Math.min(dataArray[Math.floor((i / bars) * dataArray.length)] / 255, 1.0);
+    } else if (agentActive) {
+      val = Math.abs(Math.sin(t * 5.3 + i * 0.68)) * 0.40 + Math.abs(Math.sin(t * 3.1 - i * 0.41)) * 0.28 + Math.abs(Math.sin(t * 8.7 + i * 1.10)) * 0.18 + 0.12;
+      val = Math.min(val, 1.0);
+    } else {
+      val = 0.06 + Math.abs(Math.sin(t * 1.1 + i * 0.42)) * 0.14;
+    }
+    const barH = 6 + val * 52;
+    const x1 = cx + Math.cos(angle) * innerR;
+    const y1 = cy + Math.sin(angle) * innerR;
+    const x2 = cx + Math.cos(angle) * (innerR + barH);
+    const y2 = cy + Math.sin(angle) * (innerR + barH);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+    ctx.strokeStyle = `rgba(255,255,255,${0.25 + val * 0.75})`;
+    ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.stroke();
+  }
+}
+
+endBtn.addEventListener('click', () => {
+  retellClient?.stopCall();
+  closeCallModal();
+});
+
+(async () => {
+  try {
     const cfg = await fetch('/api/config').then(r => r.json());
-    if (cfg.supabaseUrl && cfg.supabaseAnonKey) {
-      const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
-      supabase = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+    supabase = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.href = '/signin.html';
+      return;
     }
+
+    // Onboarding check
+    const onboardRes = await fetch('/api/check-onboarding', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + session.access_token },
+    });
+    const { status } = await onboardRes.json();
+    if (status !== 'complete') {
+      window.location.href = '/signin.html';
+      return;
+    }
+
+    const userId = session.user.id;
+    const userPhone = session.user.user_metadata?.phone;
+    const userEmail = session.user.email;
+    const authMeta = session.user.user_metadata || {};
+
+    dashboardData = await getDashboardData(userId, userPhone, userEmail, authMeta);
+    updateUI(dashboardData);
+
+    document.getElementById('signout-btn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/signin.html';
+    });
+
   } catch (e) {
-    console.warn('Supabase config unavailable:', e);
+    console.error("Initialization Error:", e);
   }
-
-  if (!supabase) {
-    window.location.href = '/signin.html';
-    return;
-  }
-
-  // Gate: must be signed in
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
-    window.location.href = '/signin.html';
-    return;
-  }
-
-  // Gate: onboarding must be complete
-  const onboardRes = await fetch('/api/check-onboarding', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + session.access_token },
-  });
-  const { status } = await onboardRes.json();
-  if (status !== 'complete') {
-    window.location.href = '/signin.html';
-    return;
-  }
-
-  // Populate user info from metadata
-  const meta = session.user.user_metadata || {};
-  const displayName = (meta.name || '').split(' ')[0] || session.user.email;
-  document.getElementById('user-name').textContent = displayName;
-  document.getElementById('nav-user').textContent = session.user.email;
-
-  // Fetch english_level from users table
-  if (meta.phone) {
-    const { data } = await supabase
-      .from('users')
-      .select('english_level')
-      .eq('phone', meta.phone)
-      .maybeSingle();
-    if (data?.english_level) {
-      document.getElementById('english-level').textContent = data.english_level;
-    }
-  }
-
-  document.getElementById('signout-btn').addEventListener('click', async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/signin.html';
-  });
 })();
 </script>
 
