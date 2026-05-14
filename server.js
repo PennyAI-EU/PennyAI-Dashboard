@@ -135,6 +135,15 @@ app.post("/api/check-onboarding", async (req, res) => {
 });
 
 app.post("/create-call", async (req, res) => {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+
+  const phone = user.user_metadata?.phone;
+  if (!phone) return res.status(400).json({ error: "User phone number not found" });
+
   const { level, lesson_number, instruction } = req.body;
 
   if (!level || lesson_number === undefined) {
@@ -162,7 +171,11 @@ app.post("/create-call", async (req, res) => {
   try {
     const webCallResponse = await retell.call.createWebCall({
       agent_id: process.env.RETELL_AGENT_ID,
-      retell_llm_dynamic_variables: { instruction: `${LESSON_PREAMBLE}\n\n${finalInstruction}` },
+      retell_llm_dynamic_variables: { 
+        instruction: `${LESSON_PREAMBLE}\n\n${finalInstruction}`,
+        user_phone: phone,
+        user_id: user.id
+      },
     });
     res.json({
       access_token: webCallResponse.access_token,

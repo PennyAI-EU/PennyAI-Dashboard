@@ -772,9 +772,17 @@ window.startLiveSession = async function() {
   openCallModal('Connecting…');
 
   try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    
+    if (!token) throw new Error("Authentication required");
+
     const res = await fetch('/create-call', {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify({ level, lesson_number }),
     });
     const data = await res.json();
