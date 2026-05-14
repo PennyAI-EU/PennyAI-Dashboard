@@ -112,10 +112,16 @@ app.post("/api/check-onboarding", async (req, res) => {
   if (!token) return res.status(401).json({ error: "Missing token" });
 
   const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+  if (userError || !user) {
+    console.log("[check-onboarding] PENDING — invalid/expired token:", userError?.message);
+    return res.status(401).json({ error: "Invalid token" });
+  }
 
   const phone = user.user_metadata?.phone || user.phone;
-  if (!phone) return res.json({ status: "pending" });
+  if (!phone) {
+    console.log("[check-onboarding] PENDING — no phone on user:", user.id);
+    return res.json({ status: "pending" });
+  }
 
   const { data, error } = await supabase
     .from("users")
@@ -124,14 +130,22 @@ app.post("/api/check-onboarding", async (req, res) => {
     .maybeSingle();
 
   if (error) {
-    console.error("users lookup error:", error);
+    console.error("[check-onboarding] DB error for phone", phone, ":", error.message);
     return res.status(500).json({ error: "Lookup failed" });
   }
 
-  if (data && data.english_level) {
-    return res.json({ status: "complete" });
+  if (!data) {
+    console.log("[check-onboarding] PENDING — phone not found in users table:", phone);
+    return res.json({ status: "pending" });
   }
-  return res.json({ status: "pending" });
+
+  if (!data.english_level) {
+    console.log("[check-onboarding] PENDING — english_level is null for phone:", phone);
+    return res.json({ status: "pending" });
+  }
+
+  console.log("[check-onboarding] COMPLETE — phone:", phone, "level:", data.english_level);
+  return res.json({ status: "complete" });
 });
 
 app.post("/create-call", async (req, res) => {
