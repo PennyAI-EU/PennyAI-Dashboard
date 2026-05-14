@@ -331,6 +331,7 @@
       headers: { 'Authorization': 'Bearer ' + accessToken },
     });
     const data = await res.json();
+    console.log('[check-onboarding]', data);
     return data.status; // 'complete' | 'pending'
   }
 

@@ -120,7 +120,7 @@ app.post("/api/check-onboarding", async (req, res) => {
   const phone = user.user_metadata?.phone || user.phone;
   if (!phone) {
     console.log("[check-onboarding] PENDING — no phone on user:", user.id);
-    return res.json({ status: "pending" });
+    return res.json({ status: "pending", reason: "no_phone" });
   }
 
   const { data, error } = await supabase
@@ -136,12 +136,12 @@ app.post("/api/check-onboarding", async (req, res) => {
 
   if (!data) {
     console.log("[check-onboarding] PENDING — phone not found in users table:", phone);
-    return res.json({ status: "pending" });
+    return res.json({ status: "pending", reason: "phone_not_in_users_table", phone });
   }
 
   if (!data.english_level) {
     console.log("[check-onboarding] PENDING — english_level is null for phone:", phone);
-    return res.json({ status: "pending" });
+    return res.json({ status: "pending", reason: "english_level_null", phone });
   }
 
   console.log("[check-onboarding] COMPLETE — phone:", phone, "level:", data.english_level);
