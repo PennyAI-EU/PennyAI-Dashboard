@@ -671,18 +671,21 @@ async function getDashboardData(userId, userPhone, userEmail, authMeta) {
     }
 
     // 4. Scheduling
-    if (userPhone) {
-      const { data: nextCall } = await supabase
-        .from('call_triggers')
-        .select('scheduled_time, call_status')
-        .eq('phone_number', userPhone)
-        .eq('call_status', 'pending')
-        .order('scheduled_time', { ascending: true })
-        .limit(1)
-        .maybeSingle();
-      if (nextCall) {
-        result.scheduling.nextCallTime = nextCall.scheduled_time;
-        result.scheduling.callStatus = nextCall.call_status;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      try {
+        const nextCallRes = await fetch('/api/next-call', {
+          headers: { 'Authorization': 'Bearer ' + session.access_token }
+        });
+        const nextCall = await nextCallRes.json();
+        console.log("[DEBUG] /api/next-call response:", nextCall);
+        
+        if (nextCall && nextCall.scheduled_time) {
+          result.scheduling.nextCallTime = nextCall.scheduled_time;
+          result.scheduling.callStatus = nextCall.call_status;
+        }
+      } catch (err) {
+        console.error("[DEBUG] Error fetching from /api/next-call:", err);
       }
     }
 

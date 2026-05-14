@@ -114,7 +114,7 @@ app.post("/api/check-onboarding", async (req, res) => {
   const { data: { user }, error: userError } = await supabase.auth.getUser(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
 
-  const phone = user.user_metadata?.phone;
+  const phone = user.user_metadata?.phone || user.phone;
   if (!phone) return res.json({ status: "pending" });
 
   const { data, error } = await supabase
@@ -186,6 +186,35 @@ app.post("/create-call", async (req, res) => {
   } catch (err) {
     console.error("Retell error:", err);
     res.status(500).json({ error: err.message || "Failed to create call" });
+  }
+});
+
+// Fetch next scheduled call (using service role to bypass RLS)
+app.get("/api/next-call", async (req, res) => {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+
+  const phone = user.user_metadata?.phone || user.phone;
+  if (!phone) return res.status(400).json({ error: "Phone number not found for user" });
+
+  try {
+    const { data: nextCall, error } = await supabase
+      .from("call_triggers")
+      .select("scheduled_time, call_status")
+      .eq("phone_number", phone)
+      .eq("call_status", "pending")
+      .order("scheduled_time", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+    res.json(nextCall || null);
+  } catch (err) {
+    console.error("Error fetching next call:", err);
+    res.status(500).json({ error: "Failed to fetch scheduled call" });
   }
 });
 
