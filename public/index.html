@@ -979,7 +979,7 @@
     openModal('Connecting…');
 
     try {
-      const res = await fetch('/create-call', {
+      const res = await fetch('/create-demo-call', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ level, lesson_number }),

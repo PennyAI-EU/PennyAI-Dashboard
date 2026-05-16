@@ -148,6 +148,49 @@ app.post("/api/check-onboarding", async (req, res) => {
   return res.json({ status: "complete" });
 });
 
+// Public demo endpoint — no auth required, used by the landing page free session
+app.post("/create-demo-call", async (req, res) => {
+  const { level, lesson_number, instruction } = req.body;
+
+  if (!level || lesson_number === undefined) {
+    return res.status(400).json({ error: "level and lesson_number are required" });
+  }
+
+  let finalInstruction = instruction;
+  let lessonName = null;
+
+  if (!finalInstruction) {
+    const { data, error } = await supabase
+      .from("lessons")
+      .select("lesson_instruction, title")
+      .eq("level", level)
+      .eq("lesson_number", Number(lesson_number))
+      .single();
+
+    if (error || !data) {
+      return res.status(404).json({ error: `No lesson found for ${level} lesson ${lesson_number}` });
+    }
+    finalInstruction = data.lesson_instruction;
+    lessonName = data.title || null;
+  }
+
+  try {
+    const webCallResponse = await retell.call.createWebCall({
+      agent_id: process.env.RETELL_AGENT_ID,
+      retell_llm_dynamic_variables: { instruction: `${LESSON_PREAMBLE}\n\n${finalInstruction}` },
+    });
+    res.json({
+      access_token: webCallResponse.access_token,
+      lesson_name: lessonName,
+      level,
+      lesson_number,
+    });
+  } catch (err) {
+    console.error("Retell demo error:", err);
+    res.status(500).json({ error: err.message || "Failed to create demo call" });
+  }
+});
+
 app.post("/create-call", async (req, res) => {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
