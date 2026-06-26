@@ -125,7 +125,7 @@ app.post("/api/check-onboarding", async (req, res) => {
 
   const { data, error } = await supabase
     .from("users")
-    .select("english_level")
+    .select("english_level, is_admin")
     .eq("phone", phone)
     .maybeSingle();
 
@@ -142,6 +142,11 @@ app.post("/api/check-onboarding", async (req, res) => {
   if (!data.english_level) {
     console.log("[check-onboarding] PENDING — english_level is null for phone:", phone);
     return res.json({ status: "pending", reason: "english_level_null", phone });
+  }
+
+  if (data.is_admin) {
+    console.log("[check-onboarding] ADMIN — phone:", phone);
+    return res.json({ status: "admin" });
   }
 
   console.log("[check-onboarding] COMPLETE — phone:", phone, "level:", data.english_level);
@@ -273,6 +278,157 @@ app.get("/api/next-call", async (req, res) => {
     console.error("Error fetching next call:", err);
     res.status(500).json({ error: "Failed to fetch scheduled call" });
   }
+});
+
+// --- ADMIN API ENDPOINTS ---
+async function requireAdmin(req, res, next) {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+
+  const phone = user.user_metadata?.phone || user.phone;
+  if (!phone) return res.status(401).json({ error: "No phone on user" });
+
+  const { data, error } = await supabase
+    .from("users")
+    .select("is_admin")
+    .eq("phone", phone)
+    .maybeSingle();
+
+  if (error || !data || !data.is_admin) {
+    return res.status(403).json({ error: "Forbidden: Admin access required" });
+  }
+  
+  req.adminUser = user;
+  next();
+}
+
+app.get("/api/admin/students", requireAdmin, async (req, res) => {
+  const { data, error } = await supabase.from("users").select("*").order("name");
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.put("/api/admin/students/:id/allocation", requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { count } = req.body;
+  const { error } = await supabase
+    .from("users")
+    .update({ allocated_lesson_count: count })
+    .eq("id", id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+app.get("/api/admin/prospects", requireAdmin, async (req, res) => {
+  const { data, error } = await supabase
+    .from("prospects")
+    .select("*")
+    .order("order_index", { ascending: true })
+    .order("created_at", { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.post("/api/admin/prospects", requireAdmin, async (req, res) => {
+  const { prospects } = req.body; // Array of { contact_name, phone }
+  if (!prospects || !prospects.length) return res.status(400).json({ error: "No prospects provided" });
+  
+  // Assign max order_index to new prospects
+  const { data: maxData } = await supabase
+    .from("prospects")
+    .select("order_index")
+    .order("order_index", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+    
+  let maxOrder = (maxData && maxData.order_index) ? maxData.order_index : 0;
+  
+  const toInsert = prospects.map(p => {
+    maxOrder++;
+    return {
+      contact_name: p.contact_name,
+      phone: p.phone,
+      order_index: maxOrder,
+      call_status: "pending"
+    };
+  });
+
+  const { error } = await supabase.from("prospects").insert(toInsert);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, count: toInsert.length });
+});
+
+app.put("/api/admin/prospects/reorder", requireAdmin, async (req, res) => {
+  const { updates } = req.body; // Array of { id, order_index }
+  if (!updates || !updates.length) return res.json({ success: true });
+
+  // Update rows individually
+  for (const up of updates) {
+    await supabase.from("prospects").update({ order_index: up.order_index }).eq("id", up.id);
+  }
+  res.json({ success: true });
+});
+
+app.get("/api/admin/campaign-settings", requireAdmin, async (req, res) => {
+  const { data, error } = await supabase.from("campaign_settings").select("*").limit(1).maybeSingle();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || {});
+});
+
+app.put("/api/admin/campaign-settings", requireAdmin, async (req, res) => {
+  const { daily_limit, window_start, window_end } = req.body;
+  
+  const { data, error: fetchErr } = await supabase.from("campaign_settings").select("id").limit(1).maybeSingle();
+  
+  if (data && data.id) {
+    const { error } = await supabase.from("campaign_settings").update({ daily_limit, window_start, window_end }).eq("id", data.id);
+    if (error) return res.status(500).json({ error: error.message });
+  } else {
+    const { error } = await supabase.from("campaign_settings").insert({ daily_limit, window_start, window_end });
+    if (error) return res.status(500).json({ error: error.message });
+  }
+  res.json({ success: true });
+});
+
+app.get("/api/admin/students/:id/attempts", requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabase
+    .from("lesson_attempts")
+    .select(`
+      attempt_time,
+      score,
+      completion_percentage,
+      call_summary,
+      student_feedback,
+      grading_rationale,
+      lessons ( title )
+    `)
+    .eq("user_id", id)
+    .order("attempt_time", { ascending: false });
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.post("/api/admin/schedule-call", requireAdmin, async (req, res) => {
+  const { phone_number, name, email, scheduled_time } = req.body;
+  if (!phone_number || !scheduled_time) {
+    return res.status(400).json({ error: "phone_number and scheduled_time are required" });
+  }
+
+  const { error } = await supabase.from("call_triggers").insert({
+    phone_number,
+    name,
+    email,
+    scheduled_time,
+    call_status: "pending"
+  });
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
 });
 
 if (require.main === module) {

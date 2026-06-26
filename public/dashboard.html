@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Dashboard — ABCEnglish</title>
+<title>Dashboard — Penny AI</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -350,12 +350,38 @@
   }
   .empty-state h3 { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 24px; color: var(--text); margin-bottom: 8px; }
 
+  /* CUSTOM MODALS */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-card {
+    background: white; border-radius: var(--radius); padding: 32px;
+    width: 100%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  }
+  .modal-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+  .form-input {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px;
+    font-family: inherit; font-size: 14px; outline: none;
+  }
+  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+  .btn-secondary {
+    background: var(--white); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 24px; font-family: inherit; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-secondary:hover { background: var(--off); }
+  .modal-actions { display:flex; justify-content:flex-end; gap:12px; margin-top: 24px; }
+
 </style>
 </head>
 <body>
 
 <aside class="sidebar">
-  <a class="nav-logo" href="/">ABC<span>English</span></a>
+  <a class="nav-logo" href="/">Penny<span>AI</span></a>
   
   <nav class="nav-menu">
     <div class="nav-item active" id="nav-overview" onclick="showSection('overview')">
@@ -457,7 +483,10 @@
     </div>
 
     <div class="card" style="margin-top: 24px;">
-      <div class="card-label">Preferences</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div class="card-label" style="margin-bottom:0;">Preferences</div>
+        <button class="btn-secondary" style="padding:6px 12px; font-size:12px;" onclick="openPreferencesModal()">Edit Preferences</button>
+      </div>
       <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 0;">
         <div>
           <div class="field-label">Frequency</div>
@@ -492,9 +521,12 @@
 
   <!-- PROFILE SECTION -->
   <section id="section-profile" class="section">
-    <div class="section-header">
-      <h1>Profile Settings</h1>
-      <p>Manage your personal details and learning goals.</p>
+    <div class="section-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
+      <div>
+        <h1>Profile Settings</h1>
+        <p>Manage your personal details and learning goals.</p>
+      </div>
+      <button class="btn-primary" onclick="openProfileModal()">Edit Profile</button>
     </div>
 
     <div class="card">
@@ -529,11 +561,57 @@
 
 </main>
 
+<!-- Profile Edit Modal -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal-card">
+    <div class="modal-title">Edit Profile</div>
+    <div class="form-group">
+      <label class="form-label">Full Name</label>
+      <input type="text" id="edit-profile-name" class="form-input" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Personal Bio / Details</label>
+      <textarea id="edit-profile-bio" class="form-input" rows="3"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Learning Goal</label>
+      <input type="text" id="edit-profile-goal" class="form-input" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('profileModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveProfile()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Preferences Edit Modal -->
+<div class="modal-overlay" id="preferencesModal">
+  <div class="modal-card">
+    <div class="modal-title">Edit Preferences</div>
+    <div class="form-group">
+      <label class="form-label">Lesson Frequency (e.g., Twice a week)</label>
+      <input type="text" id="edit-pref-frequency" class="form-input" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Duration (minutes)</label>
+      <input type="number" id="edit-pref-duration" class="form-input" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Preferred Days (e.g., Monday, Wednesday)</label>
+      <input type="text" id="edit-pref-days" class="form-input" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('preferencesModal')">Cancel</button>
+      <button class="btn-primary" onclick="savePreferences()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- CALL MODAL (Copied from index.html) -->
 <div id="callModal" class="call-modal" role="dialog" aria-modal="true" aria-label="Live lesson call">
   <div class="call-modal-card">
     <div class="call-modal-inner">
-      <div class="call-modal-brand"><strong>ABC</strong>English</div>
+      <div class="call-modal-brand"><strong>Penny</strong>AI</div>
       <div class="call-vis-wrap">
         <div class="call-ring call-ring-1"></div>
         <div class="call-ring call-ring-2"></div>
@@ -542,7 +620,7 @@
       </div>
       <div class="call-identity">
         <div class="call-name">Penny</div>
-        <div class="call-role">AI English Tutor · ABCEnglish</div>
+        <div class="call-role">AI English Tutor · Penny AI</div>
       </div>
       <div class="call-lesson-info" id="callLessonInfo" style="display:none;">
         <div class="call-lesson-title" id="callLessonTitle"></div>
@@ -589,6 +667,78 @@ window.showSection = function(sectionId) {
   // Switch sections
   document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
   document.getElementById('section-' + sectionId).classList.add('active');
+}
+
+window.closeModal = function(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+window.openProfileModal = function() {
+  if(!dashboardData) return;
+  document.getElementById('edit-profile-name').value = dashboardData.profile.name || '';
+  document.getElementById('edit-profile-bio').value = dashboardData.profile.bio === 'No profile details yet.' ? '' : (dashboardData.profile.bio || '');
+  document.getElementById('edit-profile-goal').value = dashboardData.profile.goal === 'No goal set.' ? '' : (dashboardData.profile.goal || '');
+  document.getElementById('profileModal').classList.add('active');
+}
+
+window.saveProfile = async function() {
+  const name = document.getElementById('edit-profile-name').value;
+  const bio = document.getElementById('edit-profile-bio').value;
+  const goal = document.getElementById('edit-profile-goal').value;
+  
+  const { data: { session } } = await supabase.auth.getSession();
+  if(!session) return;
+
+  const { error } = await supabase.from('users').update({
+    name: name,
+    personal_details: bio,
+    goal: goal
+  }).eq('id', session.user.id);
+
+  if(error) { alert("Error saving profile: " + error.message); return; }
+  
+  // Update local state & UI
+  dashboardData.profile.name = name;
+  dashboardData.profile.bio = bio;
+  dashboardData.profile.goal = goal;
+  updateUI(dashboardData);
+  closeModal('profileModal');
+}
+
+window.openPreferencesModal = function() {
+  if(!dashboardData) return;
+  document.getElementById('edit-pref-frequency').value = dashboardData.profile.preferences.frequency || '';
+  document.getElementById('edit-pref-duration').value = dashboardData.profile.preferences.duration || '';
+  
+  let days = dashboardData.profile.preferences.days;
+  document.getElementById('edit-pref-days').value = Array.isArray(days) ? days.join(', ') : (days || '');
+  
+  document.getElementById('preferencesModal').classList.add('active');
+}
+
+window.savePreferences = async function() {
+  const freq = document.getElementById('edit-pref-frequency').value;
+  const dur = parseInt(document.getElementById('edit-pref-duration').value, 10);
+  const daysStr = document.getElementById('edit-pref-days').value;
+  const daysArr = daysStr.split(',').map(d => d.trim()).filter(d => d);
+  
+  const { data: { session } } = await supabase.auth.getSession();
+  if(!session) return;
+
+  const { error } = await supabase.from('users').update({
+    lesson_frequency: freq,
+    lesson_duration: dur || null,
+    preferred_days: daysArr
+  }).eq('id', session.user.id);
+
+  if(error) { alert("Error saving preferences: " + error.message); return; }
+  
+  // Update local state & UI
+  dashboardData.profile.preferences.frequency = freq;
+  dashboardData.profile.preferences.duration = dur || null;
+  dashboardData.profile.preferences.days = daysArr;
+  updateUI(dashboardData);
+  closeModal('preferencesModal');
 }
 
 async function getDashboardData(userId, userPhone, userEmail, authMeta) {
@@ -737,21 +887,29 @@ function updateUI(data) {
   // History
   const historyContainer = document.getElementById('history-list');
   if (data.history && data.history.length > 0) {
-    historyContainer.innerHTML = data.history.map(item => {
+    historyContainer.innerHTML = data.history.map((item, idx) => {
       const d = new Date(item.attempt_time);
       const score = item.score || 0;
       const scoreClass = score >= 80 ? 'score-high' : (score >= 60 ? 'score-mid' : 'score-low');
+      const detailsId = `hist-details-${idx}`;
       return `
-        <div class="list-item">
-          <div class="item-date">
-            <div class="day">${d.getDate()}</div>
-            <div class="month">${d.toLocaleDateString([], { month: 'short' })}</div>
+        <div class="list-item" style="flex-direction:column; align-items:stretch; cursor:pointer;" onclick="document.getElementById('${detailsId}').style.display = document.getElementById('${detailsId}').style.display === 'none' ? 'block' : 'none'">
+          <div style="display:flex; align-items:center; gap:20px;">
+            <div class="item-date">
+              <div class="day">${d.getDate()}</div>
+              <div class="month">${d.toLocaleDateString([], { month: 'short' })}</div>
+            </div>
+            <div class="item-content">
+              <div class="item-title">${item.lessons?.title || 'Lesson Attempt'}</div>
+              <div class="item-meta">${item.call_summary || 'No summary available.'}</div>
+            </div>
+            <div class="item-score ${scoreClass}">${score}%</div>
           </div>
-          <div class="item-content">
-            <div class="item-title">${item.lessons?.title || 'Lesson Attempt'}</div>
-            <div class="item-meta">${item.call_summary || 'No summary available.'}</div>
+          
+          <div id="${detailsId}" style="display:none; margin-top:16px; padding:16px; background:var(--off); border-radius:8px; font-size:13px; color:var(--text);">
+            <div style="margin-bottom:8px;"><strong>Feedback:</strong><br>${item.student_feedback || 'No feedback provided.'}</div>
+            <div><strong>Grading Rationale:</strong><br>${item.grading_rationale || 'N/A'}</div>
           </div>
-          <div class="item-score ${scoreClass}">${score}%</div>
         </div>
       `;
     }).join('');

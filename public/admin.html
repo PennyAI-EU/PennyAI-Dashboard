@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Dashboard — Penny AI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --white: #ffffff;
+    --off: #f7f6f3;
+    --border: #e8e6e0;
+    --text: #1a1a1a;
+    --muted: #6b6b6b;
+    --accent: #2563eb;
+    --accent-dark: #1d4ed8;
+    --accent-light: #eff4ff;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --yellow: #d97706;
+    --yellow-light: #fffbeb;
+    --radius: 12px;
+    --radius-lg: 20px;
+    --sidebar-width: 260px;
+  }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    background: var(--off);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-width);
+    background: var(--white);
+    border-right: 1px solid var(--border);
+    height: 100vh;
+    position: fixed;
+    left: 0; top: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    z-index: 100;
+  }
+  .nav-logo {
+    font-size: 18px; font-weight: 600; letter-spacing: -0.3px;
+    text-decoration: none; color: var(--text);
+    padding: 0 12px 32px;
+    display: block;
+  }
+  .nav-logo span { color: var(--accent); }
+  
+  .nav-menu {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; border-radius: 8px;
+    text-decoration: none; color: var(--muted);
+    font-size: 14px; font-weight: 500;
+    transition: all 0.15s; cursor: pointer;
+  }
+  .nav-item:hover { background: var(--off); color: var(--text); }
+  .nav-item.active { background: var(--accent-light); color: var(--accent); }
+  .nav-item svg { width: 18px; height: 18px; opacity: 0.7; }
+  .nav-item.active svg { opacity: 1; }
+
+  .nav-footer {
+    padding-top: 20px; border-top: 1px solid var(--border);
+  }
+  .user-brief {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 12px; margin-bottom: 12px;
+  }
+  .user-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #4f46e5; color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 13px;
+  }
+  .user-info { min-width: 0; }
+  .user-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-email { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .btn-signout {
+    width: 100%; text-align: left; background: none; border: none;
+    padding: 10px 14px; border-radius: 8px; font-family: inherit;
+    font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer;
+    display: flex; align-items: center; gap: 12px; transition: all 0.15s;
+  }
+  .btn-signout:hover { background: #fee2e2; color: #dc2626; }
+  .btn-signout svg { width: 18px; height: 18px; }
+
+  /* MAIN CONTENT */
+  .main-content {
+    margin-left: var(--sidebar-width); flex: 1;
+    min-height: 100vh; padding: 40px clamp(24px, 5vw, 60px);
+  }
+  
+  .section {
+    display: none; max-width: 1100px; margin: 0 auto;
+    animation: fadeIn 0.3s ease-out;
+  }
+  .section.active { display: block; }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .section-header h1 { font-size: 2.2rem; font-weight: 600; letter-spacing: -0.8px; margin-bottom: 4px; }
+  .section-header p { font-size: 15px; color: var(--muted); }
+
+  /* CARDS & GRIDS */
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px; margin-bottom: 40px;
+  }
+  .card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+  }
+  .card-label {
+    font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--muted); margin-bottom: 16px;
+  }
+
+  /* TABLES */
+  .table-container {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow-x: auto;
+  }
+  table { width: 100%; border-collapse: collapse; text-align: left; }
+  th, td { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 14px; }
+  th { background: var(--off); font-weight: 600; color: var(--muted); }
+  tr:last-child td { border-bottom: none; }
+  tr.draggable-row { cursor: grab; background: white; }
+  tr.draggable-row:active { cursor: grabbing; }
+  .sortable-ghost { opacity: 0.4; }
+
+  /* Dynamic Queue Styling */
+  #prospects-tbody tr.draggable-row:nth-child(-n+3) {
+    background: var(--accent-light);
+  }
+
+  /* BADGES */
+  .badge {
+    padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;
+  }
+  .badge.hot { background: #fee2e2; color: #991b1b; }
+  .badge.warm { background: #fef9c3; color: #854d0e; }
+  .badge.cold { background: var(--off); color: var(--muted); }
+  .badge.pending { background: var(--accent-light); color: var(--accent-dark); }
+  .badge.called { background: var(--green-light); color: var(--green); }
+
+  /* BUTTONS & FORMS */
+  .btn-primary {
+    background: var(--accent); color: white; border: none; border-radius: 8px;
+    padding: 10px 20px; font-family: inherit; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary:hover { background: var(--accent-dark); }
+  
+  .btn-secondary {
+    background: var(--white); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 20px; font-family: inherit; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-secondary:hover { background: var(--off); }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+  .form-input {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px;
+    font-family: inherit; font-size: 14px; outline: none;
+  }
+  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+
+  /* UPLOAD ZONE */
+  .upload-zone {
+    border: 2px dashed var(--border); border-radius: var(--radius);
+    padding: 40px; text-align: center; color: var(--muted);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .upload-zone:hover { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+  .upload-zone.dragover { border-color: var(--accent); background: var(--accent-light); }
+
+  /* MODALS */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-card {
+    background: white; border-radius: var(--radius); padding: 32px;
+    width: 100%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  }
+  .modal-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="nav-logo">Penny<span>AI</span> Admin</div>
+  <nav class="nav-menu">
+    <div class="nav-item active" id="nav-students" onclick="showSection('students')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      <span>Students</span>
+    </div>
+    <div class="nav-item" id="nav-prospects" onclick="showSection('prospects')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+      <span>Outbound Campaigns</span>
+    </div>
+  </nav>
+
+  <div class="nav-footer">
+    <div class="user-brief">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Administrator</div>
+        <div class="user-email">admin@pennyai.eu</div>
+      </div>
+    </div>
+    <button class="btn-signout" id="signout-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      <span>Sign out</span>
+    </button>
+  </div>
+</aside>
+
+<main class="main-content">
+  <!-- STUDENTS SECTION -->
+  <section id="section-students" class="section active">
+    <div class="section-header">
+      <div>
+        <h1>Student Management</h1>
+        <p>Manage existing students and their lesson allocations.</p>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone / Email</th>
+            <th>Level</th>
+            <th>Allocated Lessons</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="students-tbody">
+          <tr><td colspan="5" style="text-align:center; padding:30px;">Loading students...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- PROSPECTS SECTION -->
+  <section id="section-prospects" class="section">
+    <div class="section-header">
+      <div>
+        <h1>Outbound Campaigns</h1>
+        <p>Manage the calling queue and campaign settings.</p>
+      </div>
+      <button class="btn-primary" onclick="openModal('uploadModal')">Upload Excel</button>
+    </div>
+
+    <div class="grid" style="grid-template-columns: 1fr 1fr;">
+      <div class="card">
+        <div class="card-label">Campaign Settings</div>
+        <div style="display:flex; gap:16px;">
+          <div class="form-group" style="flex:1">
+            <label class="form-label">Daily Call Limit</label>
+            <input type="number" id="setting-limit" class="form-input" value="50"/>
+          </div>
+          <div class="form-group" style="flex:1">
+            <label class="form-label">Window Start</label>
+            <input type="time" id="setting-start" class="form-input" value="09:00"/>
+          </div>
+          <div class="form-group" style="flex:1">
+            <label class="form-label">Window End</label>
+            <input type="time" id="setting-end" class="form-input" value="17:00"/>
+          </div>
+        </div>
+        <button class="btn-secondary" onclick="saveSettings()">Save Settings</button>
+      </div>
+      
+      <div class="card">
+        <div class="card-label">Quick Add Prospect</div>
+        <div style="display:flex; gap:12px;">
+          <input type="text" id="quick-name" class="form-input" placeholder="Name" style="flex:1" />
+          <input type="text" id="quick-phone" class="form-input" placeholder="Phone Number" style="flex:1" />
+          <button class="btn-primary" onclick="quickAddProspect()">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Call Queue (Drag to reorder)</div>
+      <div class="table-container" style="border:none;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 40px"></th>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Status</th>
+              <th>Lead Temp</th>
+            </tr>
+          </thead>
+          <tbody id="prospects-tbody">
+            <tr><td colspan="5" style="text-align:center; padding:30px;">Loading prospects...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Upload Modal -->
+<div class="modal-overlay" id="uploadModal">
+  <div class="modal-card">
+    <div class="modal-title">Upload Prospects</div>
+    <p style="font-size: 14px; color: var(--muted); margin-bottom: 20px;">Upload an Excel (.xlsx) or CSV file. The file should have columns for <strong>Name</strong> and <strong>Phone</strong>.</p>
+    
+    <div class="upload-zone" id="dropzone" onclick="document.getElementById('file-input').click()">
+      <svg style="margin-bottom: 12px; opacity:0.5" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+      <div id="dropzone-text">Click to browse or drag and drop a file here</div>
+      <input type="file" id="file-input" style="display:none" accept=".xlsx, .xls, .csv" />
+    </div>
+    
+    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top: 24px;">
+      <button class="btn-secondary" onclick="closeModal('uploadModal')">Cancel</button>
+      <button class="btn-primary" id="btn-process-upload" disabled>Process Upload</button>
+    </div>
+  </div>
+</div>
+
+<!-- Allocation Modal -->
+<div class="modal-overlay" id="allocationModal">
+  <div class="modal-card">
+    <div class="modal-title">Edit Lesson Allocation</div>
+    <input type="hidden" id="alloc-user-id" />
+    <div class="form-group">
+      <label class="form-label">Total Allocated Lessons</label>
+      <input type="number" id="alloc-count" class="form-input" />
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top: 24px;">
+      <button class="btn-secondary" onclick="closeModal('allocationModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveAllocation()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Schedule Modal -->
+<div class="modal-overlay" id="scheduleModal">
+  <div class="modal-card">
+    <div class="modal-title">Schedule Lesson</div>
+    <input type="hidden" id="sched-user-phone" />
+    <input type="hidden" id="sched-user-name" />
+    <input type="hidden" id="sched-user-email" />
+    <div class="form-group">
+      <label class="form-label">Date & Time</label>
+      <input type="datetime-local" id="sched-time" class="form-input" />
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top: 24px;">
+      <button class="btn-secondary" onclick="closeModal('scheduleModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveSchedule()">Schedule</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  let supabase = null;
+  let studentsData = [];
+  let prospectsData = [];
+  let sortableInstance = null;
+
+  window.showSection = function(sectionId) {
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    document.getElementById('nav-' + sectionId).classList.add('active');
+    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+    document.getElementById('section-' + sectionId).classList.add('active');
+  }
+
+  window.openModal = function(id) { document.getElementById(id).classList.add('active'); }
+  window.closeModal = function(id) { document.getElementById(id).classList.remove('active'); }
+
+  async function init() {
+    const cfg = await fetch('/api/config').then(r => r.json());
+    if (cfg.supabaseUrl && cfg.supabaseAnonKey) {
+      const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+      supabase = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    }
+    
+    // Check Auth
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '/signin.html'; return; }
+
+    loadStudents(session.access_token);
+    loadProspects(session.access_token);
+    loadSettings(session.access_token);
+
+    document.getElementById('signout-btn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/signin.html';
+    });
+  }
+
+  async function apiGet(path, token) {
+    const res = await fetch(path, { headers: { 'Authorization': 'Bearer ' + token } });
+    return await res.json();
+  }
+  async function apiPost(path, body, method = 'POST') {
+    const { data: { session } } = await supabase.auth.getSession();
+    const res = await fetch(path, {
+      method,
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify(body)
+    });
+    return await res.json();
+  }
+
+  // --- STUDENTS ---
+  async function loadStudents(token) {
+    studentsData = await apiGet('/api/admin/students', token);
+    const tbody = document.getElementById('students-tbody');
+    if (!studentsData || studentsData.length === 0) { tbody.innerHTML = '<tr><td colspan="5">No students found.</td></tr>'; return; }
+    
+    tbody.innerHTML = studentsData.map(s => `
+      <tr style="cursor:pointer;" onclick="toggleStudentDetails('${s.id}')">
+        <td style="font-weight:500">${s.name || '—'}</td>
+        <td>${s.phone || '—'}<br><small style="color:var(--muted)">${s.email || '—'}</small></td>
+        <td>${s.english_level || 'Pending'}</td>
+        <td><strong>${s.allocated_lesson_count || 0}</strong></td>
+        <td>
+          <button class="btn-secondary" onclick="event.stopPropagation(); openAllocation('${s.id}', ${s.allocated_lesson_count || 0})">Edit</button>
+        </td>
+      </tr>
+      <tr id="details-${s.id}" style="display:none; background: var(--off);">
+        <td colspan="5" style="padding: 20px;">
+          <div style="display:flex; gap:24px; margin-bottom: 20px;">
+            <div style="flex:1;">
+              <strong>Personal Details:</strong><br/>
+              <span style="font-size:13px; color:var(--muted);">${s.personal_details || 'N/A'}</span>
+            </div>
+            <div style="flex:1;">
+              <strong>Goal:</strong><br/>
+              <span style="font-size:13px; color:var(--muted);">${s.goal || 'N/A'}</span>
+            </div>
+            <div style="flex:1;">
+              <strong>Preferences:</strong><br/>
+              <span style="font-size:13px; color:var(--muted);">
+                Freq: ${s.lesson_frequency || 'N/A'} <br>
+                Duration: ${s.lesson_duration || 'N/A'} mins <br>
+                Days: ${Array.isArray(s.preferred_days) ? s.preferred_days.join(', ') : (s.preferred_days || 'N/A')}
+              </span>
+            </div>
+            <div>
+              <button class="btn-primary" onclick="openScheduleModal('${s.id}')">Schedule Lesson</button>
+            </div>
+          </div>
+          <div style="border-top: 1px solid var(--border); padding-top: 16px;">
+            <strong style="margin-bottom:12px; display:block;">Lesson History</strong>
+            <div id="history-${s.id}" style="font-size:13px;">Loading...</div>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  window.toggleStudentDetails = async function(id) {
+    const row = document.getElementById('details-' + id);
+    if (row.style.display === 'none') {
+      row.style.display = 'table-row';
+      const histDiv = document.getElementById('history-' + id);
+      const { data: { session } } = await supabase.auth.getSession();
+      const attempts = await apiGet('/api/admin/students/' + id + '/attempts', session.access_token);
+      
+      if (!attempts || attempts.length === 0) {
+        histDiv.innerHTML = '<span style="color:var(--muted)">No past attempts found.</span>';
+      } else {
+        histDiv.innerHTML = attempts.map(a => `
+          <div style="background:white; padding:12px; border:1px solid var(--border); border-radius:8px; margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+              <strong>${a.lessons?.title || 'Lesson'}</strong>
+              <span class="badge ${a.score >= 80 ? 'called' : 'warm'}">${a.score || 0}% Score</span>
+            </div>
+            <div style="margin-bottom:4px; color:var(--muted);">Date: ${new Date(a.attempt_time).toLocaleString()}</div>
+            <div style="margin-bottom:4px;"><strong>Feedback:</strong> ${a.student_feedback || 'N/A'}</div>
+            <div><strong>Rationale:</strong> ${a.grading_rationale || 'N/A'}</div>
+          </div>
+        `).join('');
+      }
+    } else {
+      row.style.display = 'none';
+    }
+  }
+
+  window.openScheduleModal = function(id) {
+    const student = studentsData.find(s => s.id === id);
+    if(!student) return;
+    document.getElementById('sched-user-phone').value = student.phone || '';
+    document.getElementById('sched-user-name').value = student.name || '';
+    document.getElementById('sched-user-email').value = student.email || '';
+    document.getElementById('sched-time').value = '';
+    openModal('scheduleModal');
+  }
+
+  window.saveSchedule = async function() {
+    const phone = document.getElementById('sched-user-phone').value;
+    const name = document.getElementById('sched-user-name').value;
+    const email = document.getElementById('sched-user-email').value;
+    const time = document.getElementById('sched-time').value;
+    if(!time) return alert('Please select a date and time.');
+
+    await apiPost('/api/admin/schedule-call', {
+      phone_number: phone,
+      name: name,
+      email: email,
+      scheduled_time: new Date(time).toISOString()
+    });
+    closeModal('scheduleModal');
+    alert('Lesson scheduled successfully.');
+  }
+
+  window.openAllocation = function(id, count) {
+    document.getElementById('alloc-user-id').value = id;
+    document.getElementById('alloc-count').value = count;
+    openModal('allocationModal');
+  }
+
+  window.saveAllocation = async function() {
+    const id = document.getElementById('alloc-user-id').value;
+    const count = parseInt(document.getElementById('alloc-count').value, 10);
+    await apiPost(`/api/admin/students/${id}/allocation`, { count }, 'PUT');
+    closeModal('allocationModal');
+    const { data: { session } } = await supabase.auth.getSession();
+    loadStudents(session.access_token);
+  }
+
+  // --- PROSPECTS ---
+  async function loadProspects(token) {
+    prospectsData = await apiGet('/api/admin/prospects', token);
+    renderProspects();
+  }
+
+  function renderProspects() {
+    const tbody = document.getElementById('prospects-tbody');
+    if (!prospectsData || prospectsData.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">No prospects found.</td></tr>'; return; }
+
+    tbody.innerHTML = prospectsData.map((p, index) => {
+      let tempBadge = '';
+      if(p.lead_temperature) {
+        tempBadge = `<span class="badge ${p.lead_temperature.toLowerCase()}">${p.lead_temperature}</span>`;
+      }
+      return `
+      <tr class="draggable-row" data-id="${p.id}">
+        <td style="color:var(--muted); cursor:grab;">☰</td>
+        <td style="font-weight:500">${p.contact_name || p.name || '—'}</td>
+        <td>${p.phone || '—'}</td>
+        <td><span class="badge ${p.call_status === 'pending' ? 'pending' : 'called'}">${p.call_status || 'pending'}</span></td>
+        <td>${tempBadge}</td>
+      </tr>
+    `}).join('');
+
+    if (sortableInstance) sortableInstance.destroy();
+    sortableInstance = new Sortable(tbody, {
+      animation: 150,
+      handle: '.draggable-row',
+      onEnd: async function() {
+        const rows = tbody.querySelectorAll('tr');
+        const updates = Array.from(rows).map((row, index) => ({
+          id: row.getAttribute('data-id'),
+          order_index: index
+        }));
+        await apiPost('/api/admin/prospects/reorder', { updates }, 'PUT');
+      }
+    });
+  }
+
+  window.quickAddProspect = async function() {
+    const name = document.getElementById('quick-name').value;
+    const phone = document.getElementById('quick-phone').value;
+    if(!name || !phone) return alert('Name and phone required');
+    await apiPost('/api/admin/prospects', { prospects: [{ contact_name: name, phone }] });
+    document.getElementById('quick-name').value = '';
+    document.getElementById('quick-phone').value = '';
+    const { data: { session } } = await supabase.auth.getSession();
+    loadProspects(session.access_token);
+  }
+
+  // --- SETTINGS ---
+  async function loadSettings(token) {
+    const settings = await apiGet('/api/admin/campaign-settings', token);
+    if(settings) {
+      if(settings.daily_limit) document.getElementById('setting-limit').value = settings.daily_limit;
+      if(settings.window_start) document.getElementById('setting-start').value = settings.window_start.substring(0,5);
+      if(settings.window_end) document.getElementById('setting-end').value = settings.window_end.substring(0,5);
+    }
+  }
+
+  window.saveSettings = async function() {
+    const daily_limit = parseInt(document.getElementById('setting-limit').value);
+    const window_start = document.getElementById('setting-start').value + ':00';
+    const window_end = document.getElementById('setting-end').value + ':00';
+    await apiPost('/api/admin/campaign-settings', { daily_limit, window_start, window_end }, 'PUT');
+    alert('Settings saved!');
+  }
+
+  // --- EXCEL UPLOAD ---
+  let parsedExcelData = [];
+  const fileInput = document.getElementById('file-input');
+  
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    document.getElementById('dropzone-text').textContent = `File selected: ${file.name}`;
+    
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const bstr = evt.target.result;
+      const wb = XLSX.read(bstr, { type: 'binary' });
+      const wsname = wb.SheetNames[0];
+      const ws = wb.Sheets[wsname];
+      const data = XLSX.utils.sheet_to_json(ws);
+      
+      parsedExcelData = data.map(row => ({
+        contact_name: row.Name || row.name || row.Contact || '',
+        phone: row.Phone || row.phone || row.PhoneNumber || ''
+      })).filter(p => p.phone);
+      
+      if(parsedExcelData.length > 0) {
+        document.getElementById('btn-process-upload').disabled = false;
+        document.getElementById('btn-process-upload').textContent = `Upload ${parsedExcelData.length} prospects`;
+      }
+    };
+    reader.readAsBinaryString(file);
+  });
+
+  document.getElementById('btn-process-upload').addEventListener('click', async () => {
+    if(parsedExcelData.length === 0) return;
+    document.getElementById('btn-process-upload').disabled = true;
+    document.getElementById('btn-process-upload').textContent = 'Uploading...';
+    
+    await apiPost('/api/admin/prospects', { prospects: parsedExcelData });
+    closeModal('uploadModal');
+    
+    const { data: { session } } = await supabase.auth.getSession();
+    loadProspects(session.access_token);
+  });
+
+  init();
+</script>
+
+</body>
+</html>

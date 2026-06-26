@@ -1,7 +1,7 @@
 {
-  "name": "abc-english",
+  "name": "penny-ai",
   "version": "1.0.0",
-  "description": "ABCEnglish landing page with AI voice lesson call",
+  "description": "Penny AI landing page with AI voice lesson call",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
