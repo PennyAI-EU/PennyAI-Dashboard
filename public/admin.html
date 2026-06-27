@@ -185,6 +185,47 @@
   }
   .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
 
+  /* CUSTOM DROPDOWN COMPONENT */
+  .custom-dropdown {
+    position: relative;
+    user-select: none;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .dropdown-selected {
+    background: var(--off) url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2212%22%20height%3D%2212%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M2%204l4%204%204-4%22%20fill%3D%22none%22%20stroke%3D%22%236b6b6b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E") no-repeat right 12px center;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 32px 6px 16px;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .dropdown-selected:hover { border-color: var(--accent); }
+  .dropdown-options {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 6px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    min-width: 140px;
+    z-index: 100;
+    overflow: hidden;
+  }
+  .dropdown-options div {
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+    color: var(--text);
+  }
+  .dropdown-options div:hover {
+    background: var(--off);
+    color: var(--accent);
+  }
+
   /* UPLOAD ZONE */
   .upload-zone {
     border: 2px dashed var(--border); border-radius: var(--radius);
@@ -219,6 +260,10 @@
     <div class="nav-item" id="nav-prospects" onclick="showSection('prospects')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
       <span>Outbound Campaigns</span>
+    </div>
+    <div class="nav-item" id="nav-lessons" onclick="showSection('lessons')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+      <span>Lesson Library</span>
     </div>
   </nav>
 
@@ -265,64 +310,137 @@
     </div>
   </section>
 
-  <!-- PROSPECTS SECTION -->
+  <!-- PROSPECTS (CAMPAIGNS) SECTION -->
   <section id="section-prospects" class="section">
     <div class="section-header">
       <div>
         <h1>Outbound Campaigns</h1>
-        <p>Manage the calling queue and campaign settings.</p>
+        <p>Manage your multiple calling campaigns.</p>
       </div>
-      <button class="btn-primary" onclick="openModal('uploadModal')">Upload Excel</button>
-    </div>
-
-    <div class="grid" style="grid-template-columns: 1fr 1fr;">
-      <div class="card">
-        <div class="card-label">Campaign Settings</div>
-        <div style="display:flex; gap:16px;">
-          <div class="form-group" style="flex:1">
-            <label class="form-label">Daily Call Limit</label>
-            <input type="number" id="setting-limit" class="form-input" value="50"/>
-          </div>
-          <div class="form-group" style="flex:1">
-            <label class="form-label">Window Start</label>
-            <input type="time" id="setting-start" class="form-input" value="09:00"/>
-          </div>
-          <div class="form-group" style="flex:1">
-            <label class="form-label">Window End</label>
-            <input type="time" id="setting-end" class="form-input" value="17:00"/>
-          </div>
-        </div>
-        <button class="btn-secondary" onclick="saveSettings()">Save Settings</button>
-      </div>
-      
-      <div class="card">
-        <div class="card-label">Quick Add Prospect</div>
-        <div style="display:flex; gap:12px;">
-          <input type="text" id="quick-name" class="form-input" placeholder="Name" style="flex:1" />
-          <input type="text" id="quick-phone" class="form-input" placeholder="Phone Number" style="flex:1" />
-          <button class="btn-primary" onclick="quickAddProspect()">Add</button>
-        </div>
+      <div>
+        <button class="btn-secondary" onclick="viewAllProspects()" style="margin-right: 12px;">Master View</button>
+        <button class="btn-primary" onclick="openModal('createCampaignModal')">New Campaign</button>
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-label">Call Queue (Drag to reorder)</div>
-      <div class="table-container" style="border:none;">
-        <table>
-          <thead>
-            <tr>
-              <th style="width: 40px"></th>
-              <th>Name</th>
-              <th>Phone</th>
-              <th>Status</th>
-              <th>Lead Temp</th>
-            </tr>
-          </thead>
-          <tbody id="prospects-tbody">
-            <tr><td colspan="5" style="text-align:center; padding:30px;">Loading prospects...</td></tr>
-          </tbody>
-        </table>
+    <div class="table-container" style="margin-bottom: 40px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Daily Limit</th>
+            <th>Window</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="campaigns-tbody">
+          <tr><td colspan="5" style="text-align:center; padding:30px;">Loading campaigns...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CAMPAIGN DETAILS (Hidden by default) -->
+    <div id="campaign-details-container" style="display:none; border-top: 1px solid var(--border); padding-top: 40px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
+        <div>
+          <h2 id="active-campaign-name" style="font-size:1.5rem; margin-bottom:4px;">Campaign Name</h2>
+          <span id="active-campaign-status" class="badge called">Active</span>
+        </div>
+        <button class="btn-primary" onclick="openModal('uploadModal')">Upload Excel</button>
       </div>
+
+      <div id="campaign-settings-grid" class="grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="card">
+          <div class="card-label">Campaign Settings</div>
+          <div style="display:flex; gap:16px;">
+            <div class="form-group" style="flex:1">
+              <label class="form-label">Daily Call Limit</label>
+              <input type="number" id="setting-limit" class="form-input" value="50"/>
+            </div>
+            <div class="form-group" style="flex:1">
+              <label class="form-label">Window Start</label>
+              <input type="time" id="setting-start" class="form-input" value="09:00"/>
+            </div>
+            <div class="form-group" style="flex:1">
+              <label class="form-label">Window End</label>
+              <input type="time" id="setting-end" class="form-input" value="17:00"/>
+            </div>
+          </div>
+          <div style="display:flex; gap:12px;">
+            <button class="btn-secondary" onclick="saveSettings()">Save Settings</button>
+            <button class="btn-secondary" id="btn-toggle-status" onclick="toggleCampaignStatus()">Pause Campaign</button>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-label">Quick Add Prospect</div>
+          <div style="display:flex; gap:12px;">
+            <input type="text" id="quick-name" class="form-input" placeholder="Name" style="flex:1" />
+            <input type="text" id="quick-phone" class="form-input" placeholder="Phone Number" style="flex:1" />
+            <button class="btn-primary" onclick="quickAddProspect()">Add</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Call Queue (Drag to reorder)</span>
+        <div class="custom-dropdown">
+          <div class="dropdown-selected" id="dropdown-selected-text" onclick="toggleDropdown(event)">All</div>
+          <div class="dropdown-options" id="dropdown-options-list" style="display: none;">
+            <div onclick="selectTemp('all', 'All')">All</div>
+            <div onclick="selectTemp('HOT', 'Hot')">Hot</div>
+            <div onclick="selectTemp('WARM', 'Warm')">Warm</div>
+            <div onclick="selectTemp('COLD', 'Cold')">Cold</div>
+            <div onclick="selectTemp('NO_LEAD', 'No Lead')">No Lead</div>
+          </div>
+        </div>
+      </div>
+        <div class="table-container" style="border:none;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 40px"></th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Lead Temp</th>
+              </tr>
+            </thead>
+            <tbody id="prospects-tbody">
+              <tr><td colspan="5" style="text-align:center; padding:30px;">Select a campaign to view queue</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LESSONS SECTION -->
+  <section id="section-lessons" class="section">
+    <div class="section-header">
+      <div>
+        <h1>Lesson Library</h1>
+        <p>Manage the curriculum and AI lesson instructions.</p>
+      </div>
+      <button class="btn-primary" onclick="openLessonModal()">Create Lesson</button>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Level</th>
+            <th>Lesson No.</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="lessons-tbody">
+          <tr><td colspan="4" style="text-align:center; padding:30px;">Loading lessons...</td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
 
@@ -381,11 +499,101 @@
   </div>
 </div>
 
+<!-- Create Campaign Modal -->
+<div class="modal-overlay" id="createCampaignModal">
+  <div class="modal-card">
+    <div class="modal-title">Create Campaign</div>
+    <div class="form-group">
+      <label class="form-label">Campaign Name</label>
+      <input type="text" id="new-camp-name" class="form-input" placeholder="e.g. Summer Outreach" />
+    </div>
+    <div style="display:flex; gap:16px;">
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Daily Call Limit</label>
+        <input type="number" id="new-camp-limit" class="form-input" value="50" />
+      </div>
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Start Time</label>
+        <input type="time" id="new-camp-start" class="form-input" value="09:00" />
+      </div>
+      <div class="form-group" style="flex:1">
+        <label class="form-label">End Time</label>
+        <input type="time" id="new-camp-end" class="form-input" value="17:00" />
+      </div>
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top: 24px;">
+      <button class="btn-secondary" onclick="closeModal('createCampaignModal')">Cancel</button>
+      <button class="btn-primary" onclick="createCampaign()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lesson Modal -->
+<div class="modal-overlay" id="lessonModal">
+  <div class="modal-card" style="max-width: 600px;">
+    <div class="modal-title" id="lesson-modal-title">Create Lesson</div>
+    <input type="hidden" id="lesson-id" />
+    <div class="form-group">
+      <label class="form-label">Title</label>
+      <input type="text" id="lesson-title" class="form-input" />
+    </div>
+    <div style="display:flex; gap:16px;">
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Level</label>
+        <select id="lesson-level" class="form-input">
+          <option value="A1">A1</option>
+          <option value="A2">A2</option>
+          <option value="B1">B1</option>
+          <option value="B2">B2</option>
+          <option value="C1">C1</option>
+          <option value="C2">C2</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Lesson Number</label>
+        <input type="number" id="lesson-number" class="form-input" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Instruction</label>
+      <textarea id="lesson-instruction" class="form-input" style="height: 150px; resize:vertical;"></textarea>
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top: 24px;">
+      <button class="btn-secondary" onclick="closeModal('lessonModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveLesson()">Save</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
   let supabase = null;
   let studentsData = [];
+  let campaignsData = [];
   let prospectsData = [];
+  let lessonsData = [];
   let sortableInstance = null;
+  let activeCampaignId = null;
+  let currentFilterTemp = 'all';
+
+  window.toggleDropdown = function(e) {
+    if(e) e.stopPropagation();
+    const opts = document.getElementById('dropdown-options-list');
+    opts.style.display = opts.style.display === 'none' ? 'block' : 'none';
+  }
+
+  window.selectTemp = function(value, text) {
+    currentFilterTemp = value;
+    document.getElementById('dropdown-selected-text').textContent = text;
+    document.getElementById('dropdown-options-list').style.display = 'none';
+    renderProspects();
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.custom-dropdown')) {
+      const opts = document.getElementById('dropdown-options-list');
+      if(opts) opts.style.display = 'none';
+    }
+  });
 
   window.showSection = function(sectionId) {
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
@@ -409,8 +617,8 @@
     if (!session) { window.location.href = '/signin.html'; return; }
 
     loadStudents(session.access_token);
-    loadProspects(session.access_token);
-    loadSettings(session.access_token);
+    loadCampaigns(session.access_token);
+    loadLessons(session.access_token);
 
     document.getElementById('signout-btn').addEventListener('click', async () => {
       await supabase.auth.signOut();
@@ -550,28 +758,159 @@
     loadStudents(session.access_token);
   }
 
-  // --- PROSPECTS ---
+  // --- CAMPAIGNS & PROSPECTS ---
+  async function loadCampaigns(token) {
+    campaignsData = await apiGet('/api/admin/campaigns', token);
+    const tbody = document.getElementById('campaigns-tbody');
+    if (!campaignsData || campaignsData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">No campaigns found. Create one to get started.</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = campaignsData.map(c => `
+      <tr>
+        <td style="font-weight:500">${c.name || 'Unnamed Campaign'}</td>
+        <td><span class="badge ${c.status === 'active' ? 'called' : 'cold'}">${c.status}</span></td>
+        <td>${c.daily_limit} calls/day</td>
+        <td>${(c.window_start || '').substring(0,5)} - ${(c.window_end || '').substring(0,5)}</td>
+        <td><button class="btn-secondary" onclick="viewCampaign('${c.id}')">View</button></td>
+      </tr>
+    `).join('');
+  }
+
+  window.createCampaign = async function() {
+    const name = document.getElementById('new-camp-name').value;
+    const limit = document.getElementById('new-camp-limit').value;
+    const start = document.getElementById('new-camp-start').value + ':00';
+    const end = document.getElementById('new-camp-end').value + ':00';
+    
+    if(!name) return alert('Campaign name is required');
+    await apiPost('/api/admin/campaigns', { name, daily_limit: limit, window_start: start, window_end: end });
+    closeModal('createCampaignModal');
+    const { data: { session } } = await supabase.auth.getSession();
+    loadCampaigns(session.access_token);
+  }
+
+  window.viewCampaign = async function(id) {
+    activeCampaignId = id;
+    const camp = campaignsData.find(c => String(c.id) === String(id));
+    if(!camp) return;
+
+    document.getElementById('active-campaign-name').textContent = camp.name;
+    const statusBadge = document.getElementById('active-campaign-status');
+    statusBadge.style.display = 'inline-block';
+    statusBadge.textContent = camp.status;
+    statusBadge.className = `badge ${camp.status === 'active' ? 'called' : 'cold'}`;
+    
+    document.getElementById('campaign-settings-grid').style.display = 'grid';
+    
+    document.getElementById('setting-limit').value = camp.daily_limit;
+    document.getElementById('setting-start').value = (camp.window_start || '').substring(0,5);
+    document.getElementById('setting-end').value = (camp.window_end || '').substring(0,5);
+    
+    const toggleBtn = document.getElementById('btn-toggle-status');
+    if(camp.status === 'active') {
+      toggleBtn.textContent = 'Pause Campaign';
+    } else {
+      toggleBtn.textContent = 'Activate Campaign';
+    }
+
+    document.getElementById('campaign-details-container').style.display = 'block';
+    
+    const { data: { session } } = await supabase.auth.getSession();
+    loadProspects(session.access_token);
+  }
+
+  window.viewAllProspects = async function() {
+    activeCampaignId = 'all';
+    
+    document.getElementById('active-campaign-name').textContent = 'Master View (All Prospects)';
+    document.getElementById('active-campaign-status').style.display = 'none';
+    
+    // Hide campaign settings and quick add for Master View
+    document.getElementById('campaign-settings-grid').style.display = 'none';
+
+    document.getElementById('campaign-details-container').style.display = 'block';
+    
+    const { data: { session } } = await supabase.auth.getSession();
+    loadProspects(session.access_token);
+  }
+
+  window.saveSettings = async function() {
+    if(!activeCampaignId) return;
+    const camp = campaignsData.find(c => String(c.id) === String(activeCampaignId));
+    const limit = parseInt(document.getElementById('setting-limit').value);
+    const start = document.getElementById('setting-start').value + ':00';
+    const end = document.getElementById('setting-end').value + ':00';
+    
+    await apiPost('/api/admin/campaigns/' + activeCampaignId, { 
+      name: camp.name, status: camp.status, daily_limit: limit, window_start: start, window_end: end 
+    }, 'PUT');
+    alert('Campaign settings saved!');
+    const { data: { session } } = await supabase.auth.getSession();
+    loadCampaigns(session.access_token);
+  }
+
+  window.toggleCampaignStatus = async function() {
+    if(!activeCampaignId) return;
+    const camp = campaignsData.find(c => String(c.id) === String(activeCampaignId));
+    const newStatus = camp.status === 'active' ? 'paused' : 'active';
+    
+    await apiPost('/api/admin/campaigns/' + activeCampaignId, { 
+      name: camp.name, status: newStatus, daily_limit: camp.daily_limit, window_start: camp.window_start, window_end: camp.window_end 
+    }, 'PUT');
+    
+    const { data: { session } } = await supabase.auth.getSession();
+    await loadCampaigns(session.access_token);
+    viewCampaign(activeCampaignId);
+  }
+
   async function loadProspects(token) {
-    prospectsData = await apiGet('/api/admin/prospects', token);
+    if(!activeCampaignId) return;
+    prospectsData = await apiGet('/api/admin/prospects?campaign_id=' + activeCampaignId, token);
     renderProspects();
   }
 
   function renderProspects() {
     const tbody = document.getElementById('prospects-tbody');
-    if (!prospectsData || prospectsData.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">No prospects found.</td></tr>'; return; }
+    const filterTemp = currentFilterTemp;
+    
+    let filteredData = prospectsData;
+    if (filterTemp !== 'all') {
+      filteredData = prospectsData.filter(p => p.lead_temperature && p.lead_temperature.toUpperCase() === filterTemp);
+    }
 
-    tbody.innerHTML = prospectsData.map((p, index) => {
+    if (!filteredData || filteredData.length === 0) { 
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">No prospects found matching criteria.</td></tr>'; 
+      return; 
+    }
+
+    tbody.innerHTML = filteredData.map((p, index) => {
       let tempBadge = '';
       if(p.lead_temperature) {
         tempBadge = `<span class="badge ${p.lead_temperature.toLowerCase()}">${p.lead_temperature}</span>`;
       }
       return `
-      <tr class="draggable-row" data-id="${p.id}">
-        <td style="color:var(--muted); cursor:grab;">☰</td>
+      <tr class="draggable-row" data-id="${p.id}" onclick="toggleProspectDetails('${p.id}')" style="cursor:pointer;">
+        <td style="color:var(--muted); cursor:grab;" onclick="event.stopPropagation()">☰</td>
         <td style="font-weight:500">${p.contact_name || p.name || '—'}</td>
         <td>${p.phone || '—'}</td>
         <td><span class="badge ${p.call_status === 'pending' ? 'pending' : 'called'}">${p.call_status || 'pending'}</span></td>
         <td>${tempBadge}</td>
+      </tr>
+      <tr id="prospect-details-${p.id}" style="display:none; background: var(--off);">
+        <td colspan="5" style="padding: 20px;">
+          <div style="font-size:13px; color:var(--text);">
+            <strong style="display:block; margin-bottom:8px; font-size:14px;">Call Report & Insights</strong>
+            <p style="margin-bottom:12px;"><strong>Summary:</strong> ${p.call_summary || 'No summary available yet.'}</p>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+              <div><strong>Job Title:</strong> ${p.job_title || '—'}</div>
+              <div><strong>Company:</strong> ${p.company_name || '—'}</div>
+              <div><strong>Caller Reason:</strong> ${p.caller_reason || '—'}</div>
+              <div><strong>Pricing Requested:</strong> ${p.pricing_requested || '—'}</div>
+            </div>
+          </div>
+        </td>
       </tr>
     `}).join('');
 
@@ -579,8 +918,10 @@
     sortableInstance = new Sortable(tbody, {
       animation: 150,
       handle: '.draggable-row',
+      filter: '[id^="prospect-details-"]', // prevent dragging the details row
+      preventOnFilter: false,
       onEnd: async function() {
-        const rows = tbody.querySelectorAll('tr');
+        const rows = tbody.querySelectorAll('tr.draggable-row');
         const updates = Array.from(rows).map((row, index) => ({
           id: row.getAttribute('data-id'),
           order_index: index
@@ -590,33 +931,85 @@
     });
   }
 
+  window.toggleProspectDetails = function(id) {
+    const row = document.getElementById('prospect-details-' + id);
+    if (row.style.display === 'none') {
+      row.style.display = 'table-row';
+    } else {
+      row.style.display = 'none';
+    }
+  }
+
   window.quickAddProspect = async function() {
+    if(!activeCampaignId || activeCampaignId === 'all') return alert('Select a specific campaign first');
     const name = document.getElementById('quick-name').value;
     const phone = document.getElementById('quick-phone').value;
     if(!name || !phone) return alert('Name and phone required');
-    await apiPost('/api/admin/prospects', { prospects: [{ contact_name: name, phone }] });
+    await apiPost('/api/admin/prospects', { prospects: [{ contact_name: name, phone }], campaign_id: activeCampaignId });
     document.getElementById('quick-name').value = '';
     document.getElementById('quick-phone').value = '';
     const { data: { session } } = await supabase.auth.getSession();
     loadProspects(session.access_token);
   }
 
-  // --- SETTINGS ---
-  async function loadSettings(token) {
-    const settings = await apiGet('/api/admin/campaign-settings', token);
-    if(settings) {
-      if(settings.daily_limit) document.getElementById('setting-limit').value = settings.daily_limit;
-      if(settings.window_start) document.getElementById('setting-start').value = settings.window_start.substring(0,5);
-      if(settings.window_end) document.getElementById('setting-end').value = settings.window_end.substring(0,5);
+  // --- LESSON LIBRARY ---
+  async function loadLessons(token) {
+    lessonsData = await apiGet('/api/admin/lessons', token);
+    const tbody = document.getElementById('lessons-tbody');
+    if (!lessonsData || lessonsData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">No lessons found.</td></tr>';
+      return;
     }
+    
+    tbody.innerHTML = lessonsData.map(l => `
+      <tr>
+        <td style="font-weight:500">${l.title || 'Untitled'}</td>
+        <td>${l.level || '—'}</td>
+        <td>${l.lesson_number || '—'}</td>
+        <td><button class="btn-secondary" onclick="openLessonModal('${l.id}')">Edit</button></td>
+      </tr>
+    `).join('');
   }
 
-  window.saveSettings = async function() {
-    const daily_limit = parseInt(document.getElementById('setting-limit').value);
-    const window_start = document.getElementById('setting-start').value + ':00';
-    const window_end = document.getElementById('setting-end').value + ':00';
-    await apiPost('/api/admin/campaign-settings', { daily_limit, window_start, window_end }, 'PUT');
-    alert('Settings saved!');
+  window.openLessonModal = function(id = null) {
+    const modalTitle = document.getElementById('lesson-modal-title');
+    if(id) {
+      const lesson = lessonsData.find(l => String(l.id) === String(id));
+      document.getElementById('lesson-id').value = id;
+      document.getElementById('lesson-title').value = lesson.title || '';
+      document.getElementById('lesson-level').value = lesson.level || 'A1';
+      document.getElementById('lesson-number').value = lesson.lesson_number || 1;
+      document.getElementById('lesson-instruction').value = lesson.lesson_instruction || '';
+      modalTitle.textContent = 'Edit Lesson';
+    } else {
+      document.getElementById('lesson-id').value = '';
+      document.getElementById('lesson-title').value = '';
+      document.getElementById('lesson-level').value = 'A1';
+      document.getElementById('lesson-number').value = 1;
+      document.getElementById('lesson-instruction').value = '';
+      modalTitle.textContent = 'Create Lesson';
+    }
+    openModal('lessonModal');
+  }
+
+  window.saveLesson = async function() {
+    const id = document.getElementById('lesson-id').value;
+    const payload = {
+      title: document.getElementById('lesson-title').value,
+      level: document.getElementById('lesson-level').value,
+      lesson_number: parseInt(document.getElementById('lesson-number').value) || 1,
+      lesson_instruction: document.getElementById('lesson-instruction').value
+    };
+    
+    if(id) {
+      await apiPost('/api/admin/lessons/' + id, payload, 'PUT');
+    } else {
+      await apiPost('/api/admin/lessons', payload);
+    }
+    
+    closeModal('lessonModal');
+    const { data: { session } } = await supabase.auth.getSession();
+    loadLessons(session.access_token);
   }
 
   // --- EXCEL UPLOAD ---
@@ -654,7 +1047,8 @@
     document.getElementById('btn-process-upload').disabled = true;
     document.getElementById('btn-process-upload').textContent = 'Uploading...';
     
-    await apiPost('/api/admin/prospects', { prospects: parsedExcelData });
+    if(!activeCampaignId || activeCampaignId === 'all') return alert("Select a specific campaign to upload prospects to.");
+    await apiPost('/api/admin/prospects', { prospects: parsedExcelData, campaign_id: activeCampaignId });
     closeModal('uploadModal');
     
     const { data: { session } } = await supabase.auth.getSession();

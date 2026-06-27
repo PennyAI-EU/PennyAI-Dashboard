@@ -293,7 +293,7 @@ async function requireAdmin(req, res, next) {
 
   const { data, error } = await supabase
     .from("users")
-    .select("is_admin")
+    .select("is_admin, school_id")
     .eq("phone", phone)
     .maybeSingle();
 
@@ -302,11 +302,16 @@ async function requireAdmin(req, res, next) {
   }
   
   req.adminUser = user;
+  req.adminSchoolId = data.school_id;
   next();
 }
 
 app.get("/api/admin/students", requireAdmin, async (req, res) => {
-  const { data, error } = await supabase.from("users").select("*").order("name");
+  let query = supabase.from("users").select("*").order("name");
+  if (req.adminSchoolId) {
+    query = query.eq("school_id", req.adminSchoolId);
+  }
+  const { data, error } = await query;
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
@@ -323,23 +328,30 @@ app.put("/api/admin/students/:id/allocation", requireAdmin, async (req, res) => 
 });
 
 app.get("/api/admin/prospects", requireAdmin, async (req, res) => {
-  const { data, error } = await supabase
+  const { campaign_id } = req.query;
+  let query = supabase
     .from("prospects")
     .select("*")
     .order("order_index", { ascending: true })
     .order("created_at", { ascending: false });
+    
+  if (campaign_id && campaign_id !== 'all') query = query.eq("campaign_id", campaign_id);
+
+  const { data, error } = await query;
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
 app.post("/api/admin/prospects", requireAdmin, async (req, res) => {
-  const { prospects } = req.body; // Array of { contact_name, phone }
+  const { prospects, campaign_id } = req.body; // Array of { contact_name, phone }
   if (!prospects || !prospects.length) return res.status(400).json({ error: "No prospects provided" });
+  if (!campaign_id) return res.status(400).json({ error: "campaign_id is required" });
   
   // Assign max order_index to new prospects
   const { data: maxData } = await supabase
     .from("prospects")
     .select("order_index")
+    .eq("campaign_id", campaign_id)
     .order("order_index", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -352,7 +364,8 @@ app.post("/api/admin/prospects", requireAdmin, async (req, res) => {
       contact_name: p.contact_name,
       phone: p.phone,
       order_index: maxOrder,
-      call_status: "pending"
+      call_status: "pending",
+      campaign_id: campaign_id
     };
   });
 
@@ -372,24 +385,49 @@ app.put("/api/admin/prospects/reorder", requireAdmin, async (req, res) => {
   res.json({ success: true });
 });
 
-app.get("/api/admin/campaign-settings", requireAdmin, async (req, res) => {
-  const { data, error } = await supabase.from("campaign_settings").select("*").limit(1).maybeSingle();
+app.get("/api/admin/campaigns", requireAdmin, async (req, res) => {
+  const { data, error } = await supabase.from("campaigns").select("*").order("created_at", { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data || {});
+  res.json(data);
 });
 
-app.put("/api/admin/campaign-settings", requireAdmin, async (req, res) => {
-  const { daily_limit, window_start, window_end } = req.body;
-  
-  const { data, error: fetchErr } = await supabase.from("campaign_settings").select("id").limit(1).maybeSingle();
-  
-  if (data && data.id) {
-    const { error } = await supabase.from("campaign_settings").update({ daily_limit, window_start, window_end }).eq("id", data.id);
-    if (error) return res.status(500).json({ error: error.message });
-  } else {
-    const { error } = await supabase.from("campaign_settings").insert({ daily_limit, window_start, window_end });
-    if (error) return res.status(500).json({ error: error.message });
-  }
+app.post("/api/admin/campaigns", requireAdmin, async (req, res) => {
+  const { name, daily_limit, window_start, window_end } = req.body;
+  const { data, error } = await supabase.from("campaigns").insert({
+    name, daily_limit, window_start, window_end, status: 'active'
+  }).select().single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.put("/api/admin/campaigns/:id", requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { name, status, daily_limit, window_start, window_end } = req.body;
+  const { error } = await supabase.from("campaigns").update({
+    name, status, daily_limit, window_start, window_end
+  }).eq("id", id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+app.get("/api/admin/lessons", requireAdmin, async (req, res) => {
+  const { data, error } = await supabase.from("lessons").select("*").order("level").order("lesson_number");
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.post("/api/admin/lessons", requireAdmin, async (req, res) => {
+  const { title, level, lesson_number, lesson_instruction } = req.body;
+  const { error } = await supabase.from("lessons").insert({ title, level, lesson_number, lesson_instruction });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+app.put("/api/admin/lessons/:id", requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { title, level, lesson_number, lesson_instruction } = req.body;
+  const { error } = await supabase.from("lessons").update({ title, level, lesson_number, lesson_instruction }).eq("id", id);
+  if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
 });
 
