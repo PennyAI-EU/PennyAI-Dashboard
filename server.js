@@ -251,6 +251,58 @@ app.post("/create-call", async (req, res) => {
   }
 });
 
+// --- PACING ALGORITHM ---
+async function recalculateCampaignSchedules(campaign_id) {
+  try {
+    const { data: campaign } = await supabase.from("campaigns").select("*").eq("id", campaign_id).single();
+    if (!campaign) return;
+
+    const daily_limit = campaign.daily_limit || 50;
+    const window_start = campaign.window_start || '09:00:00';
+    const window_end = campaign.window_end || '17:00:00';
+
+    const startParts = window_start.split(':');
+    const endParts = window_end.split(':');
+    const startMinutes = parseInt(startParts[0]) * 60 + parseInt(startParts[1] || 0);
+    const endMinutes = parseInt(endParts[0]) * 60 + parseInt(endParts[1] || 0);
+    
+    let durationMinutes = endMinutes - startMinutes;
+    if (durationMinutes <= 0) durationMinutes = 480; 
+
+    const intervalMinutes = durationMinutes / daily_limit;
+
+    const { data: prospects } = await supabase
+      .from("prospects")
+      .select("id, order_index")
+      .eq("campaign_id", campaign_id)
+      .eq("call_status", "pending")
+      .order("order_index", { ascending: true });
+
+    if (!prospects || prospects.length === 0) return;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+    
+    for (let i = 0; i < prospects.length; i++) {
+      const dayOffset = Math.floor(i / daily_limit);
+      const callIndexToday = i % daily_limit;
+
+      const scheduledDate = new Date(today);
+      scheduledDate.setDate(scheduledDate.getDate() + dayOffset);
+      
+      const totalMinutes = startMinutes + (callIndexToday * intervalMinutes);
+      const hrs = Math.floor(totalMinutes / 60);
+      const mins = Math.floor(totalMinutes % 60);
+      
+      scheduledDate.setHours(hrs, mins, 0, 0);
+
+      await supabase.from("prospects").update({ scheduled_at: scheduledDate.toISOString() }).eq("id", prospects[i].id);
+    }
+  } catch (err) {
+    console.error("Error recalculating schedules:", err);
+  }
+}
+
 // Fetch next scheduled call (using service role to bypass RLS)
 app.get("/api/next-call", async (req, res) => {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
@@ -371,6 +423,9 @@ app.post("/api/admin/prospects", requireAdmin, async (req, res) => {
 
   const { error } = await supabase.from("prospects").insert(toInsert);
   if (error) return res.status(500).json({ error: error.message });
+  
+  await recalculateCampaignSchedules(campaign_id);
+  
   res.json({ success: true, count: toInsert.length });
 });
 
@@ -382,6 +437,12 @@ app.put("/api/admin/prospects/reorder", requireAdmin, async (req, res) => {
   for (const up of updates) {
     await supabase.from("prospects").update({ order_index: up.order_index }).eq("id", up.id);
   }
+  
+  const { data: first } = await supabase.from("prospects").select("campaign_id").eq("id", updates[0].id).single();
+  if (first && first.campaign_id) {
+    await recalculateCampaignSchedules(first.campaign_id);
+  }
+
   res.json({ success: true });
 });
 
@@ -407,6 +468,9 @@ app.put("/api/admin/campaigns/:id", requireAdmin, async (req, res) => {
     name, status, daily_limit, window_start, window_end
   }).eq("id", id);
   if (error) return res.status(500).json({ error: error.message });
+  
+  await recalculateCampaignSchedules(id);
+  
   res.json({ success: true });
 });
 

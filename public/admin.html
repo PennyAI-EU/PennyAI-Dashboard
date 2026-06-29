@@ -147,11 +147,6 @@
   tr.draggable-row:active { cursor: grabbing; }
   .sortable-ghost { opacity: 0.4; }
 
-  /* Dynamic Queue Styling */
-  #prospects-tbody tr.draggable-row:nth-child(-n+3) {
-    background: var(--accent-light);
-  }
-
   /* BADGES */
   .badge {
     padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;
@@ -884,14 +879,29 @@
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">No prospects found matching criteria.</td></tr>'; 
       return; 
     }
+    
+    let dailyLimit = 0;
+    if (activeCampaignId && activeCampaignId !== 'all') {
+      const camp = campaignsData.find(c => String(c.id) === String(activeCampaignId));
+      if (camp) dailyLimit = camp.daily_limit;
+    }
+    
+    let pendingCount = 0;
 
     tbody.innerHTML = filteredData.map((p, index) => {
       let tempBadge = '';
       if(p.lead_temperature) {
         tempBadge = `<span class="badge ${p.lead_temperature.toLowerCase()}">${p.lead_temperature}</span>`;
       }
+      
+      let rowStyle = "cursor:pointer;";
+      if (p.call_status === 'pending' && activeCampaignId !== 'all' && pendingCount < dailyLimit) {
+        rowStyle += " background: var(--accent-light);";
+        pendingCount++;
+      }
+      
       return `
-      <tr class="draggable-row" data-id="${p.id}" onclick="toggleProspectDetails('${p.id}')" style="cursor:pointer;">
+      <tr class="draggable-row" data-id="${p.id}" onclick="toggleProspectDetails('${p.id}')" style="${rowStyle}">
         <td style="color:var(--muted); cursor:grab;" onclick="event.stopPropagation()">☰</td>
         <td style="font-weight:500">${p.contact_name || p.name || '—'}</td>
         <td>${p.phone || '—'}</td>
@@ -922,10 +932,30 @@
       preventOnFilter: false,
       onEnd: async function() {
         const rows = tbody.querySelectorAll('tr.draggable-row');
-        const updates = Array.from(rows).map((row, index) => ({
-          id: row.getAttribute('data-id'),
-          order_index: index
-        }));
+        
+        let currentLimit = 0;
+        if (activeCampaignId && activeCampaignId !== 'all') {
+          const camp = campaignsData.find(c => String(c.id) === String(activeCampaignId));
+          if (camp) currentLimit = camp.daily_limit;
+        }
+
+        let pendingCount = 0;
+        const updates = Array.from(rows).map((row, index) => {
+          // Instant visual update
+          const isPending = row.querySelector('.badge') && row.querySelector('.badge').classList.contains('pending');
+          if (isPending && activeCampaignId !== 'all' && pendingCount < currentLimit) {
+            row.style.background = 'var(--accent-light)';
+            pendingCount++;
+          } else {
+            row.style.background = '';
+          }
+
+          return {
+            id: row.getAttribute('data-id'),
+            order_index: index
+          };
+        });
+        
         await apiPost('/api/admin/prospects/reorder', { updates }, 'PUT');
       }
     });
