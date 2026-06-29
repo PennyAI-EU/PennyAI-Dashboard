@@ -439,8 +439,9 @@
       </div>
       <div class="card">
         <div class="card-label">Learning Time</div>
-        <div class="card-value" id="stat-time">— <small style="font-size: 14px; font-weight: 400; color: var(--muted)">mins</small></div>
-        <div class="progress-container">
+        <div class="card-value" id="stat-total-time">— <small style="font-size: 14px; font-weight: 400; color: var(--muted)">total mins</small></div>
+        <div class="card-sub" style="margin-top: 10px;">This month's usage</div>
+        <div class="progress-container" style="margin-top: 4px;">
           <div class="progress-bar"><div class="progress-fill" id="time-progress"></div></div>
           <div class="progress-labels">
             <span id="time-used">0 used</span>
@@ -511,7 +512,7 @@
       <p>A detailed record of your past sessions and progress.</p>
     </div>
 
-    <div class="list-card" id="history-list">
+    <div class="list-card" id="history-list" style="max-height: 400px; overflow-y: auto;">
       <div class="empty-state">
         <h3>No sessions yet</h3>
         <p>Your practice history will appear here once you complete your first lesson.</p>
@@ -859,14 +860,14 @@ function updateUI(data) {
   // Overview Stats
   document.getElementById('stat-level').textContent = data.profile.englishLevel || '—';
   document.getElementById('stat-completed').textContent = data.lessonProgress.completedCount;
-  document.getElementById('stat-time').innerHTML = `${data.timeTracking.used} <small style="font-size: 14px; font-weight: 400; color: var(--muted)">mins</small>`;
+  document.getElementById('stat-total-time').innerHTML = `${data.timeTracking.total || 0} <small style="font-size: 14px; font-weight: 400; color: var(--muted)">total mins</small>`;
   
-  const timeUsed = data.timeTracking.used;
-  const timeAllocated = data.timeTracking.allocated;
+  const timeUsed = data.timeTracking.used || 0;
+  const timeAllocated = data.timeTracking.allocated || 0;
   const pct = timeAllocated > 0 ? Math.min(100, (timeUsed / timeAllocated) * 100) : 0;
   document.getElementById('time-progress').style.width = pct + '%';
-  document.getElementById('time-used').textContent = `${timeUsed} used`;
-  document.getElementById('time-allocated').textContent = `${timeAllocated} allocated`;
+  document.getElementById('time-used').textContent = `${timeUsed}m used`;
+  document.getElementById('time-allocated').textContent = `${timeAllocated}m allocated`;
 
   if (data.scheduling.nextCallTime) {
     const d = new Date(data.scheduling.nextCallTime);

@@ -178,6 +178,8 @@
     width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px;
     font-family: inherit; font-size: 14px; outline: none;
   }
+  .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; margin-top: 4px; }
+  .checkbox-group label { display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--text); }
   .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
 
   /* CUSTOM DROPDOWN COMPONENT */
@@ -264,10 +266,10 @@
 
   <div class="nav-footer">
     <div class="user-brief">
-      <div class="user-avatar">A</div>
+      <div class="user-avatar" id="admin-avatar">A</div>
       <div class="user-info">
-        <div class="user-name">Administrator</div>
-        <div class="user-email">admin@pennyai.eu</div>
+        <div class="user-name" id="admin-name">Administrator</div>
+        <div class="user-email" id="admin-email">admin@pennyai.com</div>
       </div>
     </div>
     <button class="btn-signout" id="signout-btn">
@@ -360,6 +362,18 @@
             <div class="form-group" style="flex:1">
               <label class="form-label">Window End</label>
               <input type="time" id="setting-end" class="form-input" value="17:00"/>
+            </div>
+            <div class="form-group" style="flex:1">
+              <label class="form-label">Days of Week</label>
+              <div class="checkbox-group" id="setting-days">
+                <label><input type="checkbox" value="monday"> Mon</label>
+                <label><input type="checkbox" value="tuesday"> Tue</label>
+                <label><input type="checkbox" value="wednesday"> Wed</label>
+                <label><input type="checkbox" value="thursday"> Thu</label>
+                <label><input type="checkbox" value="friday"> Fri</label>
+                <label><input type="checkbox" value="saturday"> Sat</label>
+                <label><input type="checkbox" value="sunday"> Sun</label>
+              </div>
             </div>
           </div>
           <div style="display:flex; gap:12px;">
@@ -502,18 +516,30 @@
       <label class="form-label">Campaign Name</label>
       <input type="text" id="new-camp-name" class="form-input" placeholder="e.g. Summer Outreach" />
     </div>
-    <div style="display:flex; gap:16px;">
-      <div class="form-group" style="flex:1">
+    <div style="display:flex; gap:16px; margin-bottom: 16px;">
+      <div class="form-group" style="flex:1; margin-bottom:0;">
         <label class="form-label">Daily Call Limit</label>
         <input type="number" id="new-camp-limit" class="form-input" value="50" />
       </div>
-      <div class="form-group" style="flex:1">
+      <div class="form-group" style="flex:1; margin-bottom:0;">
         <label class="form-label">Start Time</label>
         <input type="time" id="new-camp-start" class="form-input" value="09:00" />
       </div>
-      <div class="form-group" style="flex:1">
+      <div class="form-group" style="flex:1; margin-bottom:0;">
         <label class="form-label">End Time</label>
         <input type="time" id="new-camp-end" class="form-input" value="17:00" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Days of Week</label>
+      <div class="checkbox-group" id="new-camp-days">
+        <label><input type="checkbox" value="monday" checked> Mon</label>
+        <label><input type="checkbox" value="tuesday" checked> Tue</label>
+        <label><input type="checkbox" value="wednesday" checked> Wed</label>
+        <label><input type="checkbox" value="thursday" checked> Thu</label>
+        <label><input type="checkbox" value="friday" checked> Fri</label>
+        <label><input type="checkbox" value="saturday"> Sat</label>
+        <label><input type="checkbox" value="sunday"> Sun</label>
       </div>
     </div>
     <div style="display:flex; justify-content:flex-end; gap:12px; margin-top: 24px;">
@@ -611,6 +637,12 @@
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) { window.location.href = '/signin.html'; return; }
 
+    const adminName = session.user.user_metadata?.name || 'Administrator';
+    const adminEmail = session.user.email;
+    document.getElementById('admin-name').textContent = adminName;
+    document.getElementById('admin-email').textContent = adminEmail;
+    document.getElementById('admin-avatar').textContent = adminName.charAt(0).toUpperCase();
+
     loadStudents(session.access_token);
     loadCampaigns(session.access_token);
     loadLessons(session.access_token);
@@ -670,13 +702,20 @@
                 Days: ${Array.isArray(s.preferred_days) ? s.preferred_days.join(', ') : (s.preferred_days || 'N/A')}
               </span>
             </div>
+            <div style="flex:1;">
+              <strong>Time Stats:</strong><br/>
+              <span style="font-size:13px; color:var(--muted);">
+                Total: ${s.total_time_used || 0} mins <br>
+                This Month: ${s.used_time_this_month || 0} / ${s.allocated_time_this_month || 0} mins
+              </span>
+            </div>
             <div>
               <button class="btn-primary" onclick="openScheduleModal('${s.id}')">Schedule Lesson</button>
             </div>
           </div>
           <div style="border-top: 1px solid var(--border); padding-top: 16px;">
             <strong style="margin-bottom:12px; display:block;">Lesson History</strong>
-            <div id="history-${s.id}" style="font-size:13px;">Loading...</div>
+            <div id="history-${s.id}" style="font-size:13px; max-height: 350px; overflow-y: auto; padding-right: 8px;">Loading...</div>
           </div>
         </td>
       </tr>
@@ -778,9 +817,10 @@
     const limit = document.getElementById('new-camp-limit').value;
     const start = document.getElementById('new-camp-start').value + ':00';
     const end = document.getElementById('new-camp-end').value + ':00';
+    const days = Array.from(document.querySelectorAll('#new-camp-days input:checked')).map(cb => cb.value).join(',');
     
     if(!name) return alert('Campaign name is required');
-    await apiPost('/api/admin/campaigns', { name, daily_limit: limit, window_start: start, window_end: end });
+    await apiPost('/api/admin/campaigns', { name, daily_limit: limit, window_start: start, window_end: end, days_of_week: days });
     closeModal('createCampaignModal');
     const { data: { session } } = await supabase.auth.getSession();
     loadCampaigns(session.access_token);
@@ -802,6 +842,11 @@
     document.getElementById('setting-limit').value = camp.daily_limit;
     document.getElementById('setting-start').value = (camp.window_start || '').substring(0,5);
     document.getElementById('setting-end').value = (camp.window_end || '').substring(0,5);
+    
+    const campDays = (camp.days_of_week || '').toLowerCase().split(',');
+    document.querySelectorAll('#setting-days input').forEach(cb => {
+      cb.checked = campDays.includes(cb.value);
+    });
     
     const toggleBtn = document.getElementById('btn-toggle-status');
     if(camp.status === 'active') {
@@ -837,9 +882,10 @@
     const limit = parseInt(document.getElementById('setting-limit').value);
     const start = document.getElementById('setting-start').value + ':00';
     const end = document.getElementById('setting-end').value + ':00';
+    const days = Array.from(document.querySelectorAll('#setting-days input:checked')).map(cb => cb.value).join(',');
     
     await apiPost('/api/admin/campaigns/' + activeCampaignId, { 
-      name: camp.name, status: camp.status, daily_limit: limit, window_start: start, window_end: end 
+      name: camp.name, status: camp.status, daily_limit: limit, window_start: start, window_end: end, days_of_week: days 
     }, 'PUT');
     alert('Campaign settings saved!');
     const { data: { session } } = await supabase.auth.getSession();

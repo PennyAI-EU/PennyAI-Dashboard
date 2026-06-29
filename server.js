@@ -260,6 +260,7 @@ async function recalculateCampaignSchedules(campaign_id) {
     const daily_limit = campaign.daily_limit || 50;
     const window_start = campaign.window_start || '09:00:00';
     const window_end = campaign.window_end || '17:00:00';
+    const allowedDays = campaign.days_of_week ? campaign.days_of_week.toLowerCase().split(',').map(d => d.trim()) : ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
     const startParts = window_start.split(':');
     const endParts = window_end.split(':');
@@ -283,20 +284,28 @@ async function recalculateCampaignSchedules(campaign_id) {
     const today = new Date();
     today.setHours(0, 0, 0, 0); 
     
-    for (let i = 0; i < prospects.length; i++) {
-      const dayOffset = Math.floor(i / daily_limit);
-      const callIndexToday = i % daily_limit;
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    let currentDate = new Date(today);
+    let prospectIndex = 0;
 
-      const scheduledDate = new Date(today);
-      scheduledDate.setDate(scheduledDate.getDate() + dayOffset);
-      
-      const totalMinutes = startMinutes + (callIndexToday * intervalMinutes);
-      const hrs = Math.floor(totalMinutes / 60);
-      const mins = Math.floor(totalMinutes % 60);
-      
-      scheduledDate.setHours(hrs, mins, 0, 0);
+    if (allowedDays.length === 0 || (allowedDays.length === 1 && allowedDays[0] === '')) {
+      allowedDays.push('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday');
+    }
 
-      await supabase.from("prospects").update({ scheduled_at: scheduledDate.toISOString() }).eq("id", prospects[i].id);
+    while (prospectIndex < prospects.length) {
+      if (allowedDays.includes(dayNames[currentDate.getDay()])) {
+        for (let i = 0; i < daily_limit && prospectIndex < prospects.length; i++) {
+          const scheduledDate = new Date(currentDate);
+          const totalMinutes = startMinutes + (i * intervalMinutes);
+          const hrs = Math.floor(totalMinutes / 60);
+          const mins = Math.floor(totalMinutes % 60);
+          
+          scheduledDate.setHours(hrs, mins, 0, 0);
+          await supabase.from("prospects").update({ scheduled_at: scheduledDate.toISOString() }).eq("id", prospects[prospectIndex].id);
+          prospectIndex++;
+        }
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
     }
   } catch (err) {
     console.error("Error recalculating schedules:", err);
@@ -453,9 +462,9 @@ app.get("/api/admin/campaigns", requireAdmin, async (req, res) => {
 });
 
 app.post("/api/admin/campaigns", requireAdmin, async (req, res) => {
-  const { name, daily_limit, window_start, window_end } = req.body;
+  const { name, daily_limit, window_start, window_end, days_of_week } = req.body;
   const { data, error } = await supabase.from("campaigns").insert({
-    name, daily_limit, window_start, window_end, status: 'active'
+    name, daily_limit, window_start, window_end, days_of_week, status: 'active'
   }).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
@@ -463,9 +472,9 @@ app.post("/api/admin/campaigns", requireAdmin, async (req, res) => {
 
 app.put("/api/admin/campaigns/:id", requireAdmin, async (req, res) => {
   const { id } = req.params;
-  const { name, status, daily_limit, window_start, window_end } = req.body;
+  const { name, status, daily_limit, window_start, window_end, days_of_week } = req.body;
   const { error } = await supabase.from("campaigns").update({
-    name, status, daily_limit, window_start, window_end
+    name, status, daily_limit, window_start, window_end, days_of_week
   }).eq("id", id);
   if (error) return res.status(500).json({ error: error.message });
   
