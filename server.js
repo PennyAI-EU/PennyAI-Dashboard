@@ -68,8 +68,15 @@ app.post("/api/register", async (req, res) => {
   });
 
   if (authError) {
-    if (authError.message?.toLowerCase().includes("already")) {
+    const msg = authError.message?.toLowerCase() || "";
+    if (msg.includes("email") && msg.includes("already")) {
       return res.status(409).json({ error: "An account with this email already exists." });
+    }
+    if (msg.includes("phone") && msg.includes("already")) {
+      return res.status(409).json({ error: "An account with this phone number already exists." });
+    }
+    if (msg.includes("already")) {
+      return res.status(409).json({ error: "An account with these details already exists." });
     }
     return res.status(400).json({ error: authError.message });
   }
