@@ -807,7 +807,10 @@
         <td><span class="badge ${c.status === 'active' ? 'called' : 'cold'}">${c.status}</span></td>
         <td>${c.daily_limit} calls/day</td>
         <td>${(c.window_start || '').substring(0,5)} - ${(c.window_end || '').substring(0,5)}</td>
-        <td><button class="btn-secondary" onclick="viewCampaign('${c.id}')">View</button></td>
+        <td style="display:flex;gap:8px">
+          <button class="btn-secondary" onclick="viewCampaign('${c.id}')">View</button>
+          <button class="btn-secondary" style="color:#e53e3e;border-color:#e53e3e" onclick="deleteCampaign('${c.id}','${(c.name||'').replace(/'/g,"\\'")}')">Delete</button>
+        </td>
       </tr>
     `).join('');
   }
@@ -825,6 +828,17 @@
     const { data: { session } } = await supabase.auth.getSession();
     loadCampaigns(session.access_token);
   }
+
+  window.deleteCampaign = async function(id, name) {
+    if (!confirm(`Delete campaign "${name}"? This cannot be undone.`)) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    const res = await fetch(`/api/admin/campaigns/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + session.access_token }
+    });
+    if (!res.ok) { alert('Failed to delete campaign.'); return; }
+    loadCampaigns(session.access_token);
+  };
 
   window.viewCampaign = async function(id) {
     activeCampaignId = id;

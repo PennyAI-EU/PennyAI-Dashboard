@@ -478,6 +478,13 @@ app.post("/api/admin/campaigns", requireAdmin, async (req, res) => {
   res.json(data);
 });
 
+app.delete("/api/admin/campaigns/:id", requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { error } = await supabase.from("campaigns").delete().eq("id", id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
 app.put("/api/admin/campaigns/:id", requireAdmin, async (req, res) => {
   const { id } = req.params;
   const { name, status, daily_limit, window_start, window_end, days_of_week } = req.body;
