@@ -68,6 +68,7 @@ app.post("/api/register", async (req, res) => {
   });
 
   if (authError) {
+    console.error("[register] Supabase auth error:", authError.message, authError.code);
     const msg = authError.message?.toLowerCase() || "";
     if (msg.includes("email") && msg.includes("already")) {
       return res.status(409).json({ error: "An account with this email already exists." });
@@ -146,14 +147,14 @@ app.post("/api/check-onboarding", async (req, res) => {
     return res.json({ status: "pending", reason: "phone_not_in_users_table", phone });
   }
 
-  if (!data.english_level) {
-    console.log("[check-onboarding] PENDING — english_level is null for phone:", phone);
-    return res.json({ status: "pending", reason: "english_level_null", phone });
-  }
-
   if (data.is_admin) {
     console.log("[check-onboarding] ADMIN — phone:", phone);
     return res.json({ status: "admin" });
+  }
+
+  if (!data.english_level) {
+    console.log("[check-onboarding] PENDING — english_level is null for phone:", phone);
+    return res.json({ status: "pending", reason: "english_level_null", phone });
   }
 
   console.log("[check-onboarding] COMPLETE — phone:", phone, "level:", data.english_level);
