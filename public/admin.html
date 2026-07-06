@@ -1118,8 +1118,9 @@
   window.quickAddProspect = async function() {
     if(!activeCampaignId || activeCampaignId === 'all') return alert('Select a specific campaign first');
     const name = document.getElementById('quick-name').value;
-    const phone = document.getElementById('quick-phone').value;
-    if(!name || !phone) return alert('Name and phone required');
+    const rawPhone = document.getElementById('quick-phone').value.trim().replace(/\s+/g, '');
+    const phone = rawPhone.startsWith('+') ? rawPhone : '+' + rawPhone;
+    if(!name || !rawPhone) return alert('Name and phone required');
     await apiPost('/api/admin/prospects', { prospects: [{ contact_name: name, phone }], campaign_id: activeCampaignId });
     document.getElementById('quick-name').value = '';
     document.getElementById('quick-phone').value = '';

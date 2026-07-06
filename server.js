@@ -429,9 +429,11 @@ app.post("/api/admin/prospects", requireAdmin, async (req, res) => {
   
   const toInsert = prospects.map(p => {
     maxOrder++;
+    const rawPhone = (p.phone || '').toString().trim().replace(/\s+/g, '');
+    const phone = rawPhone.startsWith('+') ? rawPhone : '+' + rawPhone;
     return {
       contact_name: p.contact_name,
-      phone: p.phone,
+      phone,
       order_index: maxOrder,
       call_status: "pending",
       campaign_id: campaign_id
@@ -481,6 +483,15 @@ app.post("/api/admin/campaigns", requireAdmin, async (req, res) => {
 app.delete("/api/admin/campaigns/:id", requireAdmin, async (req, res) => {
   const { id } = req.params;
   const { error } = await supabase.from("campaigns").delete().eq("id", id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+app.put("/api/admin/prospects/:id/schedule", requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { scheduled_at } = req.body;
+  if (!scheduled_at) return res.status(400).json({ error: "scheduled_at is required" });
+  const { error } = await supabase.from("prospects").update({ scheduled_at }).eq("id", id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
 });
