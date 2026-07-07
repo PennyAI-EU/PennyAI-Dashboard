@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -243,6 +244,23 @@
     width: 100%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
   }
   .modal-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
+  /* Recording player */
+  .recording-player { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+  .recording-player-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .play-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; transition: background .15s; }
+  .play-btn:hover { background: var(--accent-dark); }
+  .play-btn svg { width: 16px; height: 16px; fill: #fff; }
+  .waveform-wrap { flex: 1; height: 56px; }
+  .waveform-wrap wavesurfer-wave, .waveform-wrap > div { height: 56px !important; }
+  .recording-time { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+  /* Transcript */
+  .transcript-wrap { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; max-height: 320px; overflow-y: auto; }
+  .transcript-line { display: flex; gap: 8px; margin-bottom: 10px; font-size: 13px; line-height: 1.5; }
+  .transcript-line:last-child { margin-bottom: 0; }
+  .transcript-speaker { font-weight: 600; white-space: nowrap; min-width: 44px; }
+  .transcript-speaker.agent { color: var(--accent); }
+  .transcript-speaker.user { color: var(--green); }
 </style>
 </head>
 <body>
@@ -1058,12 +1076,26 @@
           <div style="font-size:13px; color:var(--text);">
             <strong style="display:block; margin-bottom:8px; font-size:14px;">Call Report & Insights</strong>
             <p style="margin-bottom:12px;"><strong>Summary:</strong> ${p.call_summary || 'No summary available yet.'}</p>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:16px;">
               <div><strong>Job Title:</strong> ${p.job_title || '—'}</div>
               <div><strong>Company:</strong> ${p.company_name || '—'}</div>
               <div><strong>Caller Reason:</strong> ${p.caller_reason || '—'}</div>
               <div><strong>Pricing Requested:</strong> ${p.pricing_requested || '—'}</div>
             </div>
+            ${p.recording_url ? `
+            <strong style="display:block; margin-bottom:8px; font-size:14px;">Recording</strong>
+            <div class="recording-player" id="recording-player-${p.id}">
+              <div class="recording-player-top">
+                <button class="play-btn" id="play-btn-${p.id}" onclick="toggleWavePlay('${p.id}', '${p.recording_url}')">
+                  <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+                </button>
+                <div class="waveform-wrap" id="waveform-${p.id}"></div>
+                <span class="recording-time" id="recording-time-${p.id}">0:00</span>
+              </div>
+            </div>` : ''}
+            ${p.transcript ? `
+            <strong style="display:block; margin-bottom:8px; font-size:14px;">Transcript</strong>
+            <div class="transcript-wrap">${formatTranscript(p.transcript)}</div>` : ''}
           </div>
         </td>
       </tr>
@@ -1106,12 +1138,68 @@
     });
   }
 
+  function formatTranscript(raw) {
+    return raw.split(/\\n|\n/).filter(l => l.trim()).map(line => {
+      const m = line.match(/^(Agent|User):\s*(.*)/i);
+      if (!m) return `<div class="transcript-line"><span>${line}</span></div>`;
+      const role = m[1].toLowerCase();
+      return `<div class="transcript-line">
+        <span class="transcript-speaker ${role}">${m[1]}:</span>
+        <span>${m[2]}</span>
+      </div>`;
+    }).join('');
+  }
+
+  const wavesurferInstances = {};
+
+  window.toggleWavePlay = function(id, url) {
+    if (!wavesurferInstances[id]) {
+      const ws = WaveSurfer.create({
+        container: document.getElementById('waveform-' + id),
+        waveColor: '#bfdbfe',
+        progressColor: '#2563eb',
+        height: 56,
+        barWidth: 2,
+        barGap: 1,
+        barRadius: 2,
+        url: url,
+      });
+      wavesurferInstances[id] = ws;
+
+      ws.on('timeupdate', (t) => {
+        const m = Math.floor(t / 60);
+        const s = Math.floor(t % 60).toString().padStart(2, '0');
+        const el = document.getElementById('recording-time-' + id);
+        if (el) el.textContent = `${m}:${s}`;
+      });
+
+      ws.on('finish', () => updatePlayBtn(id, false));
+      ws.on('pause', () => updatePlayBtn(id, false));
+      ws.on('play', () => updatePlayBtn(id, true));
+      ws.play();
+    } else {
+      const ws = wavesurferInstances[id];
+      ws.isPlaying() ? ws.pause() : ws.play();
+    }
+  };
+
+  function updatePlayBtn(id, playing) {
+    const btn = document.getElementById('play-btn-' + id);
+    if (!btn) return;
+    btn.innerHTML = playing
+      ? '<svg viewBox="0 0 24 24" fill="#fff" width="16" height="16"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="#fff" width="16" height="16"><polygon points="5,3 19,12 5,21"/></svg>';
+  }
+
   window.toggleProspectDetails = function(id) {
     const row = document.getElementById('prospect-details-' + id);
     if (row.style.display === 'none') {
       row.style.display = 'table-row';
     } else {
       row.style.display = 'none';
+      if (wavesurferInstances[id]) {
+        wavesurferInstances[id].pause();
+      }
     }
   }
 
