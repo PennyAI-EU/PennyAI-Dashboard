@@ -1023,6 +1023,21 @@
 
   function renderProspects() {
     const tbody = document.getElementById('prospects-tbody');
+
+    // Remember which detail rows are currently open before wiping innerHTML
+    const openIds = new Set();
+    tbody.querySelectorAll('[id^="prospect-details-"]').forEach(row => {
+      if (row.style.display !== 'none') {
+        openIds.add(row.id.replace('prospect-details-', ''));
+      }
+    });
+    // Destroy stale WaveSurfer instances for rows that will be re-rendered
+    openIds.forEach(id => {
+      if (wavesurferInstances[id]) {
+        wavesurferInstances[id].destroy();
+        delete wavesurferInstances[id];
+      }
+    });
     const filterTemp = currentFilterTemp;
     
     let filteredData = prospectsData;
@@ -1100,6 +1115,12 @@
         </td>
       </tr>
     `}).join('');
+
+    // Restore previously open rows
+    openIds.forEach(id => {
+      const row = document.getElementById('prospect-details-' + id);
+      if (row) row.style.display = 'table-row';
+    });
 
     if (sortableInstance) sortableInstance.destroy();
     sortableInstance = new Sortable(tbody, {
