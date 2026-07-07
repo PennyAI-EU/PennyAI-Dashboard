@@ -670,7 +670,7 @@
             const { data: { session } } = await supabase.auth.getSession();
             if (session) await loadProspects(session.access_token);
           }
-        }, 10000);
+        }, 30000);
       }
     } else {
       clearInterval(prospectsPoller);
@@ -1024,18 +1024,13 @@
   function renderProspects() {
     const tbody = document.getElementById('prospects-tbody');
 
-    // Remember which detail rows are currently open before wiping innerHTML
-    const openIds = new Set();
+    // Detach open detail rows from the DOM before wiping innerHTML so their
+    // WaveSurfer container nodes (and any playing audio) are preserved in memory.
+    const detachedDetailRows = {};
     tbody.querySelectorAll('[id^="prospect-details-"]').forEach(row => {
       if (row.style.display !== 'none') {
-        openIds.add(row.id.replace('prospect-details-', ''));
-      }
-    });
-    // Destroy stale WaveSurfer instances for rows that will be re-rendered
-    openIds.forEach(id => {
-      if (wavesurferInstances[id]) {
-        wavesurferInstances[id].destroy();
-        delete wavesurferInstances[id];
+        const id = row.id.replace('prospect-details-', '');
+        detachedDetailRows[id] = tbody.removeChild(row);
       }
     });
     const filterTemp = currentFilterTemp;
@@ -1116,10 +1111,10 @@
       </tr>
     `}).join('');
 
-    // Restore previously open rows
-    openIds.forEach(id => {
-      const row = document.getElementById('prospect-details-' + id);
-      if (row) row.style.display = 'table-row';
+    // Re-insert the detached detail rows after their parent prospect row
+    Object.entries(detachedDetailRows).forEach(([id, detailRow]) => {
+      const mainRow = tbody.querySelector(`[data-id="${id}"]`);
+      if (mainRow) mainRow.parentNode.insertBefore(detailRow, mainRow.nextSibling);
     });
 
     if (sortableInstance) sortableInstance.destroy();
