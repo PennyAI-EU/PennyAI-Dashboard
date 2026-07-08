@@ -620,10 +620,6 @@
     <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:12px;">System Flags</div>
     <div style="display:flex; gap:24px; margin-bottom:16px; flex-wrap:wrap;">
       <label style="display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer;">
-        <input type="checkbox" id="edit-is-admin" />
-        <span>Is Admin</span>
-      </label>
-      <label style="display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer;">
         <input type="checkbox" id="edit-approved-outbound" />
         <span>Approved for Outbound</span>
       </label>
@@ -634,7 +630,7 @@
     </div>
 
     <div style="border-top:1px solid var(--border); margin:16px 0;"></div>
-    <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:12px;">Call Feedback</div>
+    <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:12px;">Onboarding Call Feedback</div>
     <div style="display:grid; grid-template-columns:1fr 2fr; gap:12px 16px; margin-bottom:24px;">
       <div class="form-group" style="margin-bottom:0">
         <label class="form-label">Feedback Score</label>
@@ -1000,7 +996,6 @@
     document.getElementById('edit-total-time-used').value = s.total_time_used ?? '';
     document.getElementById('edit-used-time-this-month').value = s.used_time_this_month ?? '';
     document.getElementById('edit-preferred-times').value = s.preferred_times || '';
-    document.getElementById('edit-is-admin').checked = !!s.is_admin;
     document.getElementById('edit-approved-outbound').checked = !!s.approved_for_outbound;
     document.getElementById('edit-conversation-lesson').checked = !!s.conversation_lesson;
     document.getElementById('edit-call-feedback-score').value = s.call_feedback_score ?? '';
@@ -1038,7 +1033,6 @@
       used_time_this_month:     parseInt(document.getElementById('edit-used-time-this-month').value) || 0,
       preferred_times:          document.getElementById('edit-preferred-times').value || null,
       preferred_days:           days || null,
-      is_admin:                 document.getElementById('edit-is-admin').checked,
       approved_for_outbound:    document.getElementById('edit-approved-outbound').checked,
       conversation_lesson:      document.getElementById('edit-conversation-lesson').checked,
       call_feedback_score:      parseInt(document.getElementById('edit-call-feedback-score').value) || null,
