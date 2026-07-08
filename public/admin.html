@@ -496,7 +496,12 @@
 <!-- Edit Student Modal -->
 <div class="modal-overlay" id="editStudentModal">
   <div class="modal-card" style="max-width:720px; max-height:90vh; overflow-y:auto;">
-    <div class="modal-title">Edit Student</div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <div class="modal-title" style="margin-bottom:0">Edit Student</div>
+      <button onclick="closeModal('editStudentModal')" style="background:none; border:none; cursor:pointer; padding:4px; color:var(--muted); line-height:1;" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
     <input type="hidden" id="edit-student-id" />
 
     <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:12px;">Personal Info</div>
@@ -533,12 +538,6 @@
         <label class="form-label">English Level</label>
         <select id="edit-english-level" class="form-input">
           <option value="">— Not set —</option>
-          <option value="A1">A1</option>
-          <option value="A2">A2</option>
-          <option value="B1">B1</option>
-          <option value="B2">B2</option>
-          <option value="C1">C1</option>
-          <option value="C2">C2</option>
         </select>
       </div>
       <div></div>
@@ -980,6 +979,16 @@
     alert('Lesson scheduled successfully.');
   }
 
+  const STANDARD_LEVELS     = ['A1','A2','B1','B2','C1','C2'];
+  const CONVERSATION_LEVELS = ['AC1','AC2','BC1','BC2','CC1','CC2'];
+
+  function populateLevelDropdown(isConversation, currentValue) {
+    const sel = document.getElementById('edit-english-level');
+    const levels = isConversation ? CONVERSATION_LEVELS : STANDARD_LEVELS;
+    sel.innerHTML = '<option value="">— Not set —</option>' +
+      levels.map(l => `<option value="${l}"${l === currentValue ? ' selected' : ''}>${l}</option>`).join('');
+  }
+
   window.openEditStudent = function(id) {
     const s = studentsData.find(x => x.id === id);
     if (!s) return;
@@ -989,8 +998,17 @@
     document.getElementById('edit-phone').value = s.phone || '';
     document.getElementById('edit-consent').value = s.consent_given ? 'true' : 'false';
     document.getElementById('edit-personal-details').value = s.personal_details || '';
-    document.getElementById('edit-english-level').value = s.english_level || '';
     document.getElementById('edit-goal').value = s.goal || '';
+
+    // Set lesson type first, then populate levels accordingly
+    const isConv = !!s.conversation_lesson;
+    document.getElementById('edit-conversation-lesson').value = isConv ? 'true' : 'false';
+    populateLevelDropdown(isConv, s.english_level || '');
+
+    // Re-populate levels whenever lesson type changes, clearing the selection
+    document.getElementById('edit-conversation-lesson').onchange = function() {
+      populateLevelDropdown(this.value === 'true', '');
+    };
     document.getElementById('edit-allocated-lesson-count').value = s.allocated_lesson_count ?? '';
     document.getElementById('edit-current-lesson-id').value = s.current_lesson_id ?? '';
     document.getElementById('edit-lesson-frequency').value = s.lesson_frequency ?? '';
@@ -1000,7 +1018,6 @@
     document.getElementById('edit-used-time-this-month').value = s.used_time_this_month ?? '';
     document.getElementById('edit-preferred-times').value = s.preferred_times || '';
     document.getElementById('edit-approved-outbound').checked = !!s.approved_for_outbound;
-    document.getElementById('edit-conversation-lesson').value = s.conversation_lesson ? 'true' : 'false';
     document.getElementById('edit-call-feedback-score').value = s.call_feedback_score ?? '';
     document.getElementById('edit-call-feedback-notes').value = s.call_feedback_notes || '';
 
