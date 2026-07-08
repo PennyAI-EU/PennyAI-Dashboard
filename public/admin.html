@@ -493,18 +493,162 @@
   </div>
 </div>
 
-<!-- Allocation Modal -->
-<div class="modal-overlay" id="allocationModal">
-  <div class="modal-card">
-    <div class="modal-title">Edit Lesson Allocation</div>
-    <input type="hidden" id="alloc-user-id" />
-    <div class="form-group">
-      <label class="form-label">Total Allocated Lessons</label>
-      <input type="number" id="alloc-count" class="form-input" />
+<!-- Edit Student Modal -->
+<div class="modal-overlay" id="editStudentModal">
+  <div class="modal-card" style="max-width:720px; max-height:90vh; overflow-y:auto;">
+    <div class="modal-title">Edit Student</div>
+    <input type="hidden" id="edit-student-id" />
+
+    <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:12px;">Personal Info</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px 16px; margin-bottom:16px;">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Name</label>
+        <input type="text" id="edit-name" class="form-input" />
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Email</label>
+        <input type="email" id="edit-email" class="form-input" />
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Phone</label>
+        <input type="text" id="edit-phone" class="form-input" />
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Consent Given</label>
+        <select id="edit-consent" class="form-input">
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0; grid-column:1/-1">
+        <label class="form-label">Personal Details</label>
+        <textarea id="edit-personal-details" class="form-input" style="height:70px; resize:vertical;"></textarea>
+      </div>
     </div>
-    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top: 24px;">
-      <button class="btn-secondary" onclick="closeModal('allocationModal')">Cancel</button>
-      <button class="btn-primary" onclick="saveAllocation()">Save</button>
+
+    <div style="border-top:1px solid var(--border); margin:16px 0;"></div>
+    <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:12px;">English Profile</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px 16px; margin-bottom:16px;">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">English Level</label>
+        <select id="edit-english-level" class="form-input">
+          <option value="">— Not set —</option>
+          <option value="A1">A1</option>
+          <option value="A2">A2</option>
+          <option value="B1">B1</option>
+          <option value="B2">B2</option>
+          <option value="C1">C1</option>
+          <option value="C2">C2</option>
+        </select>
+      </div>
+      <div></div>
+      <div class="form-group" style="margin-bottom:0; grid-column:1/-1">
+        <label class="form-label">Learning Goal</label>
+        <textarea id="edit-goal" class="form-input" style="height:60px; resize:vertical;"></textarea>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--border); margin:16px 0;"></div>
+    <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:12px;">Lesson Settings</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px 16px; margin-bottom:16px;">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Allocated Lessons</label>
+        <input type="number" id="edit-allocated-lesson-count" class="form-input" min="0" />
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Current Lesson ID</label>
+        <input type="number" id="edit-current-lesson-id" class="form-input" min="1" />
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Lesson Frequency <small style="color:var(--muted)">(per week)</small></label>
+        <input type="number" id="edit-lesson-frequency" class="form-input" min="0" />
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Lesson Duration <small style="color:var(--muted)">(mins)</small></label>
+        <select id="edit-lesson-duration" class="form-input">
+          <option value="">— Not set —</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="30">30</option>
+          <option value="45">45</option>
+          <option value="60">60</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Allocated Time / Month <small style="color:var(--muted)">(mins)</small></label>
+        <input type="number" id="edit-allocated-time" class="form-input" min="0" />
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--border); margin:16px 0;"></div>
+    <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:12px;">Time Stats</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px 16px; margin-bottom:16px;">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Total Time Used <small style="color:var(--muted)">(mins)</small></label>
+        <input type="number" id="edit-total-time-used" class="form-input" min="0" />
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Used This Month <small style="color:var(--muted)">(mins)</small></label>
+        <input type="number" id="edit-used-time-this-month" class="form-input" min="0" />
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--border); margin:16px 0;"></div>
+    <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:12px;">Call Preferences</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px 16px; margin-bottom:16px;">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Preferred Call Times</label>
+        <input type="text" id="edit-preferred-times" class="form-input" placeholder="e.g. morning, evenings" />
+      </div>
+      <div></div>
+      <div class="form-group" style="margin-bottom:0; grid-column:1/-1">
+        <label class="form-label" style="margin-bottom:8px">Preferred Days</label>
+        <div class="checkbox-group" id="edit-preferred-days">
+          <label><input type="checkbox" value="monday"> Mon</label>
+          <label><input type="checkbox" value="tuesday"> Tue</label>
+          <label><input type="checkbox" value="wednesday"> Wed</label>
+          <label><input type="checkbox" value="thursday"> Thu</label>
+          <label><input type="checkbox" value="friday"> Fri</label>
+          <label><input type="checkbox" value="saturday"> Sat</label>
+          <label><input type="checkbox" value="sunday"> Sun</label>
+        </div>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--border); margin:16px 0;"></div>
+    <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:12px;">System Flags</div>
+    <div style="display:flex; gap:24px; margin-bottom:16px; flex-wrap:wrap;">
+      <label style="display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer;">
+        <input type="checkbox" id="edit-is-admin" />
+        <span>Is Admin</span>
+      </label>
+      <label style="display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer;">
+        <input type="checkbox" id="edit-approved-outbound" />
+        <span>Approved for Outbound</span>
+      </label>
+      <label style="display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer;">
+        <input type="checkbox" id="edit-conversation-lesson" />
+        <span>Conversation Lesson</span>
+      </label>
+    </div>
+
+    <div style="border-top:1px solid var(--border); margin:16px 0;"></div>
+    <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:12px;">Call Feedback</div>
+    <div style="display:grid; grid-template-columns:1fr 2fr; gap:12px 16px; margin-bottom:24px;">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Feedback Score</label>
+        <input type="number" id="edit-call-feedback-score" class="form-input" min="0" max="10" />
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Feedback Notes</label>
+        <input type="text" id="edit-call-feedback-notes" class="form-input" />
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:12px;">
+      <button class="btn-secondary" onclick="closeModal('editStudentModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveEditStudent()">Save Changes</button>
     </div>
   </div>
 </div>
@@ -740,7 +884,7 @@
         <td>${s.english_level || 'Pending'}</td>
         <td><strong>${s.allocated_lesson_count || 0}</strong></td>
         <td>
-          <button class="btn-secondary" onclick="event.stopPropagation(); openAllocation('${s.id}', ${s.allocated_lesson_count || 0})">Edit</button>
+          <button class="btn-secondary" onclick="event.stopPropagation(); openEditStudent('${s.id}')">Edit</button>
         </td>
       </tr>
       <tr id="details-${s.id}" style="display:none; background: var(--off);">
@@ -837,17 +981,72 @@
     alert('Lesson scheduled successfully.');
   }
 
-  window.openAllocation = function(id, count) {
-    document.getElementById('alloc-user-id').value = id;
-    document.getElementById('alloc-count').value = count;
-    openModal('allocationModal');
+  window.openEditStudent = function(id) {
+    const s = studentsData.find(x => x.id === id);
+    if (!s) return;
+    document.getElementById('edit-student-id').value = s.id;
+    document.getElementById('edit-name').value = s.name || '';
+    document.getElementById('edit-email').value = s.email || '';
+    document.getElementById('edit-phone').value = s.phone || '';
+    document.getElementById('edit-consent').value = s.consent_given ? 'true' : 'false';
+    document.getElementById('edit-personal-details').value = s.personal_details || '';
+    document.getElementById('edit-english-level').value = s.english_level || '';
+    document.getElementById('edit-goal').value = s.goal || '';
+    document.getElementById('edit-allocated-lesson-count').value = s.allocated_lesson_count ?? '';
+    document.getElementById('edit-current-lesson-id').value = s.current_lesson_id ?? '';
+    document.getElementById('edit-lesson-frequency').value = s.lesson_frequency ?? '';
+    document.getElementById('edit-lesson-duration').value = s.lesson_duration || '';
+    document.getElementById('edit-allocated-time').value = s.allocated_time_this_month ?? '';
+    document.getElementById('edit-total-time-used').value = s.total_time_used ?? '';
+    document.getElementById('edit-used-time-this-month').value = s.used_time_this_month ?? '';
+    document.getElementById('edit-preferred-times').value = s.preferred_times || '';
+    document.getElementById('edit-is-admin').checked = !!s.is_admin;
+    document.getElementById('edit-approved-outbound').checked = !!s.approved_for_outbound;
+    document.getElementById('edit-conversation-lesson').checked = !!s.conversation_lesson;
+    document.getElementById('edit-call-feedback-score').value = s.call_feedback_score ?? '';
+    document.getElementById('edit-call-feedback-notes').value = s.call_feedback_notes || '';
+
+    // preferred_days: stored as comma-separated text or JSON array
+    const rawDays = s.preferred_days || '';
+    let days = [];
+    try { days = typeof rawDays === 'string' && rawDays.startsWith('[') ? JSON.parse(rawDays) : rawDays.split(',').map(d => d.trim().toLowerCase()).filter(Boolean); }
+    catch { days = []; }
+    document.querySelectorAll('#edit-preferred-days input').forEach(cb => {
+      cb.checked = days.includes(cb.value);
+    });
+
+    openModal('editStudentModal');
   }
 
-  window.saveAllocation = async function() {
-    const id = document.getElementById('alloc-user-id').value;
-    const count = parseInt(document.getElementById('alloc-count').value, 10);
-    await apiPost(`/api/admin/students/${id}/allocation`, { count }, 'PUT');
-    closeModal('allocationModal');
+  window.saveEditStudent = async function() {
+    const id = document.getElementById('edit-student-id').value;
+    const days = Array.from(document.querySelectorAll('#edit-preferred-days input:checked')).map(cb => cb.value).join(',');
+    const payload = {
+      name:                     document.getElementById('edit-name').value || null,
+      email:                    document.getElementById('edit-email').value || null,
+      phone:                    document.getElementById('edit-phone').value || null,
+      consent_given:            document.getElementById('edit-consent').value === 'true',
+      personal_details:         document.getElementById('edit-personal-details').value || null,
+      english_level:            document.getElementById('edit-english-level').value || null,
+      goal:                     document.getElementById('edit-goal').value || null,
+      allocated_lesson_count:   parseInt(document.getElementById('edit-allocated-lesson-count').value) || null,
+      current_lesson_id:        parseInt(document.getElementById('edit-current-lesson-id').value) || null,
+      lesson_frequency:         parseInt(document.getElementById('edit-lesson-frequency').value) || null,
+      lesson_duration:          document.getElementById('edit-lesson-duration').value || null,
+      allocated_time_this_month: parseInt(document.getElementById('edit-allocated-time').value) || null,
+      total_time_used:          parseInt(document.getElementById('edit-total-time-used').value) || 0,
+      used_time_this_month:     parseInt(document.getElementById('edit-used-time-this-month').value) || 0,
+      preferred_times:          document.getElementById('edit-preferred-times').value || null,
+      preferred_days:           days || null,
+      is_admin:                 document.getElementById('edit-is-admin').checked,
+      approved_for_outbound:    document.getElementById('edit-approved-outbound').checked,
+      conversation_lesson:      document.getElementById('edit-conversation-lesson').checked,
+      call_feedback_score:      parseInt(document.getElementById('edit-call-feedback-score').value) || null,
+      call_feedback_notes:      document.getElementById('edit-call-feedback-notes').value || null,
+    };
+    const res = await apiPost(`/api/admin/students/${id}`, payload, 'PUT');
+    if (res.error) return alert('Error saving: ' + res.error);
+    closeModal('editStudentModal');
     const { data: { session } } = await supabase.auth.getSession();
     loadStudents(session.access_token);
   }
