@@ -305,6 +305,7 @@
         <h1>Student Management</h1>
         <p>Manage existing students and their lesson allocations.</p>
       </div>
+      <button class="btn-primary" onclick="openAddStudent()">+ Add Student</button>
     </div>
 
     <div class="table-container">
@@ -497,7 +498,7 @@
 <div class="modal-overlay" id="editStudentModal">
   <div class="modal-card" style="max-width:720px; max-height:90vh; overflow-y:auto;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-      <div class="modal-title" style="margin-bottom:0">Edit Student</div>
+      <div class="modal-title" style="margin-bottom:0" id="edit-student-modal-title">Edit Student</div>
       <button onclick="closeModal('editStudentModal')" style="background:none; border:none; cursor:pointer; padding:4px; color:var(--muted); line-height:1;" aria-label="Close">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -646,7 +647,7 @@
 
     <div style="display:flex; justify-content:flex-end; gap:12px;">
       <button class="btn-secondary" onclick="closeModal('editStudentModal')">Cancel</button>
-      <button class="btn-primary" onclick="saveEditStudent()">Save Changes</button>
+      <button class="btn-primary" id="edit-student-save-btn" onclick="saveEditStudent()">Save Changes</button>
     </div>
   </div>
 </div>
@@ -981,6 +982,7 @@
 
   const STANDARD_LEVELS     = ['A1','A2','B1','B2','C1','C2'];
   const CONVERSATION_LEVELS = ['AC1','AC2','BC1','BC2','CC1','CC2'];
+  let studentModalMode = 'edit'; // 'edit' | 'add'
 
   function populateLevelDropdown(isConversation, currentValue) {
     const sel = document.getElementById('edit-english-level');
@@ -989,7 +991,41 @@
       levels.map(l => `<option value="${l}"${l === currentValue ? ' selected' : ''}>${l}</option>`).join('');
   }
 
+  window.openAddStudent = function() {
+    studentModalMode = 'add';
+    document.getElementById('edit-student-modal-title').textContent = 'Add Student';
+    document.getElementById('edit-student-save-btn').textContent = 'Add Student';
+    document.getElementById('edit-student-id').value = '';
+    document.getElementById('edit-name').value = '';
+    document.getElementById('edit-email').value = '';
+    document.getElementById('edit-phone').value = '';
+    document.getElementById('edit-consent').value = 'false';
+    document.getElementById('edit-personal-details').value = '';
+    document.getElementById('edit-goal').value = '';
+    document.getElementById('edit-conversation-lesson').value = 'false';
+    populateLevelDropdown(false, '');
+    document.getElementById('edit-conversation-lesson').onchange = function() {
+      populateLevelDropdown(this.value === 'true', '');
+    };
+    document.getElementById('edit-allocated-lesson-count').value = '10';
+    document.getElementById('edit-current-lesson-id').value = '1';
+    document.getElementById('edit-lesson-frequency').value = '';
+    document.getElementById('edit-lesson-duration').value = '';
+    document.getElementById('edit-allocated-time').value = '50';
+    document.getElementById('edit-total-time-used').value = '0';
+    document.getElementById('edit-used-time-this-month').value = '0';
+    document.getElementById('edit-preferred-times').value = '';
+    document.getElementById('edit-approved-outbound').checked = false;
+    document.getElementById('edit-call-feedback-score').value = '';
+    document.getElementById('edit-call-feedback-notes').value = '';
+    document.querySelectorAll('#edit-preferred-days input').forEach(cb => cb.checked = false);
+    openModal('editStudentModal');
+  }
+
   window.openEditStudent = function(id) {
+    studentModalMode = 'edit';
+    document.getElementById('edit-student-modal-title').textContent = 'Edit Student';
+    document.getElementById('edit-student-save-btn').textContent = 'Save Changes';
     const s = studentsData.find(x => x.id === id);
     if (!s) return;
     document.getElementById('edit-student-id').value = s.id;
@@ -1035,31 +1071,35 @@
 
   window.saveEditStudent = async function() {
     const id = document.getElementById('edit-student-id').value;
+    const phone = document.getElementById('edit-phone').value.trim();
+    if (!phone) return alert('Phone number is required.');
     const days = Array.from(document.querySelectorAll('#edit-preferred-days input:checked')).map(cb => cb.value).join(',');
     const payload = {
-      name:                     document.getElementById('edit-name').value || null,
-      email:                    document.getElementById('edit-email').value || null,
-      phone:                    document.getElementById('edit-phone').value || null,
-      consent_given:            document.getElementById('edit-consent').value === 'true',
-      personal_details:         document.getElementById('edit-personal-details').value || null,
-      english_level:            document.getElementById('edit-english-level').value || null,
-      goal:                     document.getElementById('edit-goal').value || null,
-      allocated_lesson_count:   parseInt(document.getElementById('edit-allocated-lesson-count').value) || null,
-      current_lesson_id:        parseInt(document.getElementById('edit-current-lesson-id').value) || null,
-      lesson_frequency:         parseInt(document.getElementById('edit-lesson-frequency').value) || null,
-      lesson_duration:          document.getElementById('edit-lesson-duration').value || null,
+      name:                      document.getElementById('edit-name').value || null,
+      email:                     document.getElementById('edit-email').value || null,
+      phone,
+      consent_given:             document.getElementById('edit-consent').value === 'true',
+      personal_details:          document.getElementById('edit-personal-details').value || null,
+      english_level:             document.getElementById('edit-english-level').value || null,
+      goal:                      document.getElementById('edit-goal').value || null,
+      allocated_lesson_count:    parseInt(document.getElementById('edit-allocated-lesson-count').value) || null,
+      current_lesson_id:         parseInt(document.getElementById('edit-current-lesson-id').value) || null,
+      lesson_frequency:          parseInt(document.getElementById('edit-lesson-frequency').value) || null,
+      lesson_duration:           document.getElementById('edit-lesson-duration').value || null,
       allocated_time_this_month: parseInt(document.getElementById('edit-allocated-time').value) || null,
-      total_time_used:          parseInt(document.getElementById('edit-total-time-used').value) || 0,
-      used_time_this_month:     parseInt(document.getElementById('edit-used-time-this-month').value) || 0,
-      preferred_times:          document.getElementById('edit-preferred-times').value || null,
-      preferred_days:           days || null,
-      approved_for_outbound:    document.getElementById('edit-approved-outbound').checked,
-      conversation_lesson:      document.getElementById('edit-conversation-lesson').value === 'true',
-      call_feedback_score:      parseInt(document.getElementById('edit-call-feedback-score').value) || null,
-      call_feedback_notes:      document.getElementById('edit-call-feedback-notes').value || null,
+      total_time_used:           parseInt(document.getElementById('edit-total-time-used').value) || 0,
+      used_time_this_month:      parseInt(document.getElementById('edit-used-time-this-month').value) || 0,
+      preferred_times:           document.getElementById('edit-preferred-times').value || null,
+      preferred_days:            days || null,
+      approved_for_outbound:     document.getElementById('edit-approved-outbound').checked,
+      conversation_lesson:       document.getElementById('edit-conversation-lesson').value === 'true',
+      call_feedback_score:       parseInt(document.getElementById('edit-call-feedback-score').value) || null,
+      call_feedback_notes:       document.getElementById('edit-call-feedback-notes').value || null,
     };
-    const res = await apiPost(`/api/admin/students/${id}`, payload, 'PUT');
-    if (res.error) return alert('Error saving: ' + res.error);
+    const res = studentModalMode === 'add'
+      ? await apiPost('/api/admin/students', payload)
+      : await apiPost(`/api/admin/students/${id}`, payload, 'PUT');
+    if (res.error) return alert('Error: ' + res.error);
     closeModal('editStudentModal');
     const { data: { session } } = await supabase.auth.getSession();
     loadStudents(session.access_token);
