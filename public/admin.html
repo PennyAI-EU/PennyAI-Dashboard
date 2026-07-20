@@ -254,6 +254,13 @@
   .waveform-wrap wavesurfer-wave, .waveform-wrap > div { height: 56px !important; }
   .recording-time { font-size: 12px; color: var(--muted); white-space: nowrap; }
 
+  /* Nav section labels */
+  .nav-section-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.6px; color: var(--muted);
+    padding: 16px 14px 4px; margin-top: 4px;
+  }
+
   /* Transcript */
   .transcript-wrap { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; max-height: 320px; overflow-y: auto; }
   .transcript-line { display: flex; gap: 8px; margin-bottom: 10px; font-size: 13px; line-height: 1.5; }
@@ -268,17 +275,20 @@
 <aside class="sidebar">
   <div class="nav-logo">Penny<span>AI</span> Admin</div>
   <nav class="nav-menu">
-    <div class="nav-item active" id="nav-students" onclick="showSection('students')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-      <span>Students</span>
-    </div>
+    <div class="nav-section-label">Growth</div>
     <div class="nav-item" id="nav-prospects" onclick="showSection('prospects')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
       <span>Outbound Campaigns</span>
     </div>
-    <div class="nav-item" id="nav-lessons" onclick="showSection('lessons')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-      <span>Lesson Library</span>
+
+    <div class="nav-section-label">Learning</div>
+    <div class="nav-item active" id="nav-students" onclick="showSection('students')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      <span>Students</span>
+    </div>
+    <div class="nav-item" id="nav-teachers" onclick="showSection('teachers')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      <span>Teachers</span>
     </div>
   </nav>
 
@@ -315,6 +325,7 @@
             <th>Name</th>
             <th>Phone / Email</th>
             <th>Level</th>
+            <th>Teacher</th>
             <th>Allocated Lessons</th>
             <th>Actions</th>
           </tr>
@@ -446,6 +457,33 @@
     </div>
   </section>
 
+  <!-- TEACHERS SECTION -->
+  <section id="section-teachers" class="section">
+    <div class="section-header">
+      <div>
+        <h1>Teachers</h1>
+        <p>Manage teachers and their student assignments.</p>
+      </div>
+      <button class="btn-primary" onclick="openAddTeacher()">+ Add Teacher</button>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone / Email</th>
+            <th>Students</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="teachers-tbody">
+          <tr><td colspan="4" style="text-align:center; padding:30px;">Loading teachers...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
   <!-- LESSONS SECTION -->
   <section id="section-lessons" class="section">
     <div class="section-header">
@@ -524,6 +562,12 @@
         <select id="edit-consent" class="form-input">
           <option value="true">Yes</option>
           <option value="false">No</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Assigned Teacher</label>
+        <select id="edit-teacher-id" class="form-input">
+          <option value="">— No teacher assigned —</option>
         </select>
       </div>
       <div class="form-group" style="margin-bottom:0; grid-column:1/-1">
@@ -730,6 +774,35 @@
   </div>
 </div>
 
+<!-- Teacher Modal -->
+<div class="modal-overlay" id="teacherModal">
+  <div class="modal-card" style="max-width:480px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <div class="modal-title" style="margin-bottom:0" id="teacher-modal-title">Add Teacher</div>
+      <button onclick="closeModal('teacherModal')" style="background:none; border:none; cursor:pointer; padding:4px; color:var(--muted);" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <input type="hidden" id="teacher-modal-id" />
+    <div class="form-group">
+      <label class="form-label">Full Name</label>
+      <input type="text" id="teacher-name" class="form-input" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" id="teacher-email" class="form-input" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Phone</label>
+      <input type="text" id="teacher-phone" class="form-input" />
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+      <button class="btn-secondary" onclick="closeModal('teacherModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveTeacher()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- Lesson Modal -->
 <div class="modal-overlay" id="lessonModal">
   <div class="modal-card" style="max-width: 600px;">
@@ -770,6 +843,7 @@
 <script type="module">
   let supabase = null;
   let studentsData = [];
+  let teachersData = [];
   let campaignsData = [];
   let prospectsData = [];
   let lessonsData = [];
@@ -841,7 +915,7 @@
     document.getElementById('admin-email').textContent = adminEmail;
     document.getElementById('admin-avatar').textContent = adminName.charAt(0).toUpperCase();
 
-    loadStudents(session.access_token);
+    await Promise.all([loadStudents(session.access_token), loadTeachers(session.access_token)]);
     loadCampaigns(session.access_token);
     loadLessons(session.access_token);
 
@@ -881,13 +955,15 @@
         <td style="font-weight:500">${s.name || '—'}</td>
         <td>${s.phone || '—'}<br><small style="color:var(--muted)">${s.email || '—'}</small></td>
         <td>${s.english_level || 'Pending'}</td>
+        <td>${s.teacher?.name || '—'}</td>
         <td><strong>${s.allocated_lesson_count || 0}</strong></td>
         <td>
           <button class="btn-secondary" onclick="event.stopPropagation(); openEditStudent('${s.id}')">Edit</button>
+          <button class="btn-secondary" style="color:#e53e3e;border-color:#e53e3e" onclick="event.stopPropagation(); deleteStudent('${s.id}', '${(s.name||'').replace(/'/g,"\\'")}')">Delete</button>
         </td>
       </tr>
       <tr id="details-${s.id}" style="display:none; background: var(--off);">
-        <td colspan="5" style="padding: 20px;">
+        <td colspan="6" style="padding: 20px;">
           <div style="display:flex; gap:24px; margin-bottom: 20px;">
             <div style="flex:1;">
               <strong>Personal Details:</strong><br/>
@@ -923,6 +999,20 @@
         </td>
       </tr>
     `).join('');
+  }
+
+  async function loadTeachers(token) {
+    teachersData = await apiGet('/api/admin/teachers', token);
+    populateTeacherDropdown('');
+    renderTeachers();
+  }
+
+  function populateTeacherDropdown(selectedId) {
+    const sel = document.getElementById('edit-teacher-id');
+    sel.innerHTML = '<option value="">— No teacher assigned —</option>' +
+      (teachersData || []).map(t =>
+        `<option value="${t.id}"${t.id === selectedId ? ' selected' : ''}>${t.name || t.email || t.id}</option>`
+      ).join('');
   }
 
   window.toggleStudentDetails = async function(id) {
@@ -1019,6 +1109,7 @@
     document.getElementById('edit-call-feedback-score').value = '';
     document.getElementById('edit-call-feedback-notes').value = '';
     document.querySelectorAll('#edit-preferred-days input').forEach(cb => cb.checked = false);
+    populateTeacherDropdown('');
     openModal('editStudentModal');
   }
 
@@ -1056,6 +1147,7 @@
     document.getElementById('edit-approved-outbound').checked = !!s.approved_for_outbound;
     document.getElementById('edit-call-feedback-score').value = s.call_feedback_score ?? '';
     document.getElementById('edit-call-feedback-notes').value = s.call_feedback_notes || '';
+    populateTeacherDropdown(s.teacher_id || '');
 
     // preferred_days: stored as comma-separated text or JSON array
     const rawDays = s.preferred_days || '';
@@ -1095,6 +1187,7 @@
       conversation_lesson:       document.getElementById('edit-conversation-lesson').value === 'true',
       call_feedback_score:       parseInt(document.getElementById('edit-call-feedback-score').value) || null,
       call_feedback_notes:       document.getElementById('edit-call-feedback-notes').value || null,
+      teacher_id:                document.getElementById('edit-teacher-id').value || null,
     };
     const res = studentModalMode === 'add'
       ? await apiPost('/api/admin/students', payload)
@@ -1103,6 +1196,102 @@
     closeModal('editStudentModal');
     const { data: { session } } = await supabase.auth.getSession();
     loadStudents(session.access_token);
+  }
+
+  window.deleteStudent = async function(id, name) {
+    if (!confirm(`Delete student "${name}"? This cannot be undone.`)) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    const res = await fetch(`/api/admin/students/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + session.access_token }
+    });
+    if (!res.ok) { alert('Failed to delete student.'); return; }
+    loadStudents(session.access_token);
+  }
+
+  // --- TEACHERS ---
+  async function renderTeachers() {
+    const tbody = document.getElementById('teachers-tbody');
+    if (!teachersData || teachersData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px;">No teachers found. Add one to get started.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = teachersData.map(t => {
+      const studentCount = studentsData.filter(s => s.teacher_id === t.id).length;
+      return `
+        <tr>
+          <td style="font-weight:500">${t.name || '—'}</td>
+          <td>${t.phone || '—'}<br><small style="color:var(--muted)">${t.email || '—'}</small></td>
+          <td>${studentCount} student${studentCount !== 1 ? 's' : ''}</td>
+          <td style="display:flex; gap:8px;">
+            <button class="btn-secondary" onclick="openEditTeacher('${t.id}')">Edit</button>
+            <button class="btn-secondary" style="color:#e53e3e;border-color:#e53e3e" onclick="deleteTeacher('${t.id}', '${(t.name||'').replace(/'/g,"\\'")}')">Delete</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  window.openAddTeacher = function() {
+    document.getElementById('teacher-modal-title').textContent = 'Add Teacher';
+    document.getElementById('teacher-modal-id').value = '';
+    document.getElementById('teacher-name').value = '';
+    document.getElementById('teacher-email').value = '';
+    document.getElementById('teacher-phone').value = '';
+    openModal('teacherModal');
+  }
+
+  window.openEditTeacher = function(id) {
+    const t = teachersData.find(x => x.id === id);
+    if (!t) return;
+    document.getElementById('teacher-modal-title').textContent = 'Edit Teacher';
+    document.getElementById('teacher-modal-id').value = t.id;
+    document.getElementById('teacher-name').value = t.name || '';
+    document.getElementById('teacher-email').value = t.email || '';
+    document.getElementById('teacher-phone').value = t.phone || '';
+    openModal('teacherModal');
+  }
+
+  window.saveTeacher = async function() {
+    const id = document.getElementById('teacher-modal-id').value;
+    const name = document.getElementById('teacher-name').value.trim();
+    const email = document.getElementById('teacher-email').value.trim();
+    const phone = document.getElementById('teacher-phone').value.trim();
+    if (!phone) { alert('Phone number is required.'); return; }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    let res;
+    if (id) {
+      res = await fetch(`/api/admin/teachers/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        body: JSON.stringify({ name, email, phone })
+      });
+    } else {
+      res = await fetch('/api/admin/teachers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        body: JSON.stringify({ name, email, phone })
+      });
+    }
+    const result = await res.json();
+    if (result.error) { alert('Error: ' + result.error); return; }
+    closeModal('teacherModal');
+    await loadTeachers(session.access_token);
+    renderTeachers();
+  }
+
+  window.deleteTeacher = async function(id, name) {
+    if (!confirm(`Delete teacher "${name}"? Their students will be unassigned.`)) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    const res = await fetch(`/api/admin/teachers/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + session.access_token }
+    });
+    if (!res.ok) { alert('Failed to delete teacher.'); return; }
+    await loadTeachers(session.access_token);
+    await loadStudents(session.access_token);
+    renderTeachers();
   }
 
   // --- CAMPAIGNS & PROSPECTS ---

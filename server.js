@@ -376,7 +376,17 @@ async function requireAdmin(req, res, next) {
 }
 
 app.get("/api/admin/students", requireAdmin, async (req, res) => {
-  let query = supabase.from("users").select("*").order("name");
+  let query = supabase.from("users").select("*, teacher:teacher_id(id, name)").eq("role", "student").order("name");
+  if (req.adminSchoolId) {
+    query = query.eq("school_id", req.adminSchoolId);
+  }
+  const { data, error } = await query;
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.get("/api/admin/teachers", requireAdmin, async (req, res) => {
+  let query = supabase.from("users").select("id, name, email").eq("role", "teacher").order("name");
   if (req.adminSchoolId) {
     query = query.eq("school_id", req.adminSchoolId);
   }
@@ -391,9 +401,11 @@ app.post("/api/admin/students", requireAdmin, async (req, res) => {
     "preferred_times", "lesson_frequency", "lesson_duration", "preferred_days",
     "current_lesson_id", "approved_for_outbound", "conversation_lesson",
     "allocated_time_this_month", "total_time_used", "used_time_this_month",
-    "personal_details", "allocated_lesson_count", "call_feedback_score", "call_feedback_notes"
+    "personal_details", "allocated_lesson_count", "call_feedback_score", "call_feedback_notes",
+    "teacher_id"
   ];
-  const row = {};
+  const row = { role: "student" };
+  if (req.adminSchoolId) row.school_id = req.adminSchoolId;
   for (const key of allowed) {
     if (Object.prototype.hasOwnProperty.call(req.body, key)) {
       row[key] = req.body[key];
@@ -424,7 +436,7 @@ app.put("/api/admin/students/:id", requireAdmin, async (req, res) => {
     "current_lesson_id", "approved_for_outbound", "conversation_lesson",
     "allocated_time_this_month", "total_time_used", "used_time_this_month",
     "personal_details", "role", "allocated_lesson_count",
-    "call_feedback_score", "call_feedback_notes"
+    "call_feedback_score", "call_feedback_notes", "teacher_id"
   ];
   const updates = {};
   for (const key of allowed) {
@@ -433,6 +445,40 @@ app.put("/api/admin/students/:id", requireAdmin, async (req, res) => {
     }
   }
   const { error } = await supabase.from("users").update(updates).eq("id", id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+app.delete("/api/admin/students/:id", requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { error } = await supabase.from("users").delete().eq("id", id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+app.post("/api/admin/teachers", requireAdmin, async (req, res) => {
+  const { name, email, phone } = req.body;
+  if (!phone) return res.status(400).json({ error: "Phone number is required." });
+  const row = { name, email, phone, role: "teacher" };
+  if (req.adminSchoolId) row.school_id = req.adminSchoolId;
+  const { data, error } = await supabase.from("users").insert(row).select().single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.put("/api/admin/teachers/:id", requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { name, email, phone } = req.body;
+  const { error } = await supabase.from("users").update({ name, email, phone }).eq("id", id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+app.delete("/api/admin/teachers/:id", requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  // Unassign teacher from their students before deleting
+  await supabase.from("users").update({ teacher_id: null }).eq("teacher_id", id);
+  const { error } = await supabase.from("users").delete().eq("id", id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
 });
