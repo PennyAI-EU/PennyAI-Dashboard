@@ -133,7 +133,7 @@ app.post("/api/check-onboarding", async (req, res) => {
 
   const { data, error } = await supabase
     .from("users")
-    .select("english_level, is_admin")
+    .select("english_level, role")
     .eq("phone", phone)
     .maybeSingle();
 
@@ -147,7 +147,7 @@ app.post("/api/check-onboarding", async (req, res) => {
     return res.json({ status: "pending", reason: "phone_not_in_users_table", phone });
   }
 
-  if (data.is_admin) {
+  if (data.role === 'school_admin' || data.role === 'system_admin') {
     console.log("[check-onboarding] ADMIN — phone:", phone);
     return res.json({ status: "admin" });
   }
@@ -362,11 +362,11 @@ async function requireAdmin(req, res, next) {
 
   const { data, error } = await supabase
     .from("users")
-    .select("is_admin, school_id")
+    .select("role, school_id")
     .eq("phone", phone)
     .maybeSingle();
 
-  if (error || !data || !data.is_admin) {
+  if (error || !data || !['school_admin', 'system_admin'].includes(data.role)) {
     return res.status(403).json({ error: "Forbidden: Admin access required" });
   }
   
@@ -423,7 +423,7 @@ app.put("/api/admin/students/:id", requireAdmin, async (req, res) => {
     "preferred_times", "lesson_frequency", "lesson_duration", "preferred_days",
     "current_lesson_id", "approved_for_outbound", "conversation_lesson",
     "allocated_time_this_month", "total_time_used", "used_time_this_month",
-    "personal_details", "is_admin", "allocated_lesson_count",
+    "personal_details", "role", "allocated_lesson_count",
     "call_feedback_score", "call_feedback_notes"
   ];
   const updates = {};
