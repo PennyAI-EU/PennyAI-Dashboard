@@ -349,6 +349,55 @@ app.get("/api/next-call", async (req, res) => {
   }
 });
 
+app.get("/api/upcoming-calls", async (req, res) => {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+  const phone = user.user_metadata?.phone || user.phone;
+  if (!phone) return res.status(400).json({ error: "Phone not found" });
+  const { data, error } = await supabase
+    .from("call_triggers")
+    .select("id, scheduled_time, call_status, name")
+    .eq("phone_number", phone)
+    .eq("call_status", "pending")
+    .order("scheduled_time", { ascending: true });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || []);
+});
+
+app.get("/api/history", async (req, res) => {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+
+  const { data: attempts, error: attError } = await supabase
+    .from("lesson_attempts")
+    .select("*, lessons(title)")
+    .eq("user_id", user.id)
+    .order("attempt_time", { ascending: false });
+  if (attError) return res.status(500).json({ error: attError.message });
+
+  const callIds = (attempts || []).filter(a => a.call_id).map(a => a.call_id);
+  let callLogsMap = {};
+  if (callIds.length > 0) {
+    const { data: logs } = await supabase
+      .from("call_logs")
+      .select("*")
+      .in("call_id", callIds);
+    if (logs) logs.forEach(l => { callLogsMap[l.call_id] = l; });
+  }
+
+  const merged = (attempts || []).map(a => ({
+    ...a,
+    recording_url: callLogsMap[a.call_id]?.["Recording Link"] || null,
+    transcript:    callLogsMap[a.call_id]?.["Transcript"] || null,
+    duration_sec:  callLogsMap[a.call_id]?.["Duration (Sec)"] || null,
+  }));
+  res.json(merged);
+});
+
 // --- ADMIN API ENDPOINTS ---
 async function requireAdmin(req, res, next) {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
