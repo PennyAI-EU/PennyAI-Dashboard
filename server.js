@@ -152,6 +152,11 @@ app.post("/api/check-onboarding", async (req, res) => {
     return res.json({ status: "admin" });
   }
 
+  if (data.role === 'teacher') {
+    console.log("[check-onboarding] TEACHER — phone:", phone);
+    return res.json({ status: "teacher" });
+  }
+
   if (!data.english_level) {
     console.log("[check-onboarding] PENDING — english_level is null for phone:", phone);
     return res.json({ status: "pending", reason: "english_level_null", phone });
@@ -396,6 +401,95 @@ app.get("/api/history", async (req, res) => {
     duration_sec:  callLogsMap[a.call_id]?.["Duration (Sec)"] || null,
   }));
   res.json(merged);
+});
+
+// --- TEACHER API ENDPOINTS ---
+async function requireTeacher(req, res, next) {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+  const phone = user.user_metadata?.phone || user.phone;
+  if (!phone) return res.status(401).json({ error: "No phone on user" });
+  const { data, error } = await supabase
+    .from("users")
+    .select("id, role, school_id, name")
+    .eq("phone", phone)
+    .maybeSingle();
+  if (error || !data || !['teacher', 'school_admin', 'system_admin'].includes(data.role)) {
+    return res.status(403).json({ error: "Forbidden: Teacher access required" });
+  }
+  req.teacherDbId = data.id;
+  req.teacherSchoolId = data.school_id;
+  req.teacherName = data.name;
+  next();
+}
+
+app.get("/api/teacher/students", requireTeacher, async (req, res) => {
+  const { data, error } = await supabase
+    .from("users")
+    .select("id, name, email, phone, english_level, allocated_lesson_count, current_lesson_id")
+    .eq("teacher_id", req.teacherDbId)
+    .eq("role", "student")
+    .order("name");
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || []);
+});
+
+app.get("/api/teacher/students/:id/history", requireTeacher, async (req, res) => {
+  const { id } = req.params;
+  const { data: student, error: sErr } = await supabase
+    .from("users").select("teacher_id, phone").eq("id", id).maybeSingle();
+  if (sErr || !student || student.teacher_id !== req.teacherDbId) {
+    return res.status(403).json({ error: "Not your student" });
+  }
+  const { data: attempts, error } = await supabase
+    .from("lesson_attempts")
+    .select("*, lessons(title)")
+    .eq("user_id", id)
+    .order("attempt_time", { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+
+  const callIds = (attempts || []).filter(a => a.call_id).map(a => a.call_id);
+  let callLogsMap = {};
+  if (callIds.length > 0) {
+    const { data: logs } = await supabase.from("call_logs").select("*").in("call_id", callIds);
+    if (logs) logs.forEach(l => { callLogsMap[l.call_id] = l; });
+  }
+  res.json((attempts || []).map(a => ({
+    ...a,
+    recording_url: callLogsMap[a.call_id]?.["Recording Link"] || null,
+    transcript:    callLogsMap[a.call_id]?.["Transcript"] || null,
+  })));
+});
+
+app.get("/api/teacher/students/:id/upcoming", requireTeacher, async (req, res) => {
+  const { id } = req.params;
+  const { data: student, error: sErr } = await supabase
+    .from("users").select("teacher_id, phone").eq("id", id).maybeSingle();
+  if (sErr || !student || student.teacher_id !== req.teacherDbId) {
+    return res.status(403).json({ error: "Not your student" });
+  }
+  const { data, error } = await supabase
+    .from("call_triggers")
+    .select("id, scheduled_time, call_status")
+    .eq("phone_number", student.phone)
+    .eq("call_status", "pending")
+    .order("scheduled_time", { ascending: true });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || []);
+});
+
+app.put("/api/teacher/attempts/:id/feedback", requireTeacher, async (req, res) => {
+  const { id } = req.params;
+  const { teacher_feedback } = req.body;
+  if (teacher_feedback === undefined) return res.status(400).json({ error: "teacher_feedback is required" });
+  const { error } = await supabase
+    .from("lesson_attempts")
+    .update({ teacher_feedback })
+    .eq("id", id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
 });
 
 // --- ADMIN API ENDPOINTS ---
