@@ -803,6 +803,29 @@
   </div>
 </div>
 
+<!-- Account Created Modal -->
+<div class="modal-overlay" id="accountCreatedModal">
+  <div class="modal-card" style="max-width:440px; text-align:center;">
+    <div style="width:52px; height:52px; border-radius:50%; background:var(--green-light); display:flex; align-items:center; justify-content:center; margin:0 auto 20px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="modal-title" id="account-created-title" style="margin-bottom:6px;">Student created</div>
+    <p style="font-size:14px; color:var(--muted); margin-bottom:24px;" id="account-created-subtitle">Share these login credentials with them.</p>
+    <div style="background:var(--off); border-radius:10px; padding:18px 20px; text-align:left; margin-bottom:16px;">
+      <div style="margin-bottom:12px;">
+        <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); margin-bottom:4px;">Email</div>
+        <div style="font-size:15px; font-weight:600;" id="account-created-email">—</div>
+      </div>
+      <div>
+        <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); margin-bottom:4px;">Password</div>
+        <div style="font-size:15px; font-weight:600; font-family:monospace;" id="account-created-password">—</div>
+      </div>
+    </div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:24px;">They will be asked to set a new password on their first login.</p>
+    <button class="btn-primary" style="width:100%;" onclick="closeModal('accountCreatedModal')">Done</button>
+  </div>
+</div>
+
 <!-- Lesson Modal -->
 <div class="modal-overlay" id="lessonModal">
   <div class="modal-card" style="max-width: 600px;">
@@ -1164,7 +1187,9 @@
   window.saveEditStudent = async function() {
     const id = document.getElementById('edit-student-id').value;
     const phone = document.getElementById('edit-phone').value.trim();
+    const email = document.getElementById('edit-email').value.trim();
     if (!phone) return alert('Phone number is required.');
+    if (studentModalMode === 'add' && !email) return alert('Email is required.');
     const days = Array.from(document.querySelectorAll('#edit-preferred-days input:checked')).map(cb => cb.value).join(',');
     const payload = {
       name:                      document.getElementById('edit-name').value || null,
@@ -1196,6 +1221,13 @@
     closeModal('editStudentModal');
     const { data: { session } } = await supabase.auth.getSession();
     loadStudents(session.access_token);
+    if (studentModalMode === 'add' && res.defaultPassword) {
+      document.getElementById('account-created-title').textContent = 'Student created';
+      document.getElementById('account-created-subtitle').textContent = 'Share these login credentials with the student.';
+      document.getElementById('account-created-email').textContent = res.email || payload.email;
+      document.getElementById('account-created-password').textContent = res.defaultPassword;
+      openModal('accountCreatedModal');
+    }
   }
 
   window.deleteStudent = async function(id, name) {
@@ -1258,6 +1290,7 @@
     const email = document.getElementById('teacher-email').value.trim();
     const phone = document.getElementById('teacher-phone').value.trim();
     if (!phone) { alert('Phone number is required.'); return; }
+    if (!id && !email) { alert('Email is required.'); return; }
 
     const { data: { session } } = await supabase.auth.getSession();
     let res;
@@ -1279,6 +1312,13 @@
     closeModal('teacherModal');
     await loadTeachers(session.access_token);
     renderTeachers();
+    if (!id && result.defaultPassword) {
+      document.getElementById('account-created-title').textContent = 'Teacher created';
+      document.getElementById('account-created-subtitle').textContent = 'Share these login credentials with the teacher.';
+      document.getElementById('account-created-email').textContent = email;
+      document.getElementById('account-created-password').textContent = result.defaultPassword;
+      openModal('accountCreatedModal');
+    }
   }
 
   window.deleteTeacher = async function(id, name) {

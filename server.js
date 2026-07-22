@@ -21,6 +21,8 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
   },
 });
 
+const DEFAULT_PASSWORD = 'Penny2025!';
+
 const LESSON_PREAMBLE = `You are an AI English tutor conducting a live, interactive voice lesson with a student. The student's level will be provided (e.g. A1, A2, B1), and you must adapt your language, vocabulary, and pace to match that level. For A1 learners, use very simple words, short sentences, and lots of repetition.
 
 You will be given a lesson script. This script is a guide for the structure and flow of the lesson, not something to read word-for-word. Do not read labels, formatting, or instructions such as "pause", "repeat", or section titles out loud. Instead, interpret them and naturally guide the conversation.
@@ -555,9 +557,20 @@ app.post("/api/admin/students", requireAdmin, async (req, res) => {
     }
   }
   if (!row.phone) return res.status(400).json({ error: "Phone number is required." });
+  if (!row.email) return res.status(400).json({ error: "Email is required." });
   const { data, error } = await supabase.from("users").insert(row).select().single();
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  const { error: authError } = await supabase.auth.admin.createUser({
+    email: row.email,
+    password: DEFAULT_PASSWORD,
+    email_confirm: true,
+    user_metadata: { phone: row.phone, name: row.name || '', must_change_password: true },
+  });
+  if (authError) {
+    await supabase.from("users").delete().eq("id", data.id);
+    return res.status(500).json({ error: "Auth account creation failed: " + authError.message });
+  }
+  res.json({ ...data, defaultPassword: DEFAULT_PASSWORD });
 });
 
 app.put("/api/admin/students/:id/allocation", requireAdmin, async (req, res) => {
@@ -602,11 +615,22 @@ app.delete("/api/admin/students/:id", requireAdmin, async (req, res) => {
 app.post("/api/admin/teachers", requireAdmin, async (req, res) => {
   const { name, email, phone } = req.body;
   if (!phone) return res.status(400).json({ error: "Phone number is required." });
+  if (!email) return res.status(400).json({ error: "Email is required." });
   const row = { name, email, phone, role: "teacher" };
   if (req.adminSchoolId) row.school_id = req.adminSchoolId;
   const { data, error } = await supabase.from("users").insert(row).select().single();
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  const { error: authError } = await supabase.auth.admin.createUser({
+    email,
+    password: DEFAULT_PASSWORD,
+    email_confirm: true,
+    user_metadata: { phone, name: name || '', must_change_password: true },
+  });
+  if (authError) {
+    await supabase.from("users").delete().eq("id", data.id);
+    return res.status(500).json({ error: "Auth account creation failed: " + authError.message });
+  }
+  res.json({ ...data, defaultPassword: DEFAULT_PASSWORD });
 });
 
 app.put("/api/admin/teachers/:id", requireAdmin, async (req, res) => {
