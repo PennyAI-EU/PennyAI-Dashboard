@@ -406,6 +406,19 @@ app.get("/api/history", async (req, res) => {
 });
 
 // --- TEACHER API ENDPOINTS ---
+async function requireAuth(req, res, next) {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+  const phone = user.user_metadata?.phone || user.phone;
+  if (!phone) return res.status(401).json({ error: "No phone on user" });
+  const { data, error } = await supabase.from("users").select("id, role, school_id, name").eq("phone", phone).maybeSingle();
+  if (error || !data) return res.status(403).json({ error: "User not found" });
+  req.dbUser = data;
+  next();
+}
+
 async function requireTeacher(req, res, next) {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
@@ -820,6 +833,177 @@ app.post("/api/admin/schedule-call", requireAdmin, async (req, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
+});
+
+// ─── MESSAGING ENDPOINTS ─────────────────────────────────────────────────────
+
+app.get("/api/messages/conversations", requireAuth, async (req, res) => {
+  const { id: userId, role, school_id } = req.dbUser;
+
+  let convQuery;
+  if (role === "student") {
+    convQuery = supabase.from("conversations").select("id, created_at, student_id").eq("student_id", userId);
+  } else if (role === "teacher") {
+    const { data: students } = await supabase.from("users").select("id").eq("teacher_id", userId).eq("role", "student");
+    const sIds = (students || []).map(s => s.id);
+    if (!sIds.length) return res.json([]);
+    convQuery = supabase.from("conversations").select("id, created_at, student_id").in("student_id", sIds);
+  } else {
+    convQuery = school_id
+      ? supabase.from("conversations").select("id, created_at, student_id").eq("school_id", school_id)
+      : supabase.from("conversations").select("id, created_at, student_id");
+  }
+
+  const { data: convs, error: convErr } = await convQuery;
+  if (convErr) return res.status(500).json({ error: convErr.message });
+
+  if (!convs || !convs.length) {
+    if (role === "student") {
+      const newRow = { student_id: userId };
+      if (school_id) newRow.school_id = school_id;
+      const { data: created, error: ce } = await supabase.from("conversations").insert(newRow).select().single();
+      if (ce) return res.status(500).json({ error: ce.message });
+      return res.json([{ id: created.id, created_at: created.created_at, student: { id: userId, name: req.dbUser.name }, last_message: null, unread_count: 0 }]);
+    }
+    return res.json([]);
+  }
+
+  const convIds = convs.map(c => c.id);
+  const studentIds = [...new Set(convs.map(c => c.student_id))];
+
+  const [{ data: studentRows }, { data: allMsgs }, { data: reads }] = await Promise.all([
+    supabase.from("users").select("id, name, email").in("id", studentIds),
+    supabase.from("messages").select("id, conversation_id, content, created_at, sender_id").in("conversation_id", convIds).order("created_at", { ascending: false }),
+    supabase.from("conversation_reads").select("conversation_id, last_read_at").eq("user_id", userId).in("conversation_id", convIds),
+  ]);
+
+  const studentMap = {};
+  (studentRows || []).forEach(s => { studentMap[s.id] = s; });
+  const readMap = {};
+  (reads || []).forEach(r => { readMap[r.conversation_id] = r.last_read_at; });
+
+  const result = convs.map(c => {
+    const msgs = (allMsgs || []).filter(m => m.conversation_id === c.id);
+    const lastMsg = msgs[0] || null;
+    const lastRead = readMap[c.id];
+    const unread = msgs.filter(m => m.sender_id !== userId && (!lastRead || new Date(m.created_at) > new Date(lastRead))).length;
+    return {
+      id: c.id,
+      created_at: c.created_at,
+      student: studentMap[c.student_id] || { id: c.student_id, name: "Unknown" },
+      last_message: lastMsg ? { content: lastMsg.content, created_at: lastMsg.created_at } : null,
+      unread_count: unread,
+    };
+  }).sort((a, b) => {
+    const at = a.last_message?.created_at || a.created_at;
+    const bt = b.last_message?.created_at || b.created_at;
+    return new Date(bt) - new Date(at);
+  });
+
+  res.json(result);
+});
+
+app.get("/api/messages/conversations/:convId", requireAuth, async (req, res) => {
+  const { convId } = req.params;
+  const { id: userId, role } = req.dbUser;
+
+  const { data: conv } = await supabase.from("conversations").select("student_id").eq("id", convId).maybeSingle();
+  if (!conv) return res.status(404).json({ error: "Not found" });
+  if (role === "student" && conv.student_id !== userId) return res.status(403).json({ error: "Forbidden" });
+  if (role === "teacher") {
+    const { data: s } = await supabase.from("users").select("teacher_id").eq("id", conv.student_id).maybeSingle();
+    if (!s || s.teacher_id !== userId) return res.status(403).json({ error: "Forbidden" });
+  }
+
+  const { data, error } = await supabase
+    .from("messages")
+    .select("id, content, created_at, sender:sender_id(id, name, role)")
+    .eq("conversation_id", convId)
+    .order("created_at", { ascending: true })
+    .limit(100);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || []);
+});
+
+app.post("/api/messages/conversations/:convId", requireAuth, async (req, res) => {
+  const { convId } = req.params;
+  const { content } = req.body;
+  const { id: userId, role } = req.dbUser;
+
+  if (!content?.trim()) return res.status(400).json({ error: "Content required" });
+
+  const { data: conv } = await supabase.from("conversations").select("student_id").eq("id", convId).maybeSingle();
+  if (!conv) return res.status(404).json({ error: "Not found" });
+  if (role === "student" && conv.student_id !== userId) return res.status(403).json({ error: "Forbidden" });
+  if (role === "teacher") {
+    const { data: s } = await supabase.from("users").select("teacher_id").eq("id", conv.student_id).maybeSingle();
+    if (!s || s.teacher_id !== userId) return res.status(403).json({ error: "Forbidden" });
+  }
+
+  const { data, error } = await supabase
+    .from("messages")
+    .insert({ conversation_id: convId, sender_id: userId, content: content.trim() })
+    .select("id, content, created_at, sender:sender_id(id, name, role)")
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  await supabase.from("conversation_reads").upsert(
+    { conversation_id: convId, user_id: userId, last_read_at: new Date().toISOString() },
+    { onConflict: "conversation_id,user_id" }
+  );
+
+  res.json(data);
+});
+
+app.put("/api/messages/conversations/:convId/read", requireAuth, async (req, res) => {
+  const { convId } = req.params;
+  const { id: userId } = req.dbUser;
+  await supabase.from("conversation_reads").upsert(
+    { conversation_id: convId, user_id: userId, last_read_at: new Date().toISOString() },
+    { onConflict: "conversation_id,user_id" }
+  );
+  res.json({ success: true });
+});
+
+app.get("/api/messages/unread", requireAuth, async (req, res) => {
+  const { id: userId, role, school_id } = req.dbUser;
+
+  let convIds = [];
+  if (role === "student") {
+    const { data } = await supabase.from("conversations").select("id").eq("student_id", userId);
+    convIds = (data || []).map(c => c.id);
+  } else if (role === "teacher") {
+    const { data: students } = await supabase.from("users").select("id").eq("teacher_id", userId).eq("role", "student");
+    const sIds = (students || []).map(s => s.id);
+    if (sIds.length) {
+      const { data } = await supabase.from("conversations").select("id").in("student_id", sIds);
+      convIds = (data || []).map(c => c.id);
+    }
+  } else {
+    const q = school_id
+      ? supabase.from("conversations").select("id").eq("school_id", school_id)
+      : supabase.from("conversations").select("id");
+    const { data } = await q;
+    convIds = (data || []).map(c => c.id);
+  }
+
+  if (!convIds.length) return res.json({ unread: 0 });
+
+  const [{ data: reads }, { data: msgs }] = await Promise.all([
+    supabase.from("conversation_reads").select("conversation_id, last_read_at").eq("user_id", userId).in("conversation_id", convIds),
+    supabase.from("messages").select("conversation_id, sender_id, created_at").in("conversation_id", convIds).neq("sender_id", userId),
+  ]);
+
+  const readMap = {};
+  (reads || []).forEach(r => { readMap[r.conversation_id] = r.last_read_at; });
+  const total = (msgs || []).filter(m => {
+    const lr = readMap[m.conversation_id];
+    return !lr || new Date(m.created_at) > new Date(lr);
+  }).length;
+
+  res.json({ unread: total });
 });
 
 if (require.main === module) {
