@@ -21,7 +21,7 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
   },
 });
 
-const DEFAULT_PASSWORD = 'Penny2025!';
+const DEFAULT_PASSWORD = 'Penny2026!';
 
 const LESSON_PREAMBLE = `You are an AI English tutor conducting a live, interactive voice lesson with a student. The student's level will be provided (e.g. A1, A2, B1), and you must adapt your language, vocabulary, and pace to match that level. For A1 learners, use very simple words, short sentences, and lots of repetition.
 
