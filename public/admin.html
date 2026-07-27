@@ -975,6 +975,7 @@
     await Promise.all([loadStudents(session.access_token), loadTeachers(session.access_token)]);
     loadCampaigns(session.access_token);
     loadLessons(session.access_token);
+    fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + session.access_token } }).then(r => r.json()).then(d => { dbUserId = d.id || session.user.id; }).catch(() => { dbUserId = session.user.id; });
     fetch('/api/messages/unread', { headers: { 'Authorization': 'Bearer ' + session.access_token } }).then(r => r.json()).then(d => updateMsgBadge(d.unread || 0)).catch(() => {});
 
     const savedSection = location.hash.replace('#', '');
@@ -1870,6 +1871,7 @@
 let msgConvId = null;
 let msgChannel = null;
 let msgMyId = null;
+let dbUserId = null;
 
 function updateMsgBadge(count) {
   const badge = document.getElementById('nav-msg-badge');
@@ -1888,45 +1890,68 @@ async function getToken() {
 
 async function loadMsgConvList() {
   const token = await getToken();
-  const convs = await fetch('/api/messages/conversations', { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json());
+  const [contacts, convs] = await Promise.all([
+    fetch('/api/messages/contacts', { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json()).catch(() => []),
+    fetch('/api/messages/conversations', { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json()).catch(() => []),
+  ]);
   const el = document.getElementById('msg-conv-list');
-  if (!convs.length) {
-    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">No conversations yet. Students will appear here once they have accounts.</div>';
+  if (!Array.isArray(contacts) || !contacts.length) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">No contacts yet. Students and teachers will appear here once they have accounts.</div>';
     return;
   }
-  el.innerHTML = convs.map(c => {
-    const lastMsg = c.last_message;
-    const time = lastMsg ? new Date(lastMsg.created_at).toLocaleDateString([], { month:'short', day:'numeric' }) : '';
-    const preview = lastMsg ? lastMsg.content.slice(0,60) + (lastMsg.content.length > 60 ? '…' : '') : 'No messages yet';
-    const initials = (c.student.name || '?').charAt(0).toUpperCase();
-    return `<div style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;" onclick="openMsgThread('${c.id}','${escHtml(c.student.name||'')}','${escHtml(c.student.email||'')}')" onmouseover="this.style.background='var(--off)'" onmouseout="this.style.background=''">
-      <div style="width:40px;height:40px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;">${initials}</div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:14px;font-weight:600;margin-bottom:2px;">${escHtml(c.student.name||'Student')}</div>
-        <div style="font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(preview)}</div>
-      </div>
-      <div style="flex-shrink:0;text-align:right;">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${time}</div>
-        ${c.unread_count > 0 ? `<div style="background:var(--accent);color:white;border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:auto;">${c.unread_count}</div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
+
+  const convMap = {};
+  (Array.isArray(convs) ? convs : []).forEach(c => { convMap[c.other_participant.id] = c; });
+
+  // Teachers first, then students
+  const teachers = contacts.filter(c => c.role === 'teacher');
+  const students = contacts.filter(c => c.role === 'student');
+
+  const renderSection = (label, list) => {
+    if (!list.length) return '';
+    return `<div style="padding:8px 20px 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);background:var(--off);border-bottom:1px solid var(--border);">${label}</div>` +
+      list.map(contact => {
+        const conv = convMap[contact.id];
+        const lastMsg = conv?.last_message;
+        const unread = conv?.unread_count || 0;
+        const time = lastMsg ? new Date(lastMsg.created_at).toLocaleDateString([], { month:'short', day:'numeric' }) : '';
+        const preview = lastMsg ? lastMsg.content.slice(0,60) + (lastMsg.content.length > 60 ? '…' : '') : 'No messages yet';
+        const initials = (contact.name || '?').charAt(0).toUpperCase();
+        return `<div style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;" onclick="openMsgThread('${contact.id}','${escHtml(contact.name||'')}','${escHtml(contact.role === 'teacher' ? 'Teacher' : 'Student')}')" onmouseover="this.style.background='var(--off)'" onmouseout="this.style.background=''">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;">${initials}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;margin-bottom:2px;">${escHtml(contact.name||'Unknown')}</div>
+            <div style="font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(preview)}</div>
+          </div>
+          <div style="flex-shrink:0;text-align:right;">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${time}</div>
+            ${unread > 0 ? `<div style="background:var(--accent);color:white;border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:auto;">${unread}</div>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+  };
+
+  el.innerHTML = renderSection('Teachers', teachers) + renderSection('Students', students);
 }
 
-window.openMsgThread = async function(convId, studentName, studentEmail) {
-  msgConvId = convId;
-  const { data: { session } } = await supabase.auth.getSession();
-  msgMyId = session.user.id;
+window.openMsgThread = async function(targetUserId, name, meta) {
+  const token = await getToken();
 
-  document.getElementById('msg-thread-avatar').textContent = (studentName || '?').charAt(0).toUpperCase();
-  document.getElementById('msg-thread-name').textContent = studentName || 'Student';
-  document.getElementById('msg-thread-meta').textContent = studentEmail || '';
+  const res = await fetch(`/api/messages/dm/${targetUserId}`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json());
+  if (res.error) { alert('Could not open conversation: ' + res.error); return; }
+
+  msgConvId = res.conversation_id;
+  msgMyId = dbUserId;
+
+  document.getElementById('msg-thread-avatar').textContent = (name || '?').charAt(0).toUpperCase();
+  document.getElementById('msg-thread-name').textContent = name || 'Unknown';
+  document.getElementById('msg-thread-meta').textContent = meta || '';
   document.getElementById('msg-conv-list-view').style.display = 'none';
   document.getElementById('msg-thread-view').style.display = '';
 
-  await loadMsgs(session.access_token);
+  await loadMsgs(token);
   subscribeMsgs();
-  markMsgRead(session.access_token);
+  markMsgRead(token);
 };
 
 window.closeMsgThread = function() {

@@ -349,6 +349,9 @@ async function init() {
 
   await loadStudents(session.access_token);
 
+  const meData = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + session.access_token } }).then(r => r.json()).catch(() => null);
+  dbUserId = meData?.id || session.user.id;
+
   const { unread } = await fetch('/api/messages/unread', { headers: { 'Authorization': 'Bearer ' + session.access_token } }).then(r => r.json()).catch(() => ({ unread: 0 }));
   updateMsgBadge(unread);
 }
@@ -621,6 +624,7 @@ init();
 let msgConvId = null;
 let msgChannel = null;
 let msgMyId = null;
+let dbUserId = null;
 
 function updateMsgBadge(count) {
   const badge = document.getElementById('nav-msg-badge');
@@ -639,46 +643,66 @@ async function getToken() {
 
 async function loadMsgConvList() {
   const token = await getToken();
-  const convs = await fetch('/api/messages/conversations', { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json());
+  const [contacts, convs] = await Promise.all([
+    fetch('/api/messages/contacts', { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json()).catch(() => []),
+    fetch('/api/messages/conversations', { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json()).catch(() => []),
+  ]);
   const el = document.getElementById('msg-conv-list');
-  if (!convs.length) {
-    el.innerHTML = '<div class="empty-state"><h3>No conversations yet</h3><p>Conversations appear here once students are assigned to you.</p></div>';
+  if (!Array.isArray(contacts) || !contacts.length) {
+    el.innerHTML = '<div class="empty-state"><h3>No contacts yet</h3><p>Students assigned to you and your school admin will appear here.</p></div>';
     return;
   }
-  el.innerHTML = convs.map(c => {
-    const lastMsg = c.last_message;
+
+  const convMap = {};
+  (Array.isArray(convs) ? convs : []).forEach(c => { convMap[c.other_participant.id] = c; });
+
+  // Pin admins at top, students below
+  const admins = contacts.filter(c => c.role === 'school_admin' || c.role === 'system_admin');
+  const students = contacts.filter(c => c.role === 'student');
+  const ordered = [...admins, ...students];
+
+  el.innerHTML = ordered.map(contact => {
+    const conv = convMap[contact.id];
+    const lastMsg = conv?.last_message;
+    const unread = conv?.unread_count || 0;
     const time = lastMsg ? new Date(lastMsg.created_at).toLocaleDateString([], { month:'short', day:'numeric' }) : '';
     const preview = lastMsg ? lastMsg.content.slice(0,60) + (lastMsg.content.length > 60 ? '…' : '') : 'No messages yet';
-    const initials = (c.student.name || '?').charAt(0).toUpperCase();
-    return `<div class="list-item" style="cursor:pointer;display:flex;align-items:center;gap:14px;" onclick="openMsgThread('${c.id}','${escHtml(c.student.name||'')}','${escHtml(c.student.email||'')}')">
+    const initials = (contact.name || '?').charAt(0).toUpperCase();
+    const roleLabel = contact.role === 'teacher' ? 'Teacher' : (contact.role === 'school_admin' || contact.role === 'system_admin') ? 'School Admin' : 'Student';
+    return `<div class="list-item" style="cursor:pointer;display:flex;align-items:center;gap:14px;" onclick="openMsgThread('${contact.id}','${escHtml(contact.name||'')}','${escHtml(roleLabel)}')">
       <div style="width:40px;height:40px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;">${initials}</div>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:14px;font-weight:600;margin-bottom:2px;">${escHtml(c.student.name||'Student')}</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:1px;">${escHtml(contact.name||'Unknown')}</div>
+        <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:3px;">${escHtml(roleLabel)}</div>
         <div style="font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(preview)}</div>
       </div>
       <div style="flex-shrink:0;text-align:right;">
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${time}</div>
-        ${c.unread_count > 0 ? `<div style="background:var(--accent);color:white;border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:auto;">${c.unread_count}</div>` : ''}
+        ${unread > 0 ? `<div style="background:var(--accent);color:white;border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:auto;">${unread}</div>` : ''}
       </div>
     </div>`;
   }).join('');
 }
 
-window.openMsgThread = async function(convId, studentName, studentEmail) {
-  msgConvId = convId;
-  const { data: { session } } = await supabase.auth.getSession();
-  msgMyId = session.user.id;
+window.openMsgThread = async function(targetUserId, name, meta) {
+  const token = await getToken();
 
-  document.getElementById('msg-thread-avatar').textContent = (studentName || '?').charAt(0).toUpperCase();
-  document.getElementById('msg-thread-name').textContent = studentName || 'Student';
-  document.getElementById('msg-thread-meta').textContent = studentEmail || '';
+  const res = await fetch(`/api/messages/dm/${targetUserId}`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json());
+  if (res.error) { alert('Could not open conversation: ' + res.error); return; }
+
+  msgConvId = res.conversation_id;
+  msgMyId = dbUserId;
+
+  document.getElementById('msg-thread-avatar').textContent = (name || '?').charAt(0).toUpperCase();
+  document.getElementById('msg-thread-name').textContent = name || 'Unknown';
+  document.getElementById('msg-thread-meta').textContent = meta || '';
 
   document.getElementById('msg-conv-list-view').style.display = 'none';
   document.getElementById('msg-thread-view').style.display = '';
 
-  await loadMsgs(session.access_token);
+  await loadMsgs(token);
   subscribeMsgs();
-  markMsgRead(session.access_token);
+  markMsgRead(token);
 };
 
 window.closeMsgThread = function() {
