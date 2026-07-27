@@ -1153,8 +1153,7 @@
     document.getElementById('edit-conversation-lesson').value = 'false';
     populateLevelDropdown(false, '');
     document.getElementById('edit-conversation-lesson').onchange = function() {
-      const current = document.getElementById('edit-english-level').value;
-      populateLevelDropdown(this.value === 'true', current);
+      populateLevelDropdown(this.value === 'true', '');
     };
     document.getElementById('edit-allocated-lesson-count').value = '10';
     document.getElementById('edit-current-lesson-id').value = '1';
@@ -1195,10 +1194,9 @@
     document.getElementById('edit-conversation-lesson').value = isConv ? 'true' : 'false';
     populateLevelDropdown(isConv, s.english_level || '');
 
-    // Re-populate levels when lesson type changes; preserve current selection if it exists in new set
+    // Re-populate levels when lesson type changes; always reset to — Not set —
     document.getElementById('edit-conversation-lesson').onchange = function() {
-      const current = document.getElementById('edit-english-level').value;
-      populateLevelDropdown(this.value === 'true', current);
+      populateLevelDropdown(this.value === 'true', '');
     };
     document.getElementById('edit-allocated-lesson-count').value = s.allocated_lesson_count ?? '';
     document.getElementById('edit-current-lesson-id').value = s.current_lesson_id ?? '';
@@ -1238,6 +1236,7 @@
     const email = document.getElementById('edit-email').value.trim();
     if (!phone) return alert('Phone number is required.');
     if (studentModalMode === 'add' && !email) return alert('Email is required.');
+    if (studentModalMode === 'add' && !document.getElementById('edit-english-level').value) return alert('Please set an English level before creating a student.');
     const days = Array.from(document.querySelectorAll('#edit-preferred-days input:checked')).map(cb => cb.value).join(',');
     const payload = {
       name:                      document.getElementById('edit-name').value || null,
