@@ -5,6 +5,7 @@ const path = require("path");
 const Retell = require("retell-sdk").default;
 const { createClient } = require("@supabase/supabase-js");
 const ws = require("ws");
+const nodemailer = require("nodemailer");
 
 const app = express();
 app.use(cors());
@@ -22,6 +23,111 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 });
 
 const DEFAULT_PASSWORD = 'Penny2026!';
+
+// Normalize phone to E164 (+digits). If already has +, keep it; otherwise prepend +.
+function toE164(phone) {
+  if (!phone) return phone;
+  const digits = phone.replace(/\D/g, '');
+  return '+' + digits;
+}
+
+const mailer = nodemailer.createTransport({
+  host:   process.env.SMTP_HOST,
+  port:   parseInt(process.env.SMTP_PORT || '587'),
+  secure: process.env.SMTP_SECURE === 'true', // true = SSL on connect (port 465)
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+  tls: { rejectUnauthorized: false }, // Hostinger sometimes uses self-signed certs
+});
+
+async function sendWelcomeEmail(email, name, password) {
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER) return; // silently skip if not configured
+  const loginUrl = process.env.APP_URL || 'https://penny.icaoenglish.org';
+  const firstName = (name || 'there').split(' ')[0];
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"/></head>
+<body style="margin:0;padding:0;background:#f7f6f3;font-family:'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f6f3;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 100%);padding:36px 40px;text-align:center;">
+            <div style="font-size:24px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">Penny<span style="color:#93c5fd;">AI</span></div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-top:4px;">Your AI English Learning Platform</div>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:40px 40px 32px;">
+            <h1 style="font-size:22px;font-weight:700;color:#1a1a1a;margin:0 0 8px;">Welcome, ${firstName}! 👋</h1>
+            <p style="font-size:15px;color:#444;line-height:1.6;margin:0 0 24px;">
+              Your Penny AI account has been created and you're all set to start your English learning journey.
+            </p>
+
+            <!-- Credentials box -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;margin-bottom:28px;">
+              <tr>
+                <td style="padding:20px 24px;">
+                  <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#2563eb;margin-bottom:14px;">Your Login Details</div>
+                  <table cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="font-size:13px;color:#6b6b6b;padding-bottom:8px;width:90px;">Email</td>
+                      <td style="font-size:14px;font-weight:600;color:#1a1a1a;padding-bottom:8px;">${email}</td>
+                    </tr>
+                    <tr>
+                      <td style="font-size:13px;color:#6b6b6b;">Password</td>
+                      <td style="font-size:14px;font-weight:600;color:#1a1a1a;font-family:monospace;background:#dbeafe;padding:3px 8px;border-radius:4px;">${password}</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <p style="font-size:14px;color:#555;line-height:1.6;margin:0 0 28px;">
+              We recommend changing your password after your first login. Your teacher will be in touch soon to guide your learning path.
+            </p>
+
+            <!-- CTA Button -->
+            <table cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="background:#2563eb;border-radius:8px;">
+                  <a href="${loginUrl}/signin.html" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">Sign In to Penny AI →</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="padding:20px 40px 32px;border-top:1px solid #e8e6e0;">
+            <p style="font-size:12px;color:#9ca3af;line-height:1.6;margin:0;">
+              You're receiving this email because an account was created for you on Penny AI.<br/>
+              If you have any questions, reply to this email and we'll help you out.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  await mailer.sendMail({
+    from: `"Penny AI" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+    to: email,
+    subject: `Welcome to Penny AI — your account is ready, ${firstName}!`,
+    html,
+  });
+}
 
 const LESSON_PREAMBLE = `You are an AI English tutor conducting a live, interactive voice lesson with a student. The student's level will be provided (e.g. A1, A2, B1), and you must adapt your language, vocabulary, and pace to match that level. For A1 learners, use very simple words, short sentences, and lots of repetition.
 
@@ -166,6 +272,29 @@ app.post("/api/check-onboarding", async (req, res) => {
 
   console.log("[check-onboarding] COMPLETE — phone:", phone, "level:", data.english_level);
   return res.json({ status: "complete" });
+});
+
+// Authenticated user profile — looks up by auth UUID, falls back to phone if UUID not in users table
+app.get("/api/me", async (req, res) => {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+
+  let { data, error } = await supabase.from("users").select("*").eq("id", user.id).maybeSingle();
+
+  if (!data && !error) {
+    const phone = user.user_metadata?.phone || user.phone;
+    if (phone) {
+      ({ data, error } = await supabase.from("users").select("*").eq("phone", phone).maybeSingle());
+    }
+  }
+
+  if (error) return res.status(500).json({ error: error.message });
+  if (!data) return res.status(404).json({ error: "User not found" });
+
+  res.json(data);
 });
 
 // Public demo endpoint — no auth required, used by the landing page free session
@@ -571,18 +700,31 @@ app.post("/api/admin/students", requireAdmin, async (req, res) => {
   }
   if (!row.phone) return res.status(400).json({ error: "Phone number is required." });
   if (!row.email) return res.status(400).json({ error: "Email is required." });
-  const { data, error } = await supabase.from("users").insert(row).select().single();
-  if (error) return res.status(500).json({ error: error.message });
-  const { error: authError } = await supabase.auth.admin.createUser({
+
+  const e164Phone = toE164(row.phone);
+
+  // Create auth user first so we can use the auth UUID as the users table id
+  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
     email: row.email,
+    phone: e164Phone,
     password: DEFAULT_PASSWORD,
     email_confirm: true,
-    user_metadata: { phone: row.phone, name: row.name || '', must_change_password: true },
+    phone_confirm: true,
+    user_metadata: { phone: e164Phone, name: row.name || '', must_change_password: true },
   });
-  if (authError) {
-    await supabase.from("users").delete().eq("id", data.id);
-    return res.status(500).json({ error: "Auth account creation failed: " + authError.message });
+  if (authError) return res.status(500).json({ error: "Auth account creation failed: " + authError.message });
+
+  const { data, error } = await supabase.from("users").insert({ ...row, id: authData.user.id, phone: e164Phone }).select().single();
+  if (error) {
+    await supabase.auth.admin.deleteUser(authData.user.id);
+    return res.status(500).json({ error: error.message });
   }
+
+  // Fire welcome email — non-blocking, don't fail the request if it errors
+  sendWelcomeEmail(row.email, row.name, DEFAULT_PASSWORD).catch(err =>
+    console.error("[welcome email] failed to send:", err.message)
+  );
+
   res.json({ ...data, defaultPassword: DEFAULT_PASSWORD });
 });
 
@@ -629,19 +771,26 @@ app.post("/api/admin/teachers", requireAdmin, async (req, res) => {
   const { name, email, phone } = req.body;
   if (!phone) return res.status(400).json({ error: "Phone number is required." });
   if (!email) return res.status(400).json({ error: "Email is required." });
-  const row = { name, email, phone, role: "teacher" };
-  if (req.adminSchoolId) row.school_id = req.adminSchoolId;
-  const { data, error } = await supabase.from("users").insert(row).select().single();
-  if (error) return res.status(500).json({ error: error.message });
-  const { error: authError } = await supabase.auth.admin.createUser({
+
+  const e164Phone = toE164(phone);
+
+  // Create auth user first so we can use the auth UUID as the users table id
+  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
     email,
+    phone: e164Phone,
     password: DEFAULT_PASSWORD,
     email_confirm: true,
-    user_metadata: { phone, name: name || '', must_change_password: true },
+    phone_confirm: true,
+    user_metadata: { phone: e164Phone, name: name || '', must_change_password: true },
   });
-  if (authError) {
-    await supabase.from("users").delete().eq("id", data.id);
-    return res.status(500).json({ error: "Auth account creation failed: " + authError.message });
+  if (authError) return res.status(500).json({ error: "Auth account creation failed: " + authError.message });
+
+  const row = { name, email, phone: e164Phone, role: "teacher" };
+  if (req.adminSchoolId) row.school_id = req.adminSchoolId;
+  const { data, error } = await supabase.from("users").insert({ ...row, id: authData.user.id }).select().single();
+  if (error) {
+    await supabase.auth.admin.deleteUser(authData.user.id);
+    return res.status(500).json({ error: error.message });
   }
   res.json({ ...data, defaultPassword: DEFAULT_PASSWORD });
 });

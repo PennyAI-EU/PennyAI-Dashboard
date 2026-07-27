@@ -806,14 +806,13 @@ window.savePreferences = async function() {
 
 async function getDashboardData(userId, userPhone, userEmail, authMeta) {
   try {
-    // 1. Core Profile
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select(`*`)
-      .eq('id', userId)
-      .maybeSingle();
-
-    if (userError) throw userError;
+    // 1. Core Profile — use /api/me which falls back to phone if auth UUID doesn't match users.id
+    const { data: { session } } = await supabase.auth.getSession();
+    let user = null;
+    try {
+      const meRes = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + session.access_token } });
+      if (meRes.ok) user = await meRes.json();
+    } catch (_) {}
 
     // Default structure using auth data
     const result = {
@@ -850,7 +849,7 @@ async function getDashboardData(userId, userPhone, userEmail, authMeta) {
     };
 
     if (!user) {
-      console.warn("No user record found in 'users' table for ID:", userId);
+      console.warn("No user record found for this session");
       return result;
     }
 
@@ -866,7 +865,6 @@ async function getDashboardData(userId, userPhone, userEmail, authMeta) {
     }
 
     // 3. Call History (merged with call_logs for recording/transcript)
-    const { data: { session } } = await supabase.auth.getSession();
     if (session) {
       try {
         const [historyRes, upcomingRes, nextCallRes] = await Promise.all([
