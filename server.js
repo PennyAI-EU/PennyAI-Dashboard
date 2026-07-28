@@ -39,7 +39,7 @@ const mailer = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
-  tls: { rejectUnauthorized: false }, // Hostinger sometimes uses self-signed certs
+  tls: { rejectUnauthorized: false, minVersion: 'TLSv1.2' },
 });
 
 async function sendWelcomeEmail(email, name, password) {
@@ -122,7 +122,7 @@ async function sendWelcomeEmail(email, name, password) {
 </html>`;
 
   await mailer.sendMail({
-    from: `"Penny AI" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to: email,
     subject: `Welcome to Penny AI — your account is ready, ${firstName}!`,
     html,
