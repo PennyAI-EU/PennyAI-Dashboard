@@ -43,8 +43,13 @@ const mailer = nodemailer.createTransport({
 });
 
 async function sendWelcomeEmail(email, name, password) {
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER) return; // silently skip if not configured
-  const loginUrl = process.env.APP_URL || 'https://penny.icaoenglish.org';
+  console.log(`[email] attempting to send welcome email to ${email}`);
+  console.log(`[email] SMTP config — host:${process.env.SMTP_HOST} port:${process.env.SMTP_PORT} secure:${process.env.SMTP_SECURE} user:${process.env.SMTP_USER} from:${process.env.SMTP_FROM}`);
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
+    console.warn('[email] SMTP_HOST or SMTP_USER not set — skipping');
+    return;
+  }
+  const loginUrl = process.env.APP_URL || 'https://www.pennyai.eu';
   const firstName = (name || 'there').split(' ')[0];
   const html = `
 <!DOCTYPE html>
@@ -121,12 +126,16 @@ async function sendWelcomeEmail(email, name, password) {
 </body>
 </html>`;
 
-  await mailer.sendMail({
+  console.log(`[email] verifying SMTP connection...`);
+  await mailer.verify();
+  console.log(`[email] SMTP connection verified — sending...`);
+  const info = await mailer.sendMail({
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to: email,
     subject: `Welcome to Penny AI — your account is ready, ${firstName}!`,
     html,
   });
+  console.log(`[email] sent successfully — messageId:${info.messageId} response:${info.response}`);
 }
 
 const LESSON_PREAMBLE = `You are an AI English tutor conducting a live, interactive voice lesson with a student. The student's level will be provided (e.g. A1, A2, B1), and you must adapt your language, vocabulary, and pace to match that level. For A1 learners, use very simple words, short sentences, and lots of repetition.
@@ -725,11 +734,13 @@ app.post("/api/admin/students", requireAdmin, async (req, res) => {
   try {
     await Promise.race([
       sendWelcomeEmail(row.email, row.name, DEFAULT_PASSWORD),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('email timeout after 10s')), 10000)),
     ]);
     emailSent = true;
+    console.log(`[student create] welcome email sent OK to ${row.email}`);
   } catch (err) {
-    console.error("[welcome email] failed to send:", err.message);
+    console.error(`[student create] welcome email FAILED for ${row.email} — ${err.message}`);
+    console.error(`[student create] error stack:`, err.stack);
   }
 
   res.json({ ...data, defaultPassword: DEFAULT_PASSWORD, emailSent });
