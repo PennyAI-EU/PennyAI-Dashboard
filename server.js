@@ -720,12 +720,19 @@ app.post("/api/admin/students", requireAdmin, async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 
-  // Fire welcome email — non-blocking, don't fail the request if it errors
-  sendWelcomeEmail(row.email, row.name, DEFAULT_PASSWORD).catch(err =>
-    console.error("[welcome email] failed to send:", err.message)
-  );
+  // Try to send welcome email — report result but never fail student creation over it
+  let emailSent = false;
+  try {
+    await Promise.race([
+      sendWelcomeEmail(row.email, row.name, DEFAULT_PASSWORD),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
+    ]);
+    emailSent = true;
+  } catch (err) {
+    console.error("[welcome email] failed to send:", err.message);
+  }
 
-  res.json({ ...data, defaultPassword: DEFAULT_PASSWORD });
+  res.json({ ...data, defaultPassword: DEFAULT_PASSWORD, emailSent });
 });
 
 app.put("/api/admin/students/:id/allocation", requireAdmin, async (req, res) => {
