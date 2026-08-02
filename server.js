@@ -5,6 +5,7 @@ const path = require("path");
 const Retell = require("retell-sdk").default;
 const { createClient } = require("@supabase/supabase-js");
 const ws = require("ws");
+const nodemailer = require("nodemailer");
 
 const app = express();
 app.use(cors());
@@ -20,6 +21,122 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
     transport: ws,
   },
 });
+
+const DEFAULT_PASSWORD = 'Penny2026!';
+
+// Normalize phone to E164 (+digits). If already has +, keep it; otherwise prepend +.
+function toE164(phone) {
+  if (!phone) return phone;
+  const digits = phone.replace(/\D/g, '');
+  return '+' + digits;
+}
+
+const mailer = nodemailer.createTransport({
+  host:   process.env.SMTP_HOST,
+  port:   parseInt(process.env.SMTP_PORT || '587'),
+  secure: process.env.SMTP_SECURE === 'true', // true = SSL on connect (port 465)
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+  tls: { rejectUnauthorized: false, minVersion: 'TLSv1.2' },
+});
+
+async function sendWelcomeEmail(email, name, password) {
+  console.log(`[email] attempting to send welcome email to ${email}`);
+  console.log(`[email] SMTP config — host:${process.env.SMTP_HOST} port:${process.env.SMTP_PORT} secure:${process.env.SMTP_SECURE} user:${process.env.SMTP_USER} from:${process.env.SMTP_FROM}`);
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
+    console.warn('[email] SMTP_HOST or SMTP_USER not set — skipping');
+    return;
+  }
+  const loginUrl = process.env.APP_URL || 'https://www.pennyai.eu';
+  const firstName = (name || 'there').split(' ')[0];
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"/></head>
+<body style="margin:0;padding:0;background:#f7f6f3;font-family:'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f6f3;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 100%);padding:36px 40px;text-align:center;">
+            <div style="font-size:24px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">Penny<span style="color:#93c5fd;">AI</span></div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-top:4px;">Your AI English Learning Platform</div>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:40px 40px 32px;">
+            <h1 style="font-size:22px;font-weight:700;color:#1a1a1a;margin:0 0 8px;">Welcome, ${firstName}! 👋</h1>
+            <p style="font-size:15px;color:#444;line-height:1.6;margin:0 0 24px;">
+              Your Penny AI account has been created and you're all set to start your English learning journey.
+            </p>
+
+            <!-- Credentials box -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;margin-bottom:28px;">
+              <tr>
+                <td style="padding:20px 24px;">
+                  <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#2563eb;margin-bottom:14px;">Your Login Details</div>
+                  <table cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="font-size:13px;color:#6b6b6b;padding-bottom:8px;width:90px;">Email</td>
+                      <td style="font-size:14px;font-weight:600;color:#1a1a1a;padding-bottom:8px;">${email}</td>
+                    </tr>
+                    <tr>
+                      <td style="font-size:13px;color:#6b6b6b;">Password</td>
+                      <td style="font-size:14px;font-weight:600;color:#1a1a1a;font-family:monospace;background:#dbeafe;padding:3px 8px;border-radius:4px;">${password}</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <p style="font-size:14px;color:#555;line-height:1.6;margin:0 0 28px;">
+              We recommend changing your password after your first login. Your teacher will be in touch soon to guide your learning path.
+            </p>
+
+            <!-- CTA Button -->
+            <table cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="background:#2563eb;border-radius:8px;">
+                  <a href="${loginUrl}/signin.html" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">Sign In to Penny AI →</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="padding:20px 40px 32px;border-top:1px solid #e8e6e0;">
+            <p style="font-size:12px;color:#9ca3af;line-height:1.6;margin:0;">
+              You're receiving this email because an account was created for you on Penny AI.<br/>
+              If you have any questions, reply to this email and we'll help you out.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  console.log(`[email] verifying SMTP connection...`);
+  await mailer.verify();
+  console.log(`[email] SMTP connection verified — sending...`);
+  const info = await mailer.sendMail({
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    to: email,
+    subject: `Welcome to Penny AI — your account is ready, ${firstName}!`,
+    html,
+  });
+  console.log(`[email] sent successfully — messageId:${info.messageId} response:${info.response}`);
+}
 
 const LESSON_PREAMBLE = `You are an AI English tutor conducting a live, interactive voice lesson with a student. The student's level will be provided (e.g. A1, A2, B1), and you must adapt your language, vocabulary, and pace to match that level. For A1 learners, use very simple words, short sentences, and lots of repetition.
 
@@ -152,6 +269,11 @@ app.post("/api/check-onboarding", async (req, res) => {
     return res.json({ status: "admin" });
   }
 
+  if (data.role === 'teacher') {
+    console.log("[check-onboarding] TEACHER — phone:", phone);
+    return res.json({ status: "teacher" });
+  }
+
   if (!data.english_level) {
     console.log("[check-onboarding] PENDING — english_level is null for phone:", phone);
     return res.json({ status: "pending", reason: "english_level_null", phone });
@@ -159,6 +281,29 @@ app.post("/api/check-onboarding", async (req, res) => {
 
   console.log("[check-onboarding] COMPLETE — phone:", phone, "level:", data.english_level);
   return res.json({ status: "complete" });
+});
+
+// Authenticated user profile — looks up by auth UUID, falls back to phone if UUID not in users table
+app.get("/api/me", async (req, res) => {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+
+  let { data, error } = await supabase.from("users").select("*").eq("id", user.id).maybeSingle();
+
+  if (!data && !error) {
+    const phone = user.user_metadata?.phone || user.phone;
+    if (phone) {
+      ({ data, error } = await supabase.from("users").select("*").eq("phone", phone).maybeSingle());
+    }
+  }
+
+  if (error) return res.status(500).json({ error: error.message });
+  if (!data) return res.status(404).json({ error: "User not found" });
+
+  res.json(data);
 });
 
 // Public demo endpoint — no auth required, used by the landing page free session
@@ -349,6 +494,157 @@ app.get("/api/next-call", async (req, res) => {
   }
 });
 
+app.get("/api/upcoming-calls", async (req, res) => {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+  const phone = user.user_metadata?.phone || user.phone;
+  if (!phone) return res.status(400).json({ error: "Phone not found" });
+  const { data, error } = await supabase
+    .from("call_triggers")
+    .select("id, scheduled_time, call_status, name")
+    .eq("phone_number", phone)
+    .eq("call_status", "pending")
+    .order("scheduled_time", { ascending: true });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || []);
+});
+
+app.get("/api/history", async (req, res) => {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+
+  const { data: attempts, error: attError } = await supabase
+    .from("lesson_attempts")
+    .select("*, lessons(title)")
+    .eq("user_id", user.id)
+    .order("attempt_time", { ascending: false });
+  if (attError) return res.status(500).json({ error: attError.message });
+
+  const callIds = (attempts || []).filter(a => a.call_id).map(a => a.call_id);
+  let callLogsMap = {};
+  if (callIds.length > 0) {
+    const { data: logs } = await supabase
+      .from("call_logs")
+      .select("*")
+      .in("call_id", callIds);
+    if (logs) logs.forEach(l => { callLogsMap[l.call_id] = l; });
+  }
+
+  const merged = (attempts || []).map(a => ({
+    ...a,
+    recording_url: callLogsMap[a.call_id]?.["Recording Link"] || null,
+    transcript:    callLogsMap[a.call_id]?.["Transcript"] || null,
+    duration_sec:  callLogsMap[a.call_id]?.["Duration (Sec)"] || null,
+  }));
+  res.json(merged);
+});
+
+// --- TEACHER API ENDPOINTS ---
+async function requireAuth(req, res, next) {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+  const phone = user.user_metadata?.phone || user.phone;
+  if (!phone) return res.status(401).json({ error: "No phone on user" });
+  const { data, error } = await supabase.from("users").select("id, role, school_id, name").eq("phone", phone).maybeSingle();
+  if (error || !data) return res.status(403).json({ error: "User not found" });
+  req.dbUser = data;
+  next();
+}
+
+async function requireTeacher(req, res, next) {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+  const phone = user.user_metadata?.phone || user.phone;
+  if (!phone) return res.status(401).json({ error: "No phone on user" });
+  const { data, error } = await supabase
+    .from("users")
+    .select("id, role, school_id, name")
+    .eq("phone", phone)
+    .maybeSingle();
+  if (error || !data || !['teacher', 'school_admin', 'system_admin'].includes(data.role)) {
+    return res.status(403).json({ error: "Forbidden: Teacher access required" });
+  }
+  req.teacherDbId = data.id;
+  req.teacherSchoolId = data.school_id;
+  req.teacherName = data.name;
+  next();
+}
+
+app.get("/api/teacher/students", requireTeacher, async (req, res) => {
+  const { data, error } = await supabase
+    .from("users")
+    .select("id, name, email, phone, english_level, allocated_lesson_count, current_lesson_id")
+    .eq("teacher_id", req.teacherDbId)
+    .eq("role", "student")
+    .order("name");
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || []);
+});
+
+app.get("/api/teacher/students/:id/history", requireTeacher, async (req, res) => {
+  const { id } = req.params;
+  const { data: student, error: sErr } = await supabase
+    .from("users").select("teacher_id, phone").eq("id", id).maybeSingle();
+  if (sErr || !student || student.teacher_id !== req.teacherDbId) {
+    return res.status(403).json({ error: "Not your student" });
+  }
+  const { data: attempts, error } = await supabase
+    .from("lesson_attempts")
+    .select("*, lessons(title)")
+    .eq("user_id", id)
+    .order("attempt_time", { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+
+  const callIds = (attempts || []).filter(a => a.call_id).map(a => a.call_id);
+  let callLogsMap = {};
+  if (callIds.length > 0) {
+    const { data: logs } = await supabase.from("call_logs").select("*").in("call_id", callIds);
+    if (logs) logs.forEach(l => { callLogsMap[l.call_id] = l; });
+  }
+  res.json((attempts || []).map(a => ({
+    ...a,
+    recording_url: callLogsMap[a.call_id]?.["Recording Link"] || null,
+    transcript:    callLogsMap[a.call_id]?.["Transcript"] || null,
+  })));
+});
+
+app.get("/api/teacher/students/:id/upcoming", requireTeacher, async (req, res) => {
+  const { id } = req.params;
+  const { data: student, error: sErr } = await supabase
+    .from("users").select("teacher_id, phone").eq("id", id).maybeSingle();
+  if (sErr || !student || student.teacher_id !== req.teacherDbId) {
+    return res.status(403).json({ error: "Not your student" });
+  }
+  const { data, error } = await supabase
+    .from("call_triggers")
+    .select("id, scheduled_time, call_status")
+    .eq("phone_number", student.phone)
+    .eq("call_status", "pending")
+    .order("scheduled_time", { ascending: true });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || []);
+});
+
+app.put("/api/teacher/attempts/:id/feedback", requireTeacher, async (req, res) => {
+  const { id } = req.params;
+  const { teacher_feedback } = req.body;
+  if (teacher_feedback === undefined) return res.status(400).json({ error: "teacher_feedback is required" });
+  const { error } = await supabase
+    .from("lesson_attempts")
+    .update({ teacher_feedback })
+    .eq("id", id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
 // --- ADMIN API ENDPOINTS ---
 async function requireAdmin(req, res, next) {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
@@ -412,9 +708,42 @@ app.post("/api/admin/students", requireAdmin, async (req, res) => {
     }
   }
   if (!row.phone) return res.status(400).json({ error: "Phone number is required." });
-  const { data, error } = await supabase.from("users").insert(row).select().single();
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  if (!row.email) return res.status(400).json({ error: "Email is required." });
+
+  const e164Phone = toE164(row.phone);
+
+  // Create auth user first so we can use the auth UUID as the users table id
+  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    email: row.email,
+    phone: e164Phone,
+    password: DEFAULT_PASSWORD,
+    email_confirm: true,
+    phone_confirm: true,
+    user_metadata: { phone: e164Phone, name: row.name || '', must_change_password: true },
+  });
+  if (authError) return res.status(500).json({ error: "Auth account creation failed: " + authError.message });
+
+  const { data, error } = await supabase.from("users").insert({ ...row, id: authData.user.id, phone: e164Phone }).select().single();
+  if (error) {
+    await supabase.auth.admin.deleteUser(authData.user.id);
+    return res.status(500).json({ error: error.message });
+  }
+
+  // Try to send welcome email — report result but never fail student creation over it
+  let emailSent = false;
+  try {
+    await Promise.race([
+      sendWelcomeEmail(row.email, row.name, DEFAULT_PASSWORD),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('email timeout after 10s')), 10000)),
+    ]);
+    emailSent = true;
+    console.log(`[student create] welcome email sent OK to ${row.email}`);
+  } catch (err) {
+    console.error(`[student create] welcome email FAILED for ${row.email} — ${err.message}`);
+    console.error(`[student create] error stack:`, err.stack);
+  }
+
+  res.json({ ...data, defaultPassword: DEFAULT_PASSWORD, emailSent });
 });
 
 app.put("/api/admin/students/:id/allocation", requireAdmin, async (req, res) => {
@@ -459,11 +788,29 @@ app.delete("/api/admin/students/:id", requireAdmin, async (req, res) => {
 app.post("/api/admin/teachers", requireAdmin, async (req, res) => {
   const { name, email, phone } = req.body;
   if (!phone) return res.status(400).json({ error: "Phone number is required." });
-  const row = { name, email, phone, role: "teacher" };
+  if (!email) return res.status(400).json({ error: "Email is required." });
+
+  const e164Phone = toE164(phone);
+
+  // Create auth user first so we can use the auth UUID as the users table id
+  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    email,
+    phone: e164Phone,
+    password: DEFAULT_PASSWORD,
+    email_confirm: true,
+    phone_confirm: true,
+    user_metadata: { phone: e164Phone, name: name || '', must_change_password: true },
+  });
+  if (authError) return res.status(500).json({ error: "Auth account creation failed: " + authError.message });
+
+  const row = { name, email, phone: e164Phone, role: "teacher" };
   if (req.adminSchoolId) row.school_id = req.adminSchoolId;
-  const { data, error } = await supabase.from("users").insert(row).select().single();
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  const { data, error } = await supabase.from("users").insert({ ...row, id: authData.user.id }).select().single();
+  if (error) {
+    await supabase.auth.admin.deleteUser(authData.user.id);
+    return res.status(500).json({ error: error.message });
+  }
+  res.json({ ...data, defaultPassword: DEFAULT_PASSWORD });
 });
 
 app.put("/api/admin/teachers/:id", requireAdmin, async (req, res) => {
@@ -653,6 +1000,227 @@ app.post("/api/admin/schedule-call", requireAdmin, async (req, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
+});
+
+// ─── MESSAGING ENDPOINTS ─────────────────────────────────────────────────────
+
+// ─── MESSAGING ───────────────────────────────────────────────────────────────
+
+// List of people the current user can DM
+app.get("/api/messages/contacts", requireAuth, async (req, res) => {
+  const { id: userId, role, school_id } = req.dbUser;
+  let contacts = [];
+
+  if (role === "student") {
+    const { data: me } = await supabase.from("users").select("teacher_id, school_id").eq("id", userId).maybeSingle();
+    if (me?.teacher_id) {
+      const { data: teacher } = await supabase.from("users").select("id, name, role, email").eq("id", me.teacher_id).maybeSingle();
+      if (teacher) contacts.push(teacher);
+    }
+    if (me?.school_id) {
+      const { data: admins } = await supabase.from("users").select("id, name, role, email")
+        .eq("school_id", me.school_id).in("role", ["school_admin", "system_admin"]);
+      contacts.push(...(admins || []));
+    }
+  } else if (role === "teacher") {
+    const { data: students } = await supabase.from("users").select("id, name, role, email")
+      .eq("teacher_id", userId).eq("role", "student");
+    contacts.push(...(students || []));
+    if (school_id) {
+      const { data: admins } = await supabase.from("users").select("id, name, role, email")
+        .eq("school_id", school_id).in("role", ["school_admin", "system_admin"]);
+      contacts.push(...(admins || []));
+    }
+  } else {
+    const scId = school_id || req.adminSchoolId;
+    if (scId) {
+      const { data: members } = await supabase.from("users").select("id, name, role, email")
+        .eq("school_id", scId).in("role", ["student", "teacher"]);
+      contacts.push(...(members || []));
+    }
+  }
+
+  res.json(contacts);
+});
+
+// List all conversations for the current user (pair-based)
+app.get("/api/messages/conversations", requireAuth, async (req, res) => {
+  const { id: userId } = req.dbUser;
+
+  const { data: convs, error } = await supabase
+    .from("conversations")
+    .select("id, created_at, participant_a, participant_b")
+    .or(`participant_a.eq.${userId},participant_b.eq.${userId}`);
+
+  if (error) return res.status(500).json({ error: error.message });
+  if (!convs || !convs.length) return res.json([]);
+
+  const otherIds = [...new Set(convs.map(c => c.participant_a === userId ? c.participant_b : c.participant_a))];
+  const convIds = convs.map(c => c.id);
+
+  const [{ data: users }, { data: allMsgs }, { data: reads }] = await Promise.all([
+    supabase.from("users").select("id, name, email, role").in("id", otherIds),
+    supabase.from("messages").select("id, conversation_id, content, created_at, sender_id")
+      .in("conversation_id", convIds).order("created_at", { ascending: false }),
+    supabase.from("conversation_reads").select("conversation_id, last_read_at")
+      .eq("user_id", userId).in("conversation_id", convIds),
+  ]);
+
+  const userMap = {};
+  (users || []).forEach(u => { userMap[u.id] = u; });
+  const readMap = {};
+  (reads || []).forEach(r => { readMap[r.conversation_id] = r.last_read_at; });
+
+  const result = convs.map(c => {
+    const otherId = c.participant_a === userId ? c.participant_b : c.participant_a;
+    const msgs = (allMsgs || []).filter(m => m.conversation_id === c.id);
+    const lastMsg = msgs[0] || null;
+    const lastRead = readMap[c.id];
+    const unread = msgs.filter(m => m.sender_id !== userId && (!lastRead || new Date(m.created_at) > new Date(lastRead))).length;
+    return {
+      id: c.id,
+      created_at: c.created_at,
+      other_participant: userMap[otherId] || { id: otherId, name: "Unknown", role: "unknown" },
+      last_message: lastMsg ? { content: lastMsg.content, created_at: lastMsg.created_at } : null,
+      unread_count: unread,
+    };
+  }).sort((a, b) => {
+    const at = a.last_message?.created_at || a.created_at;
+    const bt = b.last_message?.created_at || b.created_at;
+    return new Date(bt) - new Date(at);
+  });
+
+  res.json(result);
+});
+
+// Get or create a 1:1 DM conversation between the current user and a target user
+app.post("/api/messages/dm/:targetUserId", requireAuth, async (req, res) => {
+  const { id: userId, role, school_id } = req.dbUser;
+  const { targetUserId } = req.params;
+
+  if (userId === targetUserId) return res.status(400).json({ error: "Cannot DM yourself" });
+
+  const { data: target } = await supabase.from("users").select("id, name, role, email, school_id, teacher_id").eq("id", targetUserId).maybeSingle();
+  if (!target) return res.status(404).json({ error: "User not found" });
+
+  // Access control: verify the pair is allowed
+  if (role === "student") {
+    const { data: me } = await supabase.from("users").select("teacher_id, school_id").eq("id", userId).maybeSingle();
+    const isMyTeacher = me?.teacher_id === targetUserId;
+    const isAdmin = ["school_admin", "system_admin"].includes(target.role) && target.school_id === me?.school_id;
+    if (!isMyTeacher && !isAdmin) return res.status(403).json({ error: "Forbidden" });
+  } else if (role === "teacher") {
+    const isMyStudent = target.teacher_id === userId && target.role === "student";
+    const isAdmin = ["school_admin", "system_admin"].includes(target.role) && target.school_id === school_id;
+    if (!isMyStudent && !isAdmin) return res.status(403).json({ error: "Forbidden" });
+  }
+
+  // Ensure consistent ordering to satisfy the unique index
+  const a = userId < targetUserId ? userId : targetUserId;
+  const b = userId < targetUserId ? targetUserId : userId;
+
+  let { data: conv, error } = await supabase.from("conversations")
+    .select("id").eq("participant_a", a).eq("participant_b", b).maybeSingle();
+
+  if (!conv && !error) {
+    const newRow = { participant_a: a, participant_b: b };
+    const scId = school_id || target.school_id;
+    if (scId) newRow.school_id = scId;
+    const { data: created, error: ce } = await supabase.from("conversations").insert(newRow).select("id").single();
+    if (ce) return res.status(500).json({ error: ce.message });
+    conv = created;
+  }
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ conversation_id: conv.id, other_participant: target });
+});
+
+// Get messages in a conversation
+app.get("/api/messages/conversations/:convId", requireAuth, async (req, res) => {
+  const { convId } = req.params;
+  const { id: userId } = req.dbUser;
+
+  const { data: conv } = await supabase.from("conversations")
+    .select("participant_a, participant_b").eq("id", convId).maybeSingle();
+  if (!conv) return res.status(404).json({ error: "Not found" });
+  if (conv.participant_a !== userId && conv.participant_b !== userId) return res.status(403).json({ error: "Forbidden" });
+
+  const { data, error } = await supabase
+    .from("messages")
+    .select("id, content, created_at, sender:sender_id(id, name, role)")
+    .eq("conversation_id", convId)
+    .order("created_at", { ascending: true })
+    .limit(100);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || []);
+});
+
+// Send a message
+app.post("/api/messages/conversations/:convId", requireAuth, async (req, res) => {
+  const { convId } = req.params;
+  const { content } = req.body;
+  const { id: userId } = req.dbUser;
+
+  if (!content?.trim()) return res.status(400).json({ error: "Content required" });
+
+  const { data: conv } = await supabase.from("conversations")
+    .select("participant_a, participant_b").eq("id", convId).maybeSingle();
+  if (!conv) return res.status(404).json({ error: "Not found" });
+  if (conv.participant_a !== userId && conv.participant_b !== userId) return res.status(403).json({ error: "Forbidden" });
+
+  const { data, error } = await supabase
+    .from("messages")
+    .insert({ conversation_id: convId, sender_id: userId, content: content.trim() })
+    .select("id, content, created_at, sender:sender_id(id, name, role)")
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  await supabase.from("conversation_reads").upsert(
+    { conversation_id: convId, user_id: userId, last_read_at: new Date().toISOString() },
+    { onConflict: "conversation_id,user_id" }
+  );
+
+  res.json(data);
+});
+
+// Mark conversation as read
+app.put("/api/messages/conversations/:convId/read", requireAuth, async (req, res) => {
+  const { convId } = req.params;
+  const { id: userId } = req.dbUser;
+  await supabase.from("conversation_reads").upsert(
+    { conversation_id: convId, user_id: userId, last_read_at: new Date().toISOString() },
+    { onConflict: "conversation_id,user_id" }
+  );
+  res.json({ success: true });
+});
+
+// Total unread message count
+app.get("/api/messages/unread", requireAuth, async (req, res) => {
+  const { id: userId } = req.dbUser;
+
+  const { data: convs } = await supabase.from("conversations")
+    .select("id").or(`participant_a.eq.${userId},participant_b.eq.${userId}`);
+
+  const convIds = (convs || []).map(c => c.id);
+  if (!convIds.length) return res.json({ unread: 0 });
+
+  const [{ data: reads }, { data: msgs }] = await Promise.all([
+    supabase.from("conversation_reads").select("conversation_id, last_read_at")
+      .eq("user_id", userId).in("conversation_id", convIds),
+    supabase.from("messages").select("conversation_id, sender_id, created_at")
+      .in("conversation_id", convIds).neq("sender_id", userId),
+  ]);
+
+  const readMap = {};
+  (reads || []).forEach(r => { readMap[r.conversation_id] = r.last_read_at; });
+  const total = (msgs || []).filter(m => {
+    const lr = readMap[m.conversation_id];
+    return !lr || new Date(m.created_at) > new Date(lr);
+  }).length;
+
+  res.json({ unread: total });
 });
 
 if (require.main === module) {

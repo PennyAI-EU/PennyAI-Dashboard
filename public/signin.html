@@ -207,6 +207,21 @@
   .pending-link a { color: var(--accent); text-decoration: none; font-weight: 500; }
   .pending-link a:hover { text-decoration: underline; }
 
+  /* ── CHANGE PASSWORD MODAL ── */
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); z-index: 200;
+    align-items: center; justify-content: center; padding: 24px;
+  }
+  .modal-backdrop.visible { display: flex; }
+  .modal-card {
+    background: var(--white); border-radius: 14px;
+    padding: 36px 32px; width: 100%; max-width: 400px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  }
+  .modal-card h2 { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 6px; }
+  .modal-card p { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+
   @media (max-width: 768px) {
     body { flex-direction: column; }
     .auth-left {
@@ -296,6 +311,24 @@
   </div>
 </div>
 
+<!-- Change Password Modal -->
+<div class="modal-backdrop" id="change-password-modal">
+  <div class="modal-card">
+    <h2>Set your password</h2>
+    <p>You're signed in with a default password. Please choose a new one before continuing.</p>
+    <div class="form-group">
+      <label class="form-label" for="new-password">New password</label>
+      <input class="form-input" id="new-password" type="password" placeholder="At least 8 characters" autocomplete="new-password"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="confirm-password">Confirm password</label>
+      <input class="form-input" id="confirm-password" type="password" placeholder="Repeat your new password" autocomplete="new-password"/>
+    </div>
+    <div id="pw-error" class="form-error"></div>
+    <button class="btn-submit" id="pw-save-btn" style="margin-top:8px;">Save and continue →</button>
+  </div>
+</div>
+
 <script>
 (async () => {
   let supabase = null;
@@ -355,10 +388,18 @@
       }
 
       const accessToken = data.session.access_token;
+
+      if (data.user.user_metadata?.must_change_password) {
+        showChangePasswordModal(supabase, data);
+        return;
+      }
+
       const status = await checkOnboarding(accessToken);
 
       if (status === 'admin') {
         window.location.href = '/admin.html';
+      } else if (status === 'teacher') {
+        window.location.href = '/teacher.html';
       } else if (status === 'complete') {
         window.location.href = '/dashboard.html';
       } else {
@@ -379,6 +420,54 @@
     formSection.style.display = '';
     pendingSection.classList.remove('visible');
   });
+
+  function showChangePasswordModal(sb, signInData) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Sign in →';
+    const modal = document.getElementById('change-password-modal');
+    const pwError = document.getElementById('pw-error');
+    const saveBtn = document.getElementById('pw-save-btn');
+    modal.classList.add('visible');
+
+    saveBtn.addEventListener('click', async () => {
+      const newPw = document.getElementById('new-password').value;
+      const confirmPw = document.getElementById('confirm-password').value;
+      pwError.classList.remove('visible');
+
+      if (newPw.length < 8) {
+        pwError.textContent = 'Password must be at least 8 characters.';
+        pwError.classList.add('visible'); return;
+      }
+      if (newPw !== confirmPw) {
+        pwError.textContent = 'Passwords do not match.';
+        pwError.classList.add('visible'); return;
+      }
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving…';
+      const { error } = await sb.auth.updateUser({
+        password: newPw,
+        data: { must_change_password: false },
+      });
+      if (error) {
+        pwError.textContent = error.message;
+        pwError.classList.add('visible');
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save and continue →';
+        return;
+      }
+
+      modal.classList.remove('visible');
+      const status = await checkOnboarding(signInData.session.access_token);
+      if (status === 'admin') window.location.href = '/admin.html';
+      else if (status === 'teacher') window.location.href = '/teacher.html';
+      else if (status === 'complete') window.location.href = '/dashboard.html';
+      else {
+        formSection.style.display = 'none';
+        pendingSection.classList.add('visible');
+      }
+    });
+  }
 })();
 </script>
 

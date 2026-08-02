@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Teacher Dashboard — Penny AI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --white: #ffffff;
+    --off: #f7f6f3;
+    --border: #e8e6e0;
+    --text: #1a1a1a;
+    --muted: #6b6b6b;
+    --accent: #2563eb;
+    --accent-dark: #1d4ed8;
+    --accent-light: #eff4ff;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --radius: 12px;
+    --sidebar-width: 260px;
+  }
+  body { font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--off); min-height: 100vh; display: flex; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-width); background: var(--white);
+    border-right: 1px solid var(--border); height: 100vh;
+    position: fixed; left: 0; top: 0;
+    display: flex; flex-direction: column; padding: 24px 16px; z-index: 100;
+  }
+  .nav-logo { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; text-decoration: none; color: var(--text); padding: 0 12px 32px; display: block; }
+  .nav-logo span { color: var(--accent); }
+  .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 8px;
+    text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500;
+    transition: all 0.15s; cursor: pointer;
+  }
+  .nav-item:hover { background: var(--off); color: var(--text); }
+  .nav-item.active { background: var(--accent-light); color: var(--accent); }
+  .nav-item svg { width: 18px; height: 18px; opacity: 0.7; }
+  .nav-item.active svg { opacity: 1; }
+  .nav-footer { padding-top: 20px; border-top: 1px solid var(--border); }
+  .user-brief { display: flex; align-items: center; gap: 12px; padding: 8px 12px; margin-bottom: 12px; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--green-light); color: var(--green); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; }
+  .user-info { min-width: 0; }
+  .user-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--muted); }
+  .btn-signout {
+    width: 100%; text-align: left; background: none; border: none;
+    padding: 10px 14px; border-radius: 8px; font-family: inherit;
+    font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer;
+    display: flex; align-items: center; gap: 12px; transition: all 0.15s;
+  }
+  .btn-signout:hover { background: #fee2e2; color: #dc2626; }
+  .btn-signout svg { width: 18px; height: 18px; }
+
+  /* MAIN */
+  .main-content { margin-left: var(--sidebar-width); flex: 1; min-height: 100vh; padding: 40px clamp(24px, 5vw, 60px); }
+  .section { display: none; max-width: 1000px; margin: 0 auto; animation: fadeIn 0.3s ease-out; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .section-header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .section-header h1 { font-size: 2.2rem; font-weight: 600; letter-spacing: -0.8px; margin-bottom: 4px; }
+  .section-header p { font-size: 15px; color: var(--muted); }
+
+  /* TABLE */
+  .table-container { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; text-align: left; }
+  th, td { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 14px; }
+  th { background: var(--off); font-weight: 600; color: var(--muted); }
+  tr:last-child td { border-bottom: none; }
+  tr.clickable { cursor: pointer; transition: background 0.1s; }
+  tr.clickable:hover { background: var(--off); }
+
+  /* CARDS */
+  .card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 24px; }
+  .card-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 12px; }
+
+  /* BADGE */
+  .badge { padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; }
+  .badge-blue { background: var(--accent-light); color: var(--accent); }
+  .badge-green { background: var(--green-light); color: var(--green); }
+  .badge-grey { background: var(--off); color: var(--muted); }
+
+  /* STUDENT DETAIL */
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 500; color: var(--muted);
+    background: none; border: none; cursor: pointer;
+    padding: 0; margin-bottom: 24px;
+    transition: color 0.15s;
+  }
+  .back-btn:hover { color: var(--text); }
+  .student-header {
+    background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 24px 28px; margin-bottom: 24px;
+    display: flex; align-items: center; gap: 24px;
+  }
+  .student-avatar { width: 52px; height: 52px; border-radius: 50%; background: var(--accent-light); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 600; flex-shrink: 0; }
+  .student-header-info { flex: 1; }
+  .student-header-info h2 { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 4px; }
+  .student-header-meta { font-size: 13px; color: var(--muted); display: flex; gap: 16px; }
+
+  /* LIST ITEMS */
+  .list-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .list-item { padding: 18px 24px; border-bottom: 1px solid var(--border); }
+  .list-item:last-child { border-bottom: none; }
+  .upcoming-item { display: flex; align-items: center; gap: 16px; }
+  .upcoming-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  /* HISTORY ITEM */
+  .history-row { cursor: pointer; }
+  .history-row-header { display: flex; align-items: center; gap: 16px; }
+  .history-date { flex-shrink: 0; width: 48px; text-align: center; }
+  .history-date .day { font-size: 18px; font-weight: 600; }
+  .history-date .month { font-size: 11px; text-transform: uppercase; color: var(--muted); }
+  .history-info { flex: 1; }
+  .history-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .history-summary { font-size: 13px; color: var(--muted); }
+  .score-chip { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .score-high { background: var(--green-light); color: var(--green); }
+  .score-mid { background: #fef9c3; color: #854d0e; }
+  .score-low { background: #fee2e2; color: #991b1b; }
+
+  /* HISTORY DETAIL */
+  .history-detail { display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+  /* RECORDING */
+  .recording-player { background: var(--off); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+  .recording-player-top { display: flex; align-items: center; gap: 12px; }
+  .play-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; transition: background .15s; }
+  .play-btn:hover { background: var(--accent-dark); }
+  .play-btn svg { width: 16px; height: 16px; fill: #fff; }
+  .waveform-wrap { flex: 1; height: 56px; }
+  .recording-time { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+  /* TRANSCRIPT */
+  .transcript-wrap { background: var(--off); border-radius: 8px; padding: 14px 16px; max-height: 240px; overflow-y: auto; margin-bottom: 16px; }
+  .transcript-line { display: flex; gap: 8px; margin-bottom: 8px; font-size: 13px; line-height: 1.5; }
+  .transcript-line:last-child { margin-bottom: 0; }
+  .transcript-speaker { font-weight: 600; white-space: nowrap; min-width: 44px; }
+  .transcript-speaker.agent { color: var(--accent); }
+  .transcript-speaker.user { color: var(--green); }
+
+  /* FEEDBACK */
+  .feedback-block { padding: 16px; border-radius: 8px; margin-bottom: 12px; }
+  .feedback-block.ai { background: var(--accent-light); }
+  .feedback-block.teacher { background: var(--green-light); }
+  .feedback-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .feedback-label.ai { color: var(--accent); }
+  .feedback-label.teacher { color: var(--green); }
+  .feedback-text { font-size: 13px; line-height: 1.6; }
+  .feedback-form { margin-top: 12px; }
+  .feedback-textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical; min-height: 80px; outline: none; }
+  .feedback-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+  .feedback-actions { display: flex; gap: 8px; margin-top: 8px; }
+  .btn-sm { padding: 6px 14px; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+  .btn-sm-primary { background: var(--accent); color: white; }
+  .btn-sm-primary:hover { background: var(--accent-dark); }
+  .btn-sm-secondary { background: var(--white); color: var(--text); border: 1px solid var(--border); }
+  .btn-sm-secondary:hover { background: var(--off); }
+
+  .empty-state { padding: 40px 24px; text-align: center; color: var(--muted); }
+  .empty-state h3 { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 20px; color: var(--text); margin-bottom: 6px; }
+
+  @media (max-width: 800px) {
+    .sidebar { width: 70px; padding: 24px 8px; }
+    .nav-logo span, .nav-item span, .user-info, .btn-signout span { display: none; }
+    .nav-logo { padding-bottom: 24px; text-align: center; }
+    .main-content { margin-left: 70px; }
+    .nav-item { justify-content: center; padding: 12px; }
+    .btn-signout { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <a class="nav-logo" href="/">Penny<span>AI</span></a>
+  <nav class="nav-menu">
+    <div class="nav-item active" id="nav-students" onclick="showSection('students')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      <span>My Students</span>
+    </div>
+    <div class="nav-item" id="nav-messages" onclick="showSection('messages')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      <span>Messages</span>
+      <span id="nav-msg-badge" style="display:none; background:#ef4444; color:white; border-radius:50%; width:16px; height:16px; font-size:10px; font-weight:700; align-items:center; justify-content:center; margin-left:auto; flex-shrink:0;"></span>
+    </div>
+  </nav>
+  <div class="nav-footer">
+    <div class="user-brief">
+      <div class="user-avatar" id="teacher-avatar">T</div>
+      <div class="user-info">
+        <div class="user-name" id="teacher-name">Teacher</div>
+        <div class="user-role">Teacher</div>
+      </div>
+    </div>
+    <button class="btn-signout" id="signout-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      <span>Sign out</span>
+    </button>
+  </div>
+</aside>
+
+<main class="main-content">
+
+  <!-- STUDENTS LIST SECTION -->
+  <section id="section-students" class="section active">
+    <div class="section-header">
+      <div>
+        <h1>My Students</h1>
+        <p>Click a student to view their progress and leave feedback.</p>
+      </div>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone / Email</th>
+            <th>Level</th>
+            <th>Lessons Allocated</th>
+          </tr>
+        </thead>
+        <tbody id="students-tbody">
+          <tr><td colspan="4" style="text-align:center; padding:40px; color:var(--muted);">Loading students...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- STUDENT DETAIL SECTION -->
+  <section id="section-student-detail" class="section">
+
+    <button class="back-btn" onclick="backToStudents()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to students
+    </button>
+
+    <div class="student-header" id="student-header">
+      <div class="student-avatar" id="detail-avatar">—</div>
+      <div class="student-header-info">
+        <h2 id="detail-name">—</h2>
+        <div class="student-header-meta">
+          <span id="detail-level">—</span>
+          <span id="detail-email">—</span>
+          <span id="detail-phone">—</span>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:12px; color:var(--muted); margin-bottom:4px;">Allocated lessons</div>
+        <div style="font-size:24px; font-weight:600;" id="detail-allocated">—</div>
+      </div>
+    </div>
+
+    <!-- UPCOMING -->
+    <div class="card">
+      <div class="card-label">Upcoming Sessions</div>
+      <div id="detail-upcoming">
+        <div class="empty-state" style="padding:20px 0;"><p>Loading...</p></div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div>
+      <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); margin-bottom:16px;">Lesson History & Feedback</div>
+      <div class="list-card" id="detail-history">
+        <div class="empty-state"><p>Loading...</p></div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- MESSAGES SECTION -->
+  <section id="section-messages" class="section">
+
+    <!-- Conversation list state -->
+    <div id="msg-conv-list-view">
+      <div class="section-header">
+        <div><h1>Messages</h1><p>Student conversations — click to open a thread.</p></div>
+      </div>
+      <div class="list-card" id="msg-conv-list">
+        <div class="empty-state"><p>Loading…</p></div>
+      </div>
+    </div>
+
+    <!-- Thread state -->
+    <div id="msg-thread-view" style="display:none;">
+      <button class="back-btn" onclick="closeMsgThread()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to messages
+      </button>
+      <div class="student-header" style="margin-bottom:20px;">
+        <div class="student-avatar" id="msg-thread-avatar">—</div>
+        <div class="student-header-info">
+          <h2 id="msg-thread-name">—</h2>
+          <div class="student-header-meta" id="msg-thread-meta">—</div>
+        </div>
+      </div>
+      <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column;">
+        <div id="msg-thread" style="overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:12px; min-height:360px; max-height:calc(100vh - 380px);"></div>
+        <div style="padding:14px 20px; border-top:1px solid var(--border); display:flex; gap:10px; align-items:flex-end;">
+          <textarea id="msg-input" rows="1" placeholder="Write a message… (Enter to send)" style="flex:1; border:1px solid var(--border); border-radius:10px; padding:10px 14px; font-family:inherit; font-size:14px; resize:none; max-height:120px; outline:none; line-height:1.5;" onkeydown="msgKeyDown(event)" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+          <button onclick="sendMsg()" style="width:40px;height:40px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<script type="module">
+let supabase = null;
+let studentsData = [];
+let selectedStudentId = null;
+const wavesurferInstances = {};
+
+async function init() {
+  const cfg = await fetch('/api/config').then(r => r.json());
+  const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+  supabase = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '/signin.html'; return; }
+
+  // Check role
+  const onboardRes = await fetch('/api/check-onboarding', {
+    method: 'POST', headers: { 'Authorization': 'Bearer ' + session.access_token }
+  });
+  const { status } = await onboardRes.json();
+  if (status !== 'teacher') { window.location.href = '/signin.html'; return; }
+
+  const name = session.user.user_metadata?.name || 'Teacher';
+  document.getElementById('teacher-name').textContent = name;
+  document.getElementById('teacher-avatar').textContent = name.charAt(0).toUpperCase();
+
+  document.getElementById('signout-btn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/signin.html';
+  });
+
+  await loadStudents(session.access_token);
+
+  const meData = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + session.access_token } }).then(r => r.json()).catch(() => null);
+  dbUserId = meData?.id || session.user.id;
+
+  const { unread } = await fetch('/api/messages/unread', { headers: { 'Authorization': 'Bearer ' + session.access_token } }).then(r => r.json()).catch(() => ({ unread: 0 }));
+  updateMsgBadge(unread);
+}
+
+window.showSection = function(id) {
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + id);
+  if (navEl) navEl.classList.add('active');
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('section-' + id).classList.add('active');
+  if (id === 'messages') loadMsgConvList();
+}
+
+window.backToStudents = function() {
+  showSection('students');
+  selectedStudentId = null;
+}
+
+async function apiGet(path, token) {
+  const res = await fetch(path, { headers: { 'Authorization': 'Bearer ' + token } });
+  return res.json();
+}
+
+async function loadStudents(token) {
+  studentsData = await apiGet('/api/teacher/students', token);
+  renderStudents();
+}
+
+function renderStudents() {
+  const tbody = document.getElementById('students-tbody');
+  if (!studentsData || studentsData.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px; color:var(--muted);">No students assigned to you yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = studentsData.map(s => `
+    <tr class="clickable" onclick="openStudent('${s.id}')">
+      <td style="font-weight:600;">${s.name || '—'}</td>
+      <td>${s.phone || '—'}<br><small style="color:var(--muted)">${s.email || '—'}</small></td>
+      <td>${s.english_level ? `<span class="badge badge-blue">${s.english_level}</span>` : '<span class="badge badge-grey">Pending</span>'}</td>
+      <td><strong>${s.allocated_lesson_count || 0}</strong></td>
+    </tr>
+  `).join('');
+}
+
+window.openStudent = async function(id) {
+  selectedStudentId = id;
+  const s = studentsData.find(x => x.id === id);
+  if (!s) return;
+
+  // Populate header
+  const initials = (s.name || '?').charAt(0).toUpperCase();
+  document.getElementById('detail-avatar').textContent = initials;
+  document.getElementById('detail-name').textContent = s.name || '—';
+  document.getElementById('detail-level').textContent = s.english_level ? `Level ${s.english_level}` : 'Level pending';
+  document.getElementById('detail-email').textContent = s.email || '';
+  document.getElementById('detail-phone').textContent = s.phone || '';
+  document.getElementById('detail-allocated').textContent = s.allocated_lesson_count || 0;
+
+  document.getElementById('detail-upcoming').innerHTML = '<div style="padding:16px; color:var(--muted); font-size:14px;">Loading...</div>';
+  document.getElementById('detail-history').innerHTML = '<div class="empty-state"><p>Loading...</p></div>';
+
+  showSection('student-detail');
+  document.getElementById('nav-students').classList.add('active');
+
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session.access_token;
+
+  const [upcoming, history] = await Promise.all([
+    apiGet(`/api/teacher/students/${id}/upcoming`, token),
+    apiGet(`/api/teacher/students/${id}/history`, token),
+  ]);
+
+  renderUpcoming(upcoming);
+  renderHistory(history, token);
+}
+
+function renderUpcoming(calls) {
+  const el = document.getElementById('detail-upcoming');
+  if (!calls || calls.length === 0) {
+    el.innerHTML = '<div style="padding:8px 0; color:var(--muted); font-size:14px;">No upcoming sessions scheduled.</div>';
+    return;
+  }
+  el.innerHTML = calls.map(c => {
+    const d = new Date(c.scheduled_time);
+    return `
+      <div class="upcoming-item" style="padding: 12px 0; border-bottom: 1px solid var(--border);">
+        <div class="upcoming-dot"></div>
+        <div style="flex:1;">
+          <div style="font-size:14px; font-weight:600;">${d.toLocaleDateString([], { weekday:'short', month:'short', day:'numeric' })} at ${d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })}</div>
+          <div style="font-size:12px; color:var(--muted);">AI English Lesson</div>
+        </div>
+        <span class="badge badge-blue">Scheduled</span>
+      </div>`;
+  }).join('');
+}
+
+function renderHistory(history, token) {
+  const el = document.getElementById('detail-history');
+  if (!history || history.length === 0) {
+    el.innerHTML = '<div class="empty-state"><h3>No sessions yet</h3><p>This student has not completed any lessons yet.</p></div>';
+    return;
+  }
+  el.innerHTML = history.map((item, idx) => {
+    const d = new Date(item.attempt_time);
+    const score = item.score || 0;
+    const scoreClass = score >= 80 ? 'score-high' : score >= 60 ? 'score-mid' : 'score-low';
+    const hasRecording = !!item.recording_url;
+    const hasTranscript = !!item.transcript;
+    const detailId = `hd-${idx}`;
+    const feedbackId = `hf-${idx}`;
+
+    return `
+      <div class="list-item">
+        <div class="history-row" onclick="toggleDetail('${detailId}')">
+          <div class="history-row-header">
+            <div class="history-date">
+              <div class="day">${d.getDate()}</div>
+              <div class="month">${d.toLocaleDateString([], { month:'short' })}</div>
+            </div>
+            <div class="history-info">
+              <div class="history-title">${item.lessons?.title || 'Lesson Attempt'}</div>
+              <div class="history-summary">${item.call_summary || 'No summary.'}</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              ${hasRecording ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16"/></svg>' : ''}
+              <span class="score-chip ${scoreClass}">${score}%</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="${detailId}" class="history-detail">
+
+          ${hasRecording ? `
+          <div style="margin-bottom:16px;">
+            <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); margin-bottom:8px;">Recording</div>
+            <div class="recording-player">
+              <div class="recording-player-top">
+                <button class="play-btn" id="play-btn-${idx}" onclick="toggleWavePlay(${idx}, '${item.recording_url}')">
+                  <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+                </button>
+                <div class="waveform-wrap" id="waveform-${idx}"></div>
+                <span class="recording-time" id="rec-time-${idx}">0:00</span>
+              </div>
+            </div>
+          </div>` : ''}
+
+          ${hasTranscript ? `
+          <div style="margin-bottom:16px;">
+            <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); margin-bottom:8px;">Transcript</div>
+            <div class="transcript-wrap">${formatTranscript(item.transcript)}</div>
+          </div>` : ''}
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+            <div class="feedback-block ai">
+              <div class="feedback-label ai">AI Feedback</div>
+              <div class="feedback-text">${item.student_feedback || 'No AI feedback available.'}</div>
+            </div>
+            <div class="feedback-block teacher">
+              <div class="feedback-label teacher">Teacher Feedback</div>
+              <div class="feedback-text" id="tf-display-${idx}">${item.teacher_feedback || '<span style="color:var(--muted); font-style:italic;">No feedback yet.</span>'}</div>
+              <div class="feedback-form" id="${feedbackId}" style="display:none;">
+                <textarea class="feedback-textarea" id="tf-input-${idx}" placeholder="Write your feedback for this student...">${item.teacher_feedback || ''}</textarea>
+                <div class="feedback-actions">
+                  <button class="btn-sm btn-sm-primary" onclick="saveFeedback('${item.id}', ${idx}, '${feedbackId}')">Save</button>
+                  <button class="btn-sm btn-sm-secondary" onclick="cancelFeedback(${idx}, '${feedbackId}')">Cancel</button>
+                </div>
+              </div>
+              <button class="btn-sm btn-sm-secondary" style="margin-top:8px;" id="tf-edit-btn-${idx}" onclick="editFeedback(${idx}, '${feedbackId}')">
+                ${item.teacher_feedback ? 'Edit Feedback' : '+ Add Feedback'}
+              </button>
+            </div>
+          </div>
+
+          <details style="cursor:pointer;">
+            <summary style="font-size:12px; color:var(--muted); list-style:none; display:flex; align-items:center; gap:4px; user-select:none;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              Grading details
+            </summary>
+            <div style="margin-top:8px; font-size:12px; color:var(--muted); line-height:1.6; padding:12px; background:var(--off); border-radius:8px;">${
+              typeof item.grading_rationale === 'string' && item.grading_rationale.startsWith('{')
+                ? (() => { try { const g = JSON.parse(item.grading_rationale); return (g.strengths ? '<strong>Strengths:</strong> ' + g.strengths + '<br><br>' : '') + (g.areas_for_improvement ? '<strong>Areas to improve:</strong> ' + g.areas_for_improvement : ''); } catch(e) { return item.grading_rationale; } })()
+                : (item.grading_rationale || 'N/A')
+            }</div>
+          </details>
+
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+window.toggleDetail = function(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' || el.style.display === '' ? 'block' : 'none';
+}
+
+window.editFeedback = function(idx, formId) {
+  document.getElementById(formId).style.display = 'block';
+  document.getElementById(`tf-edit-btn-${idx}`).style.display = 'none';
+  document.getElementById(`tf-input-${idx}`).focus();
+}
+
+window.cancelFeedback = function(idx, formId) {
+  document.getElementById(formId).style.display = 'none';
+  document.getElementById(`tf-edit-btn-${idx}`).style.display = '';
+}
+
+window.saveFeedback = async function(attemptId, idx, formId) {
+  const text = document.getElementById(`tf-input-${idx}`).value.trim();
+  const { data: { session } } = await supabase.auth.getSession();
+  const res = await fetch(`/api/teacher/attempts/${attemptId}/feedback`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+    body: JSON.stringify({ teacher_feedback: text })
+  });
+  const result = await res.json();
+  if (result.error) { alert('Error saving feedback: ' + result.error); return; }
+
+  document.getElementById(`tf-display-${idx}`).innerHTML = text || '<span style="color:var(--muted); font-style:italic;">No feedback yet.</span>';
+  document.getElementById(`tf-edit-btn-${idx}`).textContent = text ? 'Edit Feedback' : '+ Add Feedback';
+  cancelFeedback(idx, formId);
+}
+
+window.toggleWavePlay = function(idx, url) {
+  const id = String(idx);
+  if (!wavesurferInstances[id]) {
+    const ws = WaveSurfer.create({
+      container: document.getElementById('waveform-' + id),
+      waveColor: '#bfdbfe', progressColor: '#2563eb',
+      height: 56, barWidth: 2, barGap: 1, barRadius: 2, url,
+    });
+    wavesurferInstances[id] = ws;
+    ws.on('timeupdate', t => {
+      const m = Math.floor(t / 60), s = Math.floor(t % 60).toString().padStart(2, '0');
+      const el = document.getElementById('rec-time-' + id);
+      if (el) el.textContent = `${m}:${s}`;
+    });
+    ws.on('finish', () => updatePlayBtn(id, false));
+    ws.on('pause', () => updatePlayBtn(id, false));
+    ws.on('play', () => updatePlayBtn(id, true));
+    ws.play();
+  } else {
+    const ws = wavesurferInstances[id];
+    ws.isPlaying() ? ws.pause() : ws.play();
+  }
+}
+
+function updatePlayBtn(id, playing) {
+  const btn = document.getElementById('play-btn-' + id);
+  if (!btn) return;
+  btn.innerHTML = playing
+    ? '<svg viewBox="0 0 24 24" fill="#fff" width="16" height="16"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="#fff" width="16" height="16"><polygon points="5,3 19,12 5,21"/></svg>';
+}
+
+function formatTranscript(raw) {
+  if (!raw) return '';
+  return raw.split(/\\n|\n/).filter(l => l.trim()).map(line => {
+    const m = line.match(/^(Agent|User):\s*(.*)/i);
+    if (!m) return `<div class="transcript-line"><span>${line}</span></div>`;
+    const role = m[1].toLowerCase();
+    return `<div class="transcript-line"><span class="transcript-speaker ${role}">${m[1]}:</span><span>${m[2]}</span></div>`;
+  }).join('');
+}
+
+init();
+
+// ─── MESSAGING ───────────────────────────────────────────────────────────────
+let msgConvId = null;
+let msgChannel = null;
+let msgMyId = null;
+let dbUserId = null;
+
+function updateMsgBadge(count) {
+  const badge = document.getElementById('nav-msg-badge');
+  if (!badge) return;
+  if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.style.display = 'flex'; }
+  else { badge.style.display = 'none'; }
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+async function getToken() {
+  return (await supabase.auth.getSession()).data.session?.access_token;
+}
+
+async function loadMsgConvList() {
+  const token = await getToken();
+  const [contacts, convs] = await Promise.all([
+    fetch('/api/messages/contacts', { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json()).catch(() => []),
+    fetch('/api/messages/conversations', { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json()).catch(() => []),
+  ]);
+  const el = document.getElementById('msg-conv-list');
+  if (!Array.isArray(contacts) || !contacts.length) {
+    el.innerHTML = '<div class="empty-state"><h3>No contacts yet</h3><p>Students assigned to you and your school admin will appear here.</p></div>';
+    return;
+  }
+
+  const convMap = {};
+  (Array.isArray(convs) ? convs : []).forEach(c => { convMap[c.other_participant.id] = c; });
+
+  // Pin admins at top, students below
+  const admins = contacts.filter(c => c.role === 'school_admin' || c.role === 'system_admin');
+  const students = contacts.filter(c => c.role === 'student');
+  const ordered = [...admins, ...students];
+
+  el.innerHTML = ordered.map(contact => {
+    const conv = convMap[contact.id];
+    const lastMsg = conv?.last_message;
+    const unread = conv?.unread_count || 0;
+    const time = lastMsg ? new Date(lastMsg.created_at).toLocaleDateString([], { month:'short', day:'numeric' }) : '';
+    const preview = lastMsg ? lastMsg.content.slice(0,60) + (lastMsg.content.length > 60 ? '…' : '') : 'No messages yet';
+    const initials = (contact.name || '?').charAt(0).toUpperCase();
+    const roleLabel = contact.role === 'teacher' ? 'Teacher' : (contact.role === 'school_admin' || contact.role === 'system_admin') ? 'School Admin' : 'Student';
+    return `<div class="list-item" style="cursor:pointer;display:flex;align-items:center;gap:14px;" onclick="openMsgThread('${contact.id}','${escHtml(contact.name||'')}','${escHtml(roleLabel)}')">
+      <div style="width:40px;height:40px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;">${initials}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:600;margin-bottom:1px;">${escHtml(contact.name||'Unknown')}</div>
+        <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:3px;">${escHtml(roleLabel)}</div>
+        <div style="font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(preview)}</div>
+      </div>
+      <div style="flex-shrink:0;text-align:right;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${time}</div>
+        ${unread > 0 ? `<div style="background:var(--accent);color:white;border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:auto;">${unread}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.openMsgThread = async function(targetUserId, name, meta) {
+  const token = await getToken();
+
+  const res = await fetch(`/api/messages/dm/${targetUserId}`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json());
+  if (res.error) { alert('Could not open conversation: ' + res.error); return; }
+
+  msgConvId = res.conversation_id;
+  msgMyId = dbUserId;
+
+  document.getElementById('msg-thread-avatar').textContent = (name || '?').charAt(0).toUpperCase();
+  document.getElementById('msg-thread-name').textContent = name || 'Unknown';
+  document.getElementById('msg-thread-meta').textContent = meta || '';
+
+  document.getElementById('msg-conv-list-view').style.display = 'none';
+  document.getElementById('msg-thread-view').style.display = '';
+
+  await loadMsgs(token);
+  subscribeMsgs();
+  markMsgRead(token);
+};
+
+window.closeMsgThread = function() {
+  if (msgChannel) { supabase.removeChannel(msgChannel); msgChannel = null; }
+  msgConvId = null;
+  document.getElementById('msg-thread-view').style.display = 'none';
+  document.getElementById('msg-conv-list-view').style.display = '';
+  loadMsgConvList();
+};
+
+async function loadMsgs(token) {
+  if (!msgConvId) return;
+  const msgs = await fetch(`/api/messages/conversations/${msgConvId}`, { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json());
+  renderMsgs(Array.isArray(msgs) ? msgs : []);
+}
+
+function renderMsgs(msgs) {
+  const el = document.getElementById('msg-thread');
+  if (!msgs.length) {
+    el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px;font-size:14px;">No messages yet — start the conversation!</div>';
+    return;
+  }
+  el.innerHTML = msgs.map(m => {
+    const isOwn = m.sender.id === msgMyId;
+    const time = new Date(m.created_at).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    const date = new Date(m.created_at).toLocaleDateString([], { month:'short', day:'numeric' });
+    return `<div style="display:flex;flex-direction:column;align-items:${isOwn ? 'flex-end' : 'flex-start'};">
+      ${!isOwn ? `<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:3px;padding-left:2px;">${escHtml(m.sender.name||'')}</div>` : ''}
+      <div style="max-width:72%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.5;background:${isOwn ? 'var(--accent)' : 'var(--white)'};color:${isOwn ? 'white' : 'var(--text)'};border:${isOwn ? 'none' : '1px solid var(--border)'};border-bottom-${isOwn ? 'right' : 'left'}-radius:4px;">${escHtml(m.content)}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:3px;padding:0 2px;">${date} · ${time}</div>
+    </div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function subscribeMsgs() {
+  if (msgChannel) { supabase.removeChannel(msgChannel); msgChannel = null; }
+  msgChannel = supabase.channel('msgs-t-' + msgConvId)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${msgConvId}` }, async () => {
+      const token = await getToken();
+      await loadMsgs(token);
+      markMsgRead(token);
+      updateMsgBadge(0);
+    })
+    .subscribe();
+}
+
+window.sendMsg = async function() {
+  if (!msgConvId) return;
+  const input = document.getElementById('msg-input');
+  const content = input.value.trim();
+  if (!content) return;
+  input.value = ''; input.style.height = 'auto';
+  const token = await getToken();
+  await fetch(`/api/messages/conversations/${msgConvId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ content })
+  });
+  await loadMsgs(token);
+};
+
+window.msgKeyDown = function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+};
+
+async function markMsgRead(token) {
+  if (!msgConvId) return;
+  const t = token || await getToken();
+  await fetch(`/api/messages/conversations/${msgConvId}/read`, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + t } });
+  updateMsgBadge(0);
+}
+</script>
+
+</body>
+</html>

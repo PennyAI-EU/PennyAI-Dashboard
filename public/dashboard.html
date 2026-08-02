@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Dashboard — Penny AI</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -333,6 +334,28 @@
   .call-lesson-title { font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.9); }
   .call-lesson-meta { font-size: 12px; color: rgba(255,255,255,0.45); }
 
+  /* RECORDING PLAYER */
+  .recording-player { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+  .recording-player-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .play-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; transition: background .15s; }
+  .play-btn:hover { background: var(--accent-dark); }
+  .play-btn svg { width: 16px; height: 16px; fill: #fff; }
+  .waveform-wrap { flex: 1; height: 56px; }
+  .recording-time { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+  /* TRANSCRIPT */
+  .transcript-wrap { background: var(--off); border-radius: 8px; padding: 14px 16px; max-height: 280px; overflow-y: auto; margin-bottom: 16px; }
+  .transcript-line { display: flex; gap: 8px; margin-bottom: 10px; font-size: 13px; line-height: 1.5; }
+  .transcript-line:last-child { margin-bottom: 0; }
+  .transcript-speaker { font-weight: 600; white-space: nowrap; min-width: 44px; }
+  .transcript-speaker.agent { color: var(--accent); }
+  .transcript-speaker.user { color: var(--green); }
+
+  /* UPCOMING LIST */
+  .upcoming-item { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
+  .upcoming-item:last-child { border-bottom: none; }
+  .upcoming-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
   /* MOBILE RESPONSIVENESS */
   @media (max-width: 800px) {
     .sidebar { width: 70px; padding: 24px 8px; }
@@ -400,6 +423,11 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
       <span>Profile</span>
     </div>
+    <div class="nav-item" id="nav-messages" onclick="showSection('messages')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      <span>Messages</span>
+      <span id="nav-msg-badge" style="display:none; background:#ef4444; color:white; border-radius:50%; width:16px; height:16px; font-size:10px; font-weight:700; align-items:center; justify-content:center; margin-left:auto; flex-shrink:0;"></span>
+    </div>
   </nav>
 
   <div class="nav-footer">
@@ -436,6 +464,11 @@
         <div class="card-label">Lessons Completed</div>
         <div class="card-value" id="stat-completed">—</div>
         <div class="card-sub">Total sessions finished</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Lesson Balance</div>
+        <div class="card-value" id="stat-remaining">—</div>
+        <div class="card-sub" id="stat-balance-sub">of <span id="stat-allocated">—</span> allocated</div>
       </div>
       <div class="card">
         <div class="card-label">Learning Time</div>
@@ -484,6 +517,15 @@
     </div>
 
     <div class="card" style="margin-top: 24px;">
+      <div class="card-label">Upcoming Scheduled Sessions</div>
+      <div id="upcoming-calls-list">
+        <div class="empty-state" style="padding: 24px 0;">
+          <p>No upcoming sessions scheduled.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 24px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <div class="card-label" style="margin-bottom:0;">Preferences</div>
         <button class="btn-secondary" style="padding:6px 12px; font-size:12px;" onclick="openPreferencesModal()">Edit Preferences</button>
@@ -508,11 +550,11 @@
   <!-- HISTORY SECTION -->
   <section id="section-history" class="section">
     <div class="section-header">
-      <h1>Learning History</h1>
-      <p>A detailed record of your past sessions and progress.</p>
+      <h1>Progress</h1>
+      <p>Your past sessions, recordings, transcripts and feedback.</p>
     </div>
 
-    <div class="list-card" id="history-list" style="max-height: 400px; overflow-y: auto;">
+    <div class="list-card" id="history-list">
       <div class="empty-state">
         <h3>No sessions yet</h3>
         <p>Your practice history will appear here once you complete your first lesson.</p>
@@ -558,6 +600,41 @@
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- MESSAGES SECTION -->
+  <section id="section-messages" class="section">
+
+    <!-- Contact list view -->
+    <div id="msg-conv-list-view">
+      <div class="section-header">
+        <div><h1>Messages</h1><p>Your dedicated chats with your teacher and school.</p></div>
+      </div>
+      <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;" id="msg-conv-list">
+        <div style="text-align:center; color:var(--muted); padding:40px;">Loading…</div>
+      </div>
+    </div>
+
+    <!-- Thread view -->
+    <div id="msg-thread-view" style="display:none;">
+      <button onclick="closeMsgThread()" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--muted);background:none;border:none;cursor:pointer;padding:0;margin-bottom:24px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Back to messages
+      </button>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;" id="msg-thread-avatar">—</div>
+        <div><div style="font-size:18px;font-weight:600;" id="msg-thread-name">—</div><div style="font-size:13px;color:var(--muted);" id="msg-thread-meta">—</div></div>
+      </div>
+      <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column;">
+        <div id="msg-thread" style="flex:1; overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:12px; min-height:360px; max-height:calc(100vh - 380px);"></div>
+        <div style="padding:14px 20px; border-top:1px solid var(--border); display:flex; gap:10px; align-items:flex-end;">
+          <textarea id="msg-input" rows="1" placeholder="Write a message… (Enter to send)" style="flex:1; border:1px solid var(--border); border-radius:10px; padding:10px 14px; font-family:inherit; font-size:14px; resize:none; max-height:120px; outline:none; line-height:1.5; transition:border-color 0.15s;" onkeydown="msgKeyDown(event)" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+          <button onclick="sendMsg()" style="width:40px;height:40px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s;" onmouseover="this.style.background='var(--accent-dark)'" onmouseout="this.style.background='var(--accent)'">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
   </section>
 
 </main>
@@ -658,16 +735,15 @@ const lessonTitle = document.getElementById('callLessonTitle');
 const lessonMeta = document.getElementById('callLessonMeta');
 
 window.showSection = function(sectionId) {
-  // Update nav UI
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.classList.remove('active');
-  });
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
   const activeItem = document.getElementById('nav-' + sectionId);
   if (activeItem) activeItem.classList.add('active');
-
-  // Switch sections
   document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
   document.getElementById('section-' + sectionId).classList.add('active');
+  if (sectionId === 'messages') {
+    if (msgConvId) markMsgRead();
+    else initMessages();
+  }
 }
 
 window.closeModal = function(id) {
@@ -744,14 +820,13 @@ window.savePreferences = async function() {
 
 async function getDashboardData(userId, userPhone, userEmail, authMeta) {
   try {
-    // 1. Core Profile
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select(`*`)
-      .eq('id', userId)
-      .maybeSingle();
-
-    if (userError) throw userError;
+    // 1. Core Profile — use /api/me which falls back to phone if auth UUID doesn't match users.id
+    const { data: { session } } = await supabase.auth.getSession();
+    let user = null;
+    try {
+      const meRes = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + session.access_token } });
+      if (meRes.ok) user = await meRes.json();
+    } catch (_) {}
 
     // Default structure using auth data
     const result = {
@@ -761,6 +836,7 @@ async function getDashboardData(userId, userPhone, userEmail, authMeta) {
         bio: user?.personal_details || 'No profile details yet.',
         goal: user?.goal || 'No goal set.',
         englishLevel: user?.english_level || 'Pending...',
+        allocatedLessons: user?.allocated_lesson_count || 0,
         preferences: {
           frequency: user?.lesson_frequency,
           duration: user?.lesson_duration,
@@ -782,11 +858,12 @@ async function getDashboardData(userId, userPhone, userEmail, authMeta) {
         nextCallTime: null,
         callStatus: 'No pending calls'
       },
-      history: []
+      history: [],
+      upcomingCalls: []
     };
 
     if (!user) {
-      console.warn("No user record found in 'users' table for ID:", userId);
+      console.warn("No user record found for this session");
       return result;
     }
 
@@ -801,42 +878,31 @@ async function getDashboardData(userId, userPhone, userEmail, authMeta) {
       result.lessonProgress.nextLessonDetails = lessonData;
     }
 
-    // 3. Call History
-    const { data: callHistory, error: historyError } = await supabase
-      .from('lesson_attempts')
-      .select(`
-        attempt_time, 
-        score, 
-        completion_percentage, 
-        call_summary, 
-        grading_rationale, 
-        student_feedback, 
-        lessons ( title )
-      `)
-      .eq('user_id', userId)
-      .order('attempt_time', { ascending: false });
-
-    if (!historyError) {
-      result.history = callHistory;
-      result.lessonProgress.completedCount = callHistory.filter(c => (c.completion_percentage || 0) >= 60).length;
-    }
-
-    // 4. Scheduling
-    const { data: { session } } = await supabase.auth.getSession();
+    // 3. Call History (merged with call_logs for recording/transcript)
     if (session) {
       try {
-        const nextCallRes = await fetch('/api/next-call', {
-          headers: { 'Authorization': 'Bearer ' + session.access_token }
-        });
+        const [historyRes, upcomingRes, nextCallRes] = await Promise.all([
+          fetch('/api/history', { headers: { 'Authorization': 'Bearer ' + session.access_token } }),
+          fetch('/api/upcoming-calls', { headers: { 'Authorization': 'Bearer ' + session.access_token } }),
+          fetch('/api/next-call', { headers: { 'Authorization': 'Bearer ' + session.access_token } }),
+        ]);
+
+        const callHistory = await historyRes.json();
+        if (Array.isArray(callHistory)) {
+          result.history = callHistory;
+          result.lessonProgress.completedCount = callHistory.filter(c => (c.completion_percentage || 0) >= 60).length;
+        }
+
+        const upcomingCalls = await upcomingRes.json();
+        result.upcomingCalls = Array.isArray(upcomingCalls) ? upcomingCalls : [];
+
         const nextCall = await nextCallRes.json();
-        console.log("[DEBUG] /api/next-call response:", nextCall);
-        
         if (nextCall && nextCall.scheduled_time) {
           result.scheduling.nextCallTime = nextCall.scheduled_time;
           result.scheduling.callStatus = nextCall.call_status;
         }
       } catch (err) {
-        console.error("[DEBUG] Error fetching from /api/next-call:", err);
+        console.error("[DEBUG] Error fetching history/upcoming:", err);
       }
     }
 
@@ -860,6 +926,10 @@ function updateUI(data) {
   // Overview Stats
   document.getElementById('stat-level').textContent = data.profile.englishLevel || '—';
   document.getElementById('stat-completed').textContent = data.lessonProgress.completedCount;
+  const allocated = data.profile.allocatedLessons || 0;
+  const remaining = Math.max(0, allocated - data.lessonProgress.completedCount);
+  document.getElementById('stat-remaining').textContent = remaining;
+  document.getElementById('stat-allocated').textContent = allocated;
   document.getElementById('stat-total-time').innerHTML = `${data.timeTracking.total || 0} <small style="font-size: 14px; font-weight: 400; color: var(--muted)">total mins</small>`;
   
   const timeUsed = data.timeTracking.used || 0;
@@ -885,6 +955,27 @@ function updateUI(data) {
   document.getElementById('pref-duration').textContent = (data.profile.preferences.duration || '—') + ' mins';
   document.getElementById('pref-days').textContent = Array.isArray(data.profile.preferences.days) ? data.profile.preferences.days.join(', ') : (data.profile.preferences.days || 'Not set');
 
+  // Upcoming calls
+  const upcomingEl = document.getElementById('upcoming-calls-list');
+  if (data.upcomingCalls && data.upcomingCalls.length > 0) {
+    upcomingEl.innerHTML = data.upcomingCalls.map(c => {
+      const d = new Date(c.scheduled_time);
+      const dateStr = d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+      const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return `
+        <div class="upcoming-item">
+          <div class="upcoming-dot"></div>
+          <div style="flex:1;">
+            <div style="font-size:14px; font-weight:600;">${dateStr} at ${timeStr}</div>
+            <div style="font-size:12px; color:var(--muted);">AI English Lesson</div>
+          </div>
+          <span style="font-size:12px; padding:4px 10px; background:var(--accent-light); color:var(--accent); border-radius:20px; font-weight:600;">Scheduled</span>
+        </div>`;
+    }).join('');
+  } else {
+    upcomingEl.innerHTML = '<div style="padding:20px; color:var(--muted); font-size:14px;">No upcoming sessions scheduled.</div>';
+  }
+
   // History
   const historyContainer = document.getElementById('history-list');
   if (data.history && data.history.length > 0) {
@@ -893,8 +984,11 @@ function updateUI(data) {
       const score = item.score || 0;
       const scoreClass = score >= 80 ? 'score-high' : (score >= 60 ? 'score-mid' : 'score-low');
       const detailsId = `hist-details-${idx}`;
+      const hasRecording = !!item.recording_url;
+      const hasTranscript = !!item.transcript;
+      const hasTeacherFeedback = !!item.teacher_feedback;
       return `
-        <div class="list-item" style="flex-direction:column; align-items:stretch; cursor:pointer;" onclick="document.getElementById('${detailsId}').style.display = document.getElementById('${detailsId}').style.display === 'none' ? 'block' : 'none'">
+        <div class="list-item" style="flex-direction:column; align-items:stretch; cursor:pointer;" onclick="toggleHistoryItem('${detailsId}')">
           <div style="display:flex; align-items:center; gap:20px;">
             <div class="item-date">
               <div class="day">${d.getDate()}</div>
@@ -904,16 +998,59 @@ function updateUI(data) {
               <div class="item-title">${item.lessons?.title || 'Lesson Attempt'}</div>
               <div class="item-meta">${item.call_summary || 'No summary available.'}</div>
             </div>
-            <div class="item-score ${scoreClass}">${score}%</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              ${hasRecording ? '<svg title="Recording available" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16"/></svg>' : ''}
+              <div class="item-score ${scoreClass}">${score}%</div>
+            </div>
           </div>
-          
-          <div id="${detailsId}" style="display:none; margin-top:16px; padding:16px; background:var(--off); border-radius:8px; font-size:13px; color:var(--text);">
-            <div style="margin-bottom:8px;"><strong>Feedback:</strong><br>${item.student_feedback || 'No feedback provided.'}</div>
-            <div><strong>Grading Rationale:</strong><br>${item.grading_rationale || 'N/A'}</div>
+
+          <div id="${detailsId}" style="display:none; margin-top:16px; padding:16px 0 0; font-size:13px;">
+            ${hasRecording ? `
+            <div style="margin-bottom:12px;">
+              <strong style="display:block; margin-bottom:8px;">Recording</strong>
+              <div class="recording-player">
+                <div class="recording-player-top">
+                  <button class="play-btn" id="play-btn-h${idx}" onclick="event.stopPropagation(); toggleWavePlay('h${idx}', '${item.recording_url}')">
+                    <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+                  </button>
+                  <div class="waveform-wrap" id="waveform-h${idx}"></div>
+                  <span class="recording-time" id="recording-time-h${idx}">0:00</span>
+                </div>
+              </div>
+            </div>` : ''}
+            ${hasTranscript ? `
+            <div style="margin-bottom:12px;">
+              <strong style="display:block; margin-bottom:8px;">Transcript</strong>
+              <div class="transcript-wrap">${formatTranscript(item.transcript)}</div>
+            </div>` : ''}
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+              <div>
+                <strong style="display:block; margin-bottom:4px; color:var(--accent);">AI Feedback</strong>
+                <div style="color:var(--text);">${item.student_feedback || 'No feedback provided.'}</div>
+              </div>
+              ${hasTeacherFeedback ? `
+              <div>
+                <strong style="display:block; margin-bottom:4px; color:var(--green);">Teacher Feedback</strong>
+                <div style="color:var(--text);">${item.teacher_feedback}</div>
+              </div>` : ''}
+            </div>
+            <details style="cursor:pointer;">
+              <summary style="font-size:12px; color:var(--muted); list-style:none; display:flex; align-items:center; gap:4px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                Grading details
+              </summary>
+              <div style="margin-top:8px; font-size:12px; color:var(--muted); line-height:1.6;">${
+                typeof item.grading_rationale === 'string' && item.grading_rationale.startsWith('{')
+                  ? (() => { try { const g = JSON.parse(item.grading_rationale); return (g.strengths ? '<strong>Strengths:</strong> ' + g.strengths + '<br>' : '') + (g.areas_for_improvement ? '<strong>Areas to improve:</strong> ' + g.areas_for_improvement : ''); } catch(e) { return item.grading_rationale; } })()
+                  : (item.grading_rationale || 'N/A')
+              }</div>
+            </details>
           </div>
         </div>
       `;
     }).join('');
+  } else {
+    historyContainer.innerHTML = '<div class="empty-state"><h3>No sessions yet</h3><p>Your lesson history will appear here after your first session.</p></div>';
   }
 
   // Profile
@@ -922,6 +1059,59 @@ function updateUI(data) {
   document.getElementById('profile-level').textContent = data.profile.englishLevel || '—';
   document.getElementById('profile-bio').textContent = data.profile.bio || 'No details provided.';
   document.getElementById('profile-goal').textContent = data.profile.goal || 'No goal set yet.';
+}
+
+// HISTORY HELPERS
+window.toggleHistoryItem = function(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function formatTranscript(raw) {
+  if (!raw) return '';
+  return raw.split(/\\n|\n/).filter(l => l.trim()).map(line => {
+    const m = line.match(/^(Agent|User):\s*(.*)/i);
+    if (!m) return `<div class="transcript-line"><span>${line}</span></div>`;
+    const role = m[1].toLowerCase();
+    return `<div class="transcript-line">
+      <span class="transcript-speaker ${role}">${m[1]}:</span>
+      <span>${m[2]}</span>
+    </div>`;
+  }).join('');
+}
+
+const wavesurferInstances = {};
+
+window.toggleWavePlay = function(id, url) {
+  if (!wavesurferInstances[id]) {
+    const ws = WaveSurfer.create({
+      container: document.getElementById('waveform-' + id),
+      waveColor: '#bfdbfe', progressColor: '#2563eb',
+      height: 56, barWidth: 2, barGap: 1, barRadius: 2, url,
+    });
+    wavesurferInstances[id] = ws;
+    ws.on('timeupdate', t => {
+      const m = Math.floor(t / 60), s = Math.floor(t % 60).toString().padStart(2, '0');
+      const el = document.getElementById('recording-time-' + id);
+      if (el) el.textContent = `${m}:${s}`;
+    });
+    ws.on('finish', () => updatePlayBtn(id, false));
+    ws.on('pause', () => updatePlayBtn(id, false));
+    ws.on('play', () => updatePlayBtn(id, true));
+    ws.play();
+  } else {
+    const ws = wavesurferInstances[id];
+    ws.isPlaying() ? ws.pause() : ws.play();
+  }
+};
+
+function updatePlayBtn(id, playing) {
+  const btn = document.getElementById('play-btn-' + id);
+  if (!btn) return;
+  btn.innerHTML = playing
+    ? '<svg viewBox="0 0 24 24" fill="#fff" width="16" height="16"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="#fff" width="16" height="16"><polygon points="5,3 19,12 5,21"/></svg>';
 }
 
 // CALL LOGIC
@@ -1100,10 +1290,164 @@ endBtn.addEventListener('click', () => {
       window.location.href = '/signin.html';
     });
 
+    // Load unread badge on startup
+    const { unread } = await fetch('/api/messages/unread', { headers: { 'Authorization': 'Bearer ' + session.access_token } }).then(r => r.json()).catch(() => ({ unread: 0 }));
+    updateMsgBadge(unread);
+
   } catch (e) {
     console.error("Initialization Error:", e);
   }
 })();
+
+// ─── MESSAGING ───────────────────────────────────────────────────────────────
+let msgConvId = null;
+let msgChannel = null;
+let msgMyId = null;
+
+function updateMsgBadge(count) {
+  const badge = document.getElementById('nav-msg-badge');
+  if (!badge) return;
+  if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.style.display = 'flex'; }
+  else { badge.style.display = 'none'; }
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+async function initMessages() {
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session.access_token;
+
+  // Use DB user id (may differ from auth UUID for legacy rows)
+  const me = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json()).catch(() => null);
+  msgMyId = me?.id || session.user.id;
+
+  const [contacts, convs] = await Promise.all([
+    fetch('/api/messages/contacts', { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json()).catch(() => []),
+    fetch('/api/messages/conversations', { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json()).catch(() => []),
+  ]);
+
+  const el = document.getElementById('msg-conv-list');
+  if (!Array.isArray(contacts) || !contacts.length) {
+    el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px;font-size:14px;">No contacts yet. You\'ll be able to message your teacher once one is assigned.</div>';
+    return;
+  }
+
+  const convMap = {};
+  (Array.isArray(convs) ? convs : []).forEach(c => { convMap[c.other_participant.id] = c; });
+
+  el.innerHTML = contacts.map(contact => {
+    const conv = convMap[contact.id];
+    const lastMsg = conv?.last_message;
+    const unread = conv?.unread_count || 0;
+    const time = lastMsg ? new Date(lastMsg.created_at).toLocaleDateString([], { month:'short', day:'numeric' }) : '';
+    const preview = lastMsg ? lastMsg.content.slice(0,60) + (lastMsg.content.length > 60 ? '…' : '') : 'No messages yet — tap to start';
+    const initials = (contact.name || '?').charAt(0).toUpperCase();
+    const roleLabel = contact.role === 'teacher' ? 'Teacher' : (contact.role === 'school_admin' || contact.role === 'system_admin') ? 'School Admin' : contact.role;
+    return `<div style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;" onclick="openMsgThread('${contact.id}','${escHtml(contact.name||'')}','${escHtml(roleLabel)}')" onmouseover="this.style.background='var(--off)'" onmouseout="this.style.background=''">
+      <div style="width:40px;height:40px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;">${initials}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:600;margin-bottom:1px;">${escHtml(contact.name || 'Unknown')}</div>
+        <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:3px;">${escHtml(roleLabel)}</div>
+        <div style="font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(preview)}</div>
+      </div>
+      <div style="flex-shrink:0;text-align:right;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${time}</div>
+        ${unread > 0 ? `<div style="background:var(--accent);color:white;border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:auto;">${unread}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.openMsgThread = async function(targetUserId, name, meta) {
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session.access_token;
+
+  const res = await fetch(`/api/messages/dm/${targetUserId}`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json());
+  if (res.error) { alert('Could not open conversation: ' + res.error); return; }
+
+  msgConvId = res.conversation_id;
+
+  document.getElementById('msg-thread-avatar').textContent = (name || '?').charAt(0).toUpperCase();
+  document.getElementById('msg-thread-name').textContent = name || 'Unknown';
+  document.getElementById('msg-thread-meta').textContent = meta || '';
+  document.getElementById('msg-conv-list-view').style.display = 'none';
+  document.getElementById('msg-thread-view').style.display = '';
+
+  await loadMsgs(token);
+  subscribeMsgs();
+  markMsgRead(token);
+};
+
+window.closeMsgThread = function() {
+  if (msgChannel) { supabase.removeChannel(msgChannel); msgChannel = null; }
+  msgConvId = null;
+  document.getElementById('msg-thread-view').style.display = 'none';
+  document.getElementById('msg-conv-list-view').style.display = '';
+  initMessages();
+};
+
+async function loadMsgs(token) {
+  if (!msgConvId) return;
+  const t = token || (await supabase.auth.getSession()).data.session?.access_token;
+  const msgs = await fetch(`/api/messages/conversations/${msgConvId}`, { headers: { 'Authorization': 'Bearer ' + t } }).then(r => r.json());
+  const el = document.getElementById('msg-thread');
+  if (!Array.isArray(msgs) || !msgs.length) {
+    el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px;font-size:14px;">No messages yet — say hello!</div>';
+    el.scrollTop = el.scrollHeight;
+    return;
+  }
+  el.innerHTML = msgs.map(m => {
+    const isOwn = m.sender.id === msgMyId;
+    const time = new Date(m.created_at).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    const date = new Date(m.created_at).toLocaleDateString([], { month:'short', day:'numeric' });
+    return `<div style="display:flex;flex-direction:column;align-items:${isOwn ? 'flex-end' : 'flex-start'};">
+      ${!isOwn ? `<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:3px;padding-left:2px;">${escHtml(m.sender.name||'')}</div>` : ''}
+      <div style="max-width:72%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.5;background:${isOwn ? 'var(--accent)' : 'var(--white)'};color:${isOwn ? 'white' : 'var(--text)'};border:${isOwn ? 'none' : '1px solid var(--border)'};border-bottom-${isOwn ? 'right' : 'left'}-radius:4px;">${escHtml(m.content)}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:3px;padding:0 2px;">${date} · ${time}</div>
+    </div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function subscribeMsgs() {
+  if (msgChannel) { supabase.removeChannel(msgChannel); msgChannel = null; }
+  msgChannel = supabase.channel('msgs-d-' + msgConvId)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${msgConvId}` }, async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      await loadMsgs(session.access_token);
+      markMsgRead(session.access_token);
+      updateMsgBadge(0);
+    })
+    .subscribe();
+}
+
+window.sendMsg = async function() {
+  if (!msgConvId) return;
+  const input = document.getElementById('msg-input');
+  const content = input.value.trim();
+  if (!content) return;
+  input.value = ''; input.style.height = 'auto';
+  const { data: { session } } = await supabase.auth.getSession();
+  await fetch(`/api/messages/conversations/${msgConvId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+    body: JSON.stringify({ content })
+  });
+  await loadMsgs(session.access_token);
+};
+
+window.msgKeyDown = function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+};
+
+async function markMsgRead(token) {
+  if (!msgConvId) return;
+  const t = token || (await supabase.auth.getSession()).data.session?.access_token;
+  await fetch(`/api/messages/conversations/${msgConvId}/read`, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + t } });
+  updateMsgBadge(0);
+}
 </script>
 
 </body>
