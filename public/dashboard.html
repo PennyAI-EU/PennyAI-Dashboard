@@ -1009,7 +1009,7 @@ function updateUI(data) {
             </div>
           </div>
 
-          <div id="${detailsId}" style="display:none; margin-top:16px; padding:16px 0 0; font-size:13px;">
+          <div id="${detailsId}" onclick="event.stopPropagation()" style="display:none; margin-top:16px; padding:16px 0 0; font-size:13px;">
             ${hasRecording ? `
             <div style="margin-bottom:12px;">
               <strong style="display:block; margin-bottom:8px;">Recording</strong>
