@@ -511,18 +511,39 @@ app.get("/api/upcoming-calls", async (req, res) => {
   res.json(data || []);
 });
 
+// lesson_attempts.lesson_id stores the human-readable lessons.lesson_id (e.g. "4.02"),
+// not the lessons.id UUID, and the FK constraint between them was dropped — so PostgREST
+// can no longer resolve an embedded `lessons(title)` select (it 400s). Look titles up manually.
+async function attachLessonTitles(attempts) {
+  const lessonIds = [...new Set((attempts || []).filter(a => a.lesson_id).map(a => a.lesson_id))];
+  let titleMap = {};
+  if (lessonIds.length > 0) {
+    const { data: lessons } = await supabase
+      .from("lessons")
+      .select("lesson_id, title")
+      .in("lesson_id", lessonIds);
+    if (lessons) lessons.forEach(l => { titleMap[l.lesson_id] = l.title; });
+  }
+  return (attempts || []).map(a => ({
+    ...a,
+    lessons: { title: titleMap[a.lesson_id] || null },
+  }));
+}
+
 app.get("/api/history", async (req, res) => {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
   const { data: { user }, error: userError } = await supabase.auth.getUser(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
 
-  const { data: attempts, error: attError } = await supabase
+  const { data: rawAttempts, error: attError } = await supabase
     .from("lesson_attempts")
-    .select("*, lessons(title)")
+    .select("*")
     .eq("user_id", user.id)
     .order("attempt_time", { ascending: false });
   if (attError) return res.status(500).json({ error: attError.message });
+
+  const attempts = await attachLessonTitles(rawAttempts);
 
   const callIds = (attempts || []).filter(a => a.call_id).map(a => a.call_id);
   let callLogsMap = {};
@@ -536,8 +557,8 @@ app.get("/api/history", async (req, res) => {
 
   const merged = (attempts || []).map(a => ({
     ...a,
-    recording_url: callLogsMap[a.call_id]?.["Recording Link"] || null,
-    transcript:    callLogsMap[a.call_id]?.["Transcript"] || null,
+    recording_url: a.recording_url || callLogsMap[a.call_id]?.["Recording Link"] || null,
+    transcript:    a.transcript || callLogsMap[a.call_id]?.["Transcript"] || null,
     duration_sec:  callLogsMap[a.call_id]?.["Duration (Sec)"] || null,
   }));
   res.json(merged);
@@ -596,12 +617,14 @@ app.get("/api/teacher/students/:id/history", requireTeacher, async (req, res) =>
   if (sErr || !student || student.teacher_id !== req.teacherDbId) {
     return res.status(403).json({ error: "Not your student" });
   }
-  const { data: attempts, error } = await supabase
+  const { data: rawAttempts, error } = await supabase
     .from("lesson_attempts")
-    .select("*, lessons(title)")
+    .select("*")
     .eq("user_id", id)
     .order("attempt_time", { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
+
+  const attempts = await attachLessonTitles(rawAttempts);
 
   const callIds = (attempts || []).filter(a => a.call_id).map(a => a.call_id);
   let callLogsMap = {};
@@ -611,8 +634,8 @@ app.get("/api/teacher/students/:id/history", requireTeacher, async (req, res) =>
   }
   res.json((attempts || []).map(a => ({
     ...a,
-    recording_url: callLogsMap[a.call_id]?.["Recording Link"] || null,
-    transcript:    callLogsMap[a.call_id]?.["Transcript"] || null,
+    recording_url: a.recording_url || callLogsMap[a.call_id]?.["Recording Link"] || null,
+    transcript:    a.transcript || callLogsMap[a.call_id]?.["Transcript"] || null,
   })));
 });
 
@@ -782,6 +805,12 @@ app.delete("/api/admin/students/:id", requireAdmin, async (req, res) => {
   const { id } = req.params;
   const { error } = await supabase.from("users").delete().eq("id", id);
   if (error) return res.status(500).json({ error: error.message });
+  try {
+    const { error: authError } = await supabase.auth.admin.deleteUser(id);
+    if (authError) console.error("Failed to delete Auth account for student", id, authError);
+  } catch (authError) {
+    console.error("Failed to delete Auth account for student", id, authError);
+  }
   res.json({ success: true });
 });
 
@@ -827,6 +856,12 @@ app.delete("/api/admin/teachers/:id", requireAdmin, async (req, res) => {
   await supabase.from("users").update({ teacher_id: null }).eq("teacher_id", id);
   const { error } = await supabase.from("users").delete().eq("id", id);
   if (error) return res.status(500).json({ error: error.message });
+  try {
+    const { error: authError } = await supabase.auth.admin.deleteUser(id);
+    if (authError) console.error("Failed to delete Auth account for teacher", id, authError);
+  } catch (authError) {
+    console.error("Failed to delete Auth account for teacher", id, authError);
+  }
   res.json({ success: true });
 });
 
@@ -969,19 +1004,19 @@ app.get("/api/admin/students/:id/attempts", requireAdmin, async (req, res) => {
   const { data, error } = await supabase
     .from("lesson_attempts")
     .select(`
+      lesson_id,
       attempt_time,
       score,
       completion_percentage,
       call_summary,
       student_feedback,
-      grading_rationale,
-      lessons ( title )
+      grading_rationale
     `)
     .eq("user_id", id)
     .order("attempt_time", { ascending: false });
 
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  res.json(await attachLessonTitles(data));
 });
 
 app.post("/api/admin/schedule-call", requireAdmin, async (req, res) => {
