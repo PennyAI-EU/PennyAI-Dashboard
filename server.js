@@ -22,6 +22,32 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
   },
 });
 
+// supabase.auth.getUser(token) always makes a network round trip to the Auth
+// server (~500-600ms observed) to validate the JWT, and nearly every API route
+// on the dashboard's load path calls it once — that latency was compounding
+// into several seconds of load time. This project signs JWTs with an asymmetric
+// key (ES256), so getClaims() can verify the same token locally via WebCrypto
+// against a cached JWKS instead, with no per-request network call after the
+// first. Returns the same { data: { user }, error } shape as getUser() so
+// every existing call site works unchanged.
+async function getUserFromToken(token) {
+  const { data, error } = await supabase.auth.getClaims(token);
+  if (error || !data) return { data: { user: null }, error };
+  const c = data.claims;
+  return {
+    data: {
+      user: {
+        id: c.sub,
+        email: c.email,
+        phone: c.phone,
+        user_metadata: c.user_metadata || {},
+        app_metadata: c.app_metadata || {},
+      },
+    },
+    error: null,
+  };
+}
+
 const DEFAULT_PASSWORD = 'Penny2026!';
 
 // Normalize phone to E164 (+digits). If already has +, keep it; otherwise prepend +.
@@ -236,7 +262,7 @@ app.post("/api/check-onboarding", async (req, res) => {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) {
     console.log("[check-onboarding] PENDING — invalid/expired token:", userError?.message);
     return res.status(401).json({ error: "Invalid token" });
@@ -288,7 +314,7 @@ app.get("/api/me", async (req, res) => {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
 
   let { data, error } = await supabase.from("users").select("*").eq("id", user.id).maybeSingle();
@@ -353,7 +379,7 @@ app.post("/create-call", async (req, res) => {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
 
   const phone = user.user_metadata?.phone;
@@ -470,7 +496,7 @@ app.get("/api/next-call", async (req, res) => {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
 
   const phone = user.user_metadata?.phone || user.phone;
@@ -497,7 +523,7 @@ app.get("/api/next-call", async (req, res) => {
 app.get("/api/upcoming-calls", async (req, res) => {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
   const phone = user.user_metadata?.phone || user.phone;
   if (!phone) return res.status(400).json({ error: "Phone not found" });
@@ -533,7 +559,7 @@ async function attachLessonTitles(attempts) {
 app.get("/api/history", async (req, res) => {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
 
   const { data: rawAttempts, error: attError } = await supabase
@@ -568,7 +594,7 @@ app.get("/api/history", async (req, res) => {
 async function requireAuth(req, res, next) {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
   const phone = user.user_metadata?.phone || user.phone;
   if (!phone) return res.status(401).json({ error: "No phone on user" });
@@ -581,7 +607,7 @@ async function requireAuth(req, res, next) {
 async function requireTeacher(req, res, next) {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
   const phone = user.user_metadata?.phone || user.phone;
   if (!phone) return res.status(401).json({ error: "No phone on user" });
@@ -673,7 +699,7 @@ async function requireAdmin(req, res, next) {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
 
   const phone = user.user_metadata?.phone || user.phone;
