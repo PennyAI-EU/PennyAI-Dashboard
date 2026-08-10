@@ -219,7 +219,7 @@
 
   .item-content { flex: 1; }
   .item-title { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
-  .item-lesson-id { color: var(--accent); margin-right: 8px; }
+  .item-lesson-id { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); margin-bottom: 4px; }
   .item-meta { font-size: 13px; color: var(--muted); }
 
   .item-score {
@@ -998,7 +998,8 @@ function updateUI(data) {
         <div class="list-item" style="flex-direction:column; align-items:stretch; cursor:pointer;" onclick="toggleHistoryItem('${detailsId}')">
           <div style="display:flex; align-items:center; gap:20px;">
             <div class="item-content">
-              <div class="item-title">${item.lesson_id ? `<span class="item-lesson-id">${item.lesson_id}</span>` : ''}${item.lessons?.title || 'Lesson Attempt'}</div>
+              ${item.lesson_id ? `<div class="item-lesson-id">Lesson ${item.lesson_id}</div>` : ''}
+              <div class="item-title">${item.lessons?.title || 'Lesson Attempt'}</div>
               <div class="item-meta">${item.call_summary || 'No summary available.'}</div>
             </div>
             <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0;">

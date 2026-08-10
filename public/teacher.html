@@ -121,7 +121,7 @@
   .history-date-small { font-size: 11px; color: var(--muted); white-space: nowrap; }
   .history-info { flex: 1; }
   .history-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
-  .history-lesson-id { color: var(--accent); margin-right: 8px; }
+  .history-lesson-id { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); margin-bottom: 4px; }
   .history-summary { font-size: 13px; color: var(--muted); }
   .score-chip { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
   .score-high { background: var(--green-light); color: var(--green); }
@@ -470,7 +470,8 @@ function renderHistory(history, token) {
         <div class="history-row" onclick="toggleDetail('${detailId}')">
           <div class="history-row-header">
             <div class="history-info">
-              <div class="history-title">${item.lesson_id ? `<span class="history-lesson-id">${item.lesson_id}</span>` : ''}${item.lessons?.title || 'Lesson Attempt'}</div>
+              ${item.lesson_id ? `<div class="history-lesson-id">Lesson ${item.lesson_id}</div>` : ''}
+              <div class="history-title">${item.lessons?.title || 'Lesson Attempt'}</div>
               <div class="history-summary">${item.call_summary || 'No summary.'}</div>
             </div>
             <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0;">
