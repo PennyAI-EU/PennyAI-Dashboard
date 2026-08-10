@@ -773,7 +773,12 @@ window.saveProfile = async function() {
   }).eq('id', session.user.id);
 
   if(error) { alert("Error saving profile: " + error.message); return; }
-  
+
+  // Keep Auth user_metadata.name in sync — updateUser() updates the caller's own metadata,
+  // no service role needed. Non-fatal if it fails: the users-table save (source of truth) already succeeded.
+  const { error: authError } = await supabase.auth.updateUser({ data: { name: name } });
+  if (authError) console.error('Failed to sync name to Auth metadata:', authError.message);
+
   // Update local state & UI
   dashboardData.profile.name = name;
   dashboardData.profile.bio = bio;
@@ -1266,23 +1271,30 @@ endBtn.addEventListener('click', () => {
       return;
     }
 
-    // Onboarding check
-    const onboardRes = await fetch('/api/check-onboarding', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + session.access_token },
-    });
-    const { status } = await onboardRes.json();
-    if (status !== 'complete') {
-      window.location.href = '/signin.html';
-      return;
-    }
-
     const userId = session.user.id;
     const userPhone = session.user.user_metadata?.phone;
     const userEmail = session.user.email;
     const authMeta = session.user.user_metadata || {};
 
-    dashboardData = await getDashboardData(userId, userPhone, userEmail, authMeta);
+    // Onboarding check runs alongside the dashboard data fetch instead of blocking it first —
+    // both need their own getUser() + DB round trip, so doing them serially just adds a redundant
+    // wait on every load (signin.html already checked this once right before redirecting here).
+    const onboardPromise = fetch('/api/check-onboarding', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + session.access_token },
+    }).then(r => r.json());
+
+    const [{ status }, dashData] = await Promise.all([
+      onboardPromise,
+      getDashboardData(userId, userPhone, userEmail, authMeta),
+    ]);
+
+    if (status !== 'complete') {
+      window.location.href = '/signin.html';
+      return;
+    }
+
+    dashboardData = dashData;
     updateUI(dashboardData);
 
     document.getElementById('signout-btn').addEventListener('click', async () => {
