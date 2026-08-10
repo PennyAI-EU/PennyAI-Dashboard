@@ -507,7 +507,11 @@ function renderHistory(history, token) {
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
             <div class="feedback-block ai">
               <div class="feedback-label ai">AI Feedback</div>
-              <div class="feedback-text">${item.student_feedback || 'No AI feedback available.'}</div>
+              <div class="feedback-text">${
+                typeof item.grading_rationale === 'string' && item.grading_rationale.startsWith('{')
+                  ? (() => { try { const g = JSON.parse(item.grading_rationale); return (g.strengths ? '<strong>Strengths:</strong> ' + g.strengths + '<br><br>' : '') + (g.areas_for_improvement ? '<strong>Areas to improve:</strong> ' + g.areas_for_improvement : ''); } catch(e) { return item.grading_rationale; } })()
+                  : (item.grading_rationale || 'No AI feedback available.')
+              }</div>
             </div>
             <div class="feedback-block teacher">
               <div class="feedback-label teacher">Teacher Feedback</div>
@@ -524,18 +528,6 @@ function renderHistory(history, token) {
               </button>
             </div>
           </div>
-
-          <details style="cursor:pointer;">
-            <summary style="font-size:12px; color:var(--muted); list-style:none; display:flex; align-items:center; gap:4px; user-select:none;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-              Grading details
-            </summary>
-            <div style="margin-top:8px; font-size:12px; color:var(--muted); line-height:1.6; padding:12px; background:var(--off); border-radius:8px;">${
-              typeof item.grading_rationale === 'string' && item.grading_rationale.startsWith('{')
-                ? (() => { try { const g = JSON.parse(item.grading_rationale); return (g.strengths ? '<strong>Strengths:</strong> ' + g.strengths + '<br><br>' : '') + (g.areas_for_improvement ? '<strong>Areas to improve:</strong> ' + g.areas_for_improvement : ''); } catch(e) { return item.grading_rationale; } })()
-                : (item.grading_rationale || 'N/A')
-            }</div>
-          </details>
 
         </div>
       </div>

@@ -1102,8 +1102,11 @@
               <span class="badge ${a.score >= 80 ? 'called' : 'warm'}">${a.score || 0}% Score</span>
             </div>
             <div style="margin-bottom:4px; color:var(--muted);">Date: ${new Date(a.attempt_time).toLocaleString()}</div>
-            <div style="margin-bottom:4px;"><strong>Feedback:</strong> ${a.student_feedback || 'N/A'}</div>
-            <div><strong>Rationale:</strong> ${a.grading_rationale || 'N/A'}</div>
+            <div><strong>AI Feedback:</strong> ${
+              typeof a.grading_rationale === 'string' && a.grading_rationale.startsWith('{')
+                ? (() => { try { const g = JSON.parse(a.grading_rationale); return (g.strengths ? '<strong>Strengths:</strong> ' + g.strengths + '<br>' : '') + (g.areas_for_improvement ? '<strong>Areas to improve:</strong> ' + g.areas_for_improvement : ''); } catch(e) { return a.grading_rationale; } })()
+                : (a.grading_rationale || 'N/A')
+            }</div>
           </div>
         `).join('');
       }
