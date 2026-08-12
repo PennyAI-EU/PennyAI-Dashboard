@@ -57,6 +57,31 @@ function toE164(phone) {
   return '+' + digits;
 }
 
+// Admin-created students skip the phone onboarding call that normally collects
+// self_rating/avg_self_rating, so those stay null — which fails the "Is the profile
+// 100% complete" gate in N8N and routes them into the incomplete-profile flow on their
+// first call, even though the admin already fully configured their level. Per Max: once
+// a teacher/admin has decided a student's level, the individual sub-scores don't need to
+// mean anything — just derive a placeholder avg_self_rating from the level (even split
+// across a 0-10 scale, 6 buckets) and set every self_rating sub-field to that same value.
+// Level codes can be conversational (e.g. "BC1" = B1 delivered conversationally) — the
+// inserted "C" doesn't change the underlying score, so it's stripped before mapping.
+const LEVEL_SCORE_MIDPOINT = { A1: 0.83, A2: 2.5, B1: 4.17, B2: 5.83, C1: 7.5, C2: 9.17 };
+function deriveSelfRatingFromLevel(englishLevel) {
+  if (!englishLevel) return null;
+  const base = englishLevel.length === 3 ? englishLevel[0] + englishLevel[2] : englishLevel;
+  const score = LEVEL_SCORE_MIDPOINT[base];
+  if (score === undefined) return null;
+  return {
+    avg_self_rating: score,
+    self_rating: {
+      grammar: score, speaking: score, listening: score,
+      vocabulary: score, pronunciation: score,
+      reading_writing: score, overall_comfort: score,
+    },
+  };
+}
+
 const mailer = nodemailer.createTransport({
   host:   process.env.SMTP_HOST,
   port:   parseInt(process.env.SMTP_PORT || '587'),
@@ -72,8 +97,7 @@ async function sendWelcomeEmail(email, name, password) {
   console.log(`[email] attempting to send welcome email to ${email}`);
   console.log(`[email] SMTP config — host:${process.env.SMTP_HOST} port:${process.env.SMTP_PORT} secure:${process.env.SMTP_SECURE} user:${process.env.SMTP_USER} from:${process.env.SMTP_FROM}`);
   if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
-    console.warn('[email] SMTP_HOST or SMTP_USER not set — skipping');
-    return;
+    throw new Error('SMTP_HOST or SMTP_USER not set — email not sent');
   }
   const loginUrl = process.env.APP_URL || 'https://www.pennyai.eu';
   const firstName = (name || 'there').split(' ')[0];
@@ -435,6 +459,7 @@ async function recalculateCampaignSchedules(campaign_id) {
   try {
     const { data: campaign } = await supabase.from("campaigns").select("*").eq("id", campaign_id).single();
     if (!campaign) return;
+    if (campaign.status !== 'active') return; // don't schedule calls for paused/inactive campaigns
 
     const daily_limit = campaign.daily_limit || 50;
     const window_start = campaign.window_start || '09:00:00';
@@ -445,9 +470,12 @@ async function recalculateCampaignSchedules(campaign_id) {
     const endParts = window_end.split(':');
     const startMinutes = parseInt(startParts[0]) * 60 + parseInt(startParts[1] || 0);
     const endMinutes = parseInt(endParts[0]) * 60 + parseInt(endParts[1] || 0);
-    
+
+    // window_start/window_end are stored in UTC (e.g. "09:00:00+00"). All Date math below
+    // uses UTC accessors so the computed schedule matches what was actually configured,
+    // regardless of the server process's local timezone.
     let durationMinutes = endMinutes - startMinutes;
-    if (durationMinutes <= 0) durationMinutes = 480; 
+    if (durationMinutes <= 0) durationMinutes += 1440; // window wraps past midnight (e.g. 09:00 -> 08:00 next day)
 
     const intervalMinutes = durationMinutes / daily_limit;
 
@@ -461,8 +489,8 @@ async function recalculateCampaignSchedules(campaign_id) {
     if (!prospects || prospects.length === 0) return;
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0); 
-    
+    today.setUTCHours(0, 0, 0, 0);
+
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     let currentDate = new Date(today);
     let prospectIndex = 0;
@@ -472,19 +500,19 @@ async function recalculateCampaignSchedules(campaign_id) {
     }
 
     while (prospectIndex < prospects.length) {
-      if (allowedDays.includes(dayNames[currentDate.getDay()])) {
+      if (allowedDays.includes(dayNames[currentDate.getUTCDay()])) {
         for (let i = 0; i < daily_limit && prospectIndex < prospects.length; i++) {
           const scheduledDate = new Date(currentDate);
           const totalMinutes = startMinutes + (i * intervalMinutes);
           const hrs = Math.floor(totalMinutes / 60);
           const mins = Math.floor(totalMinutes % 60);
-          
-          scheduledDate.setHours(hrs, mins, 0, 0);
+
+          scheduledDate.setUTCHours(hrs, mins, 0, 0);
           await supabase.from("prospects").update({ scheduled_at: scheduledDate.toISOString() }).eq("id", prospects[prospectIndex].id);
           prospectIndex++;
         }
       }
-      currentDate.setDate(currentDate.getDate() + 1);
+      currentDate.setUTCDate(currentDate.getUTCDate() + 1);
     }
   } catch (err) {
     console.error("Error recalculating schedules:", err);
@@ -758,6 +786,9 @@ app.post("/api/admin/students", requireAdmin, async (req, res) => {
   }
   if (!row.phone) return res.status(400).json({ error: "Phone number is required." });
   if (!row.email) return res.status(400).json({ error: "Email is required." });
+
+  const derivedRating = deriveSelfRatingFromLevel(row.english_level);
+  if (derivedRating) Object.assign(row, derivedRating);
 
   const e164Phone = toE164(row.phone);
 
@@ -1185,8 +1216,8 @@ app.post("/api/messages/dm/:targetUserId", requireAuth, async (req, res) => {
 
   if (!conv && !error) {
     const newRow = { participant_a: a, participant_b: b };
-    const scId = school_id || target.school_id;
-    if (scId) newRow.school_id = scId;
+    // conversations.school_id is typed uuid in the DB but schools.id/users.school_id are bigint —
+    // a schema mismatch (see DOCUMENTATION.md). Not read anywhere yet, so omit until the column type is fixed.
     const { data: created, error: ce } = await supabase.from("conversations").insert(newRow).select("id").single();
     if (ce) return res.status(500).json({ error: ce.message });
     conv = created;
