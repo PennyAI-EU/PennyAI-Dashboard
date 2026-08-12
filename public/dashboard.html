@@ -1344,7 +1344,18 @@ async function initMessages() {
   const convMap = {};
   (Array.isArray(convs) ? convs : []).forEach(c => { convMap[c.other_participant.id] = c; });
 
-  el.innerHTML = contacts.map(contact => {
+  // Most recently messaged first; contacts with no conversation yet fall to the end,
+  // alphabetically.
+  const sortedContacts = [...contacts].sort((a, b) => {
+    const at = convMap[a.id]?.last_message?.created_at;
+    const bt = convMap[b.id]?.last_message?.created_at;
+    if (at && bt) return new Date(bt) - new Date(at);
+    if (at) return -1;
+    if (bt) return 1;
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
+  el.innerHTML = sortedContacts.map(contact => {
     const conv = convMap[contact.id];
     const lastMsg = conv?.last_message;
     const unread = conv?.unread_count || 0;

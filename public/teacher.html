@@ -650,9 +650,22 @@ async function loadMsgConvList() {
   const convMap = {};
   (Array.isArray(convs) ? convs : []).forEach(c => { convMap[c.other_participant.id] = c; });
 
+  // Most recently messaged first within each group; contacts with no conversation yet
+  // fall to the end of their group, alphabetically.
+  function sortByRecency(list) {
+    return [...list].sort((a, b) => {
+      const at = convMap[a.id]?.last_message?.created_at;
+      const bt = convMap[b.id]?.last_message?.created_at;
+      if (at && bt) return new Date(bt) - new Date(at);
+      if (at) return -1;
+      if (bt) return 1;
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  }
+
   // Pin admins at top, students below
-  const admins = contacts.filter(c => c.role === 'school_admin' || c.role === 'system_admin');
-  const students = contacts.filter(c => c.role === 'student');
+  const admins = sortByRecency(contacts.filter(c => c.role === 'school_admin' || c.role === 'system_admin'));
+  const students = sortByRecency(contacts.filter(c => c.role === 'student'));
   const ordered = [...admins, ...students];
 
   el.innerHTML = ordered.map(contact => {
