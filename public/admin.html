@@ -654,7 +654,6 @@
           <option value="">— Not set —</option>
           <option value="10">10</option>
           <option value="15">15</option>
-          <option value="20">20</option>
         </select>
         <div class="field-error" id="err-lesson-duration">This field is required.</div>
       </div>
@@ -1296,6 +1295,10 @@
     if (studentModalMode === 'add' && !email) return alert('Email is required.');
     if (studentModalMode === 'add' && !document.getElementById('edit-english-level').value) return alert('Please set an English level before creating a student.');
     if (studentModalMode === 'add' && !validateRequiredForCreate()) return;
+    const lessonDuration = document.getElementById('edit-lesson-duration').value;
+    if (lessonDuration && !['10', '15'].includes(lessonDuration)) {
+      return alert('Lesson duration must be 10 or 15 minutes.');
+    }
     const days = Array.from(document.querySelectorAll('#edit-preferred-days input:checked')).map(cb => cb.value).join(',');
     const payload = {
       name:                      document.getElementById('edit-name').value || null,
@@ -1308,7 +1311,7 @@
       allocated_lesson_count:    parseInt(document.getElementById('edit-allocated-lesson-count').value) || null,
       current_lesson_id:         parseInt(document.getElementById('edit-current-lesson-id').value) || null,
       lesson_frequency:          parseInt(document.getElementById('edit-lesson-frequency').value) || null,
-      lesson_duration:           document.getElementById('edit-lesson-duration').value || null,
+      lesson_duration:           lessonDuration || null,
       allocated_time_this_month: parseInt(document.getElementById('edit-allocated-time').value) || null,
       total_time_used:           parseInt(document.getElementById('edit-total-time-used').value) || 0,
       used_time_this_month:      parseInt(document.getElementById('edit-used-time-this-month').value) || 0,
