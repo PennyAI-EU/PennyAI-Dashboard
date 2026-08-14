@@ -768,6 +768,12 @@ app.get("/api/admin/teachers", requireAdmin, async (req, res) => {
   res.json(data);
 });
 
+const ALLOWED_LESSON_DURATIONS = new Set(["10", "15"]);
+
+function isValidLessonDuration(value) {
+  return value == null || value === "" || ALLOWED_LESSON_DURATIONS.has(String(value));
+}
+
 app.post("/api/admin/students", requireAdmin, async (req, res) => {
   const allowed = [
     "name", "email", "phone", "english_level", "goal", "consent_given",
@@ -786,6 +792,11 @@ app.post("/api/admin/students", requireAdmin, async (req, res) => {
   }
   if (!row.phone) return res.status(400).json({ error: "Phone number is required." });
   if (!row.email) return res.status(400).json({ error: "Email is required." });
+  if (!isValidLessonDuration(row.lesson_duration)) {
+    return res.status(400).json({ error: "Lesson duration must be 10 or 15 minutes." });
+  }
+  if (row.lesson_duration === "") row.lesson_duration = null;
+  else if (row.lesson_duration != null) row.lesson_duration = String(row.lesson_duration);
 
   const derivedRating = deriveSelfRatingFromLevel(row.english_level);
   if (derivedRating) Object.assign(row, derivedRating);
@@ -852,6 +863,14 @@ app.put("/api/admin/students/:id", requireAdmin, async (req, res) => {
     if (Object.prototype.hasOwnProperty.call(req.body, key)) {
       updates[key] = req.body[key];
     }
+  }
+  if (Object.prototype.hasOwnProperty.call(updates, "lesson_duration")) {
+    if (!isValidLessonDuration(updates.lesson_duration)) {
+      return res.status(400).json({ error: "Lesson duration must be 10 or 15 minutes." });
+    }
+    updates.lesson_duration = updates.lesson_duration === "" || updates.lesson_duration == null
+      ? null
+      : String(updates.lesson_duration);
   }
   const { error } = await supabase.from("users").update(updates).eq("id", id);
   if (error) return res.status(500).json({ error: error.message });

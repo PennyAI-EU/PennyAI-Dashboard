@@ -674,7 +674,11 @@
     </div>
     <div class="form-group">
       <label class="form-label">Duration (minutes)</label>
-      <input type="number" id="edit-pref-duration" class="form-input" />
+      <select id="edit-pref-duration" class="form-input">
+        <option value="">— Select duration —</option>
+        <option value="10">10 minutes</option>
+        <option value="15">15 minutes</option>
+      </select>
     </div>
     <div class="form-group">
       <label class="form-label">Preferred Days (e.g., Monday, Wednesday)</label>
@@ -803,6 +807,10 @@ window.openPreferencesModal = function() {
 window.savePreferences = async function() {
   const freq = document.getElementById('edit-pref-frequency').value;
   const dur = parseInt(document.getElementById('edit-pref-duration').value, 10);
+  if (![10, 15].includes(dur)) {
+    alert('Please choose a 10- or 15-minute lesson.');
+    return;
+  }
   const daysStr = document.getElementById('edit-pref-days').value;
   const daysArr = daysStr.split(',').map(d => d.trim()).filter(d => d);
   
@@ -811,7 +819,7 @@ window.savePreferences = async function() {
 
   const { error } = await supabase.from('users').update({
     lesson_frequency: freq,
-    lesson_duration: dur || null,
+    lesson_duration: String(dur),
     preferred_days: daysArr
   }).eq('id', session.user.id);
 
