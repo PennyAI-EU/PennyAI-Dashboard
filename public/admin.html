@@ -1197,11 +1197,16 @@
     openModal('editStudentModal');
   }
 
-  window.openEditStudent = function(id) {
+  window.openEditStudent = async function(id) {
     clearFieldErrors();
     studentModalMode = 'edit';
     document.getElementById('edit-student-modal-title').textContent = 'Edit Student';
     document.getElementById('edit-student-save-btn').textContent = 'Save Changes';
+    // Re-fetch before populating — studentsData can be stale if this row was edited
+    // directly in Supabase since the page/list was last loaded, and saving the form
+    // as-is would silently overwrite that direct DB change with the stale cached value.
+    const { data: { session } } = await supabase.auth.getSession();
+    await loadStudents(session.access_token);
     const s = studentsData.find(x => x.id === id);
     if (!s) return;
     document.getElementById('edit-student-id').value = s.id;
@@ -1360,7 +1365,11 @@
       method: 'DELETE',
       headers: { 'Authorization': 'Bearer ' + session.access_token }
     });
-    if (!res.ok) { alert('Failed to delete student.'); return; }
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      alert('Failed to delete student: ' + (body.error || res.statusText));
+      return;
+    }
     loadStudents(session.access_token);
   }
 
@@ -1451,7 +1460,11 @@
       method: 'DELETE',
       headers: { 'Authorization': 'Bearer ' + session.access_token }
     });
-    if (!res.ok) { alert('Failed to delete teacher.'); return; }
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      alert('Failed to delete teacher: ' + (body.error || res.statusText));
+      return;
+    }
     await loadTeachers(session.access_token);
     await loadStudents(session.access_token);
     renderTeachers();
