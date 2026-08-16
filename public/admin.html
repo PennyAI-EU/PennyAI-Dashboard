@@ -182,6 +182,9 @@
   .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; margin-top: 4px; }
   .checkbox-group label { display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--text); }
   .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+  .field-error { display: none; color: #dc2626; font-size: 11px; margin-top: 4px; }
+  .field-error.visible { display: block; }
+  .form-input.field-invalid { border-color: #dc2626; }
 
   /* CUSTOM DROPDOWN COMPONENT */
   .custom-dropdown {
@@ -625,6 +628,7 @@
       <div class="form-group" style="margin-bottom:0; grid-column:1/-1">
         <label class="form-label">Learning Goal</label>
         <textarea id="edit-goal" class="form-input" style="height:60px; resize:vertical;"></textarea>
+        <div class="field-error" id="err-goal">This field is required.</div>
       </div>
     </div>
 
@@ -642,6 +646,7 @@
       <div class="form-group" style="margin-bottom:0">
         <label class="form-label">Lesson Frequency <small style="color:var(--muted)">(per week)</small></label>
         <input type="number" id="edit-lesson-frequency" class="form-input" min="0" />
+        <div class="field-error" id="err-lesson-frequency">This field is required.</div>
       </div>
       <div class="form-group" style="margin-bottom:0">
         <label class="form-label">Lesson Duration <small style="color:var(--muted)">(mins)</small></label>
@@ -649,8 +654,8 @@
           <option value="">— Not set —</option>
           <option value="10">10</option>
           <option value="15">15</option>
-          <option value="20">20</option>
         </select>
+        <div class="field-error" id="err-lesson-duration">This field is required.</div>
       </div>
       <div class="form-group" style="margin-bottom:0">
         <label class="form-label">Allocated Time / Month <small style="color:var(--muted)">(mins)</small></label>
@@ -677,6 +682,7 @@
       <div class="form-group" style="margin-bottom:0">
         <label class="form-label">Preferred Call Times <small style="color:var(--muted)">(24hr, e.g. 14:00, 16:00)</small></label>
         <input type="text" id="edit-preferred-times" class="form-input" placeholder="e.g. 14:00, 16:00" />
+        <div class="field-error" id="err-preferred-times">This field is required.</div>
       </div>
       <div></div>
       <div class="form-group" style="margin-bottom:0; grid-column:1/-1">
@@ -690,6 +696,7 @@
           <label><input type="checkbox" value="saturday"> Sat</label>
           <label><input type="checkbox" value="sunday"> Sun</label>
         </div>
+        <div class="field-error" id="err-preferred-days">Select at least one day.</div>
       </div>
     </div>
 
@@ -1102,8 +1109,11 @@
               <span class="badge ${a.score >= 80 ? 'called' : 'warm'}">${a.score || 0}% Score</span>
             </div>
             <div style="margin-bottom:4px; color:var(--muted);">Date: ${new Date(a.attempt_time).toLocaleString()}</div>
-            <div style="margin-bottom:4px;"><strong>Feedback:</strong> ${a.student_feedback || 'N/A'}</div>
-            <div><strong>Rationale:</strong> ${a.grading_rationale || 'N/A'}</div>
+            <div><strong>AI Feedback:</strong> ${
+              typeof a.grading_rationale === 'string' && a.grading_rationale.startsWith('{')
+                ? (() => { try { const g = JSON.parse(a.grading_rationale); return (g.strengths ? '<strong>Strengths:</strong> ' + g.strengths + '<br>' : '') + (g.areas_for_improvement ? '<strong>Areas to improve:</strong> ' + g.areas_for_improvement : ''); } catch(e) { return a.grading_rationale; } })()
+                : (a.grading_rationale || 'N/A')
+            }</div>
           </div>
         `).join('');
       }
@@ -1151,6 +1161,7 @@
   }
 
   window.openAddStudent = function() {
+    clearFieldErrors();
     studentModalMode = 'add';
     document.getElementById('edit-student-modal-title').textContent = 'Add Student';
     document.getElementById('edit-student-save-btn').textContent = 'Add Student';
@@ -1186,10 +1197,16 @@
     openModal('editStudentModal');
   }
 
-  window.openEditStudent = function(id) {
+  window.openEditStudent = async function(id) {
+    clearFieldErrors();
     studentModalMode = 'edit';
     document.getElementById('edit-student-modal-title').textContent = 'Edit Student';
     document.getElementById('edit-student-save-btn').textContent = 'Save Changes';
+    // Re-fetch before populating — studentsData can be stale if this row was edited
+    // directly in Supabase since the page/list was last loaded, and saving the form
+    // as-is would silently overwrite that direct DB change with the stale cached value.
+    const { data: { session } } = await supabase.auth.getSession();
+    await loadStudents(session.access_token);
     const s = studentsData.find(x => x.id === id);
     if (!s) return;
     document.getElementById('edit-student-id').value = s.id;
@@ -1241,6 +1258,40 @@
     openModal('editStudentModal');
   }
 
+  const REQUIRED_ON_CREATE = ['goal', 'lesson-frequency', 'lesson-duration', 'preferred-times'];
+
+  function clearFieldErrors() {
+    REQUIRED_ON_CREATE.concat(['preferred-days']).forEach(key => {
+      document.getElementById('err-' + key)?.classList.remove('visible');
+    });
+    REQUIRED_ON_CREATE.forEach(key => {
+      document.getElementById('edit-' + key)?.classList.remove('field-invalid');
+    });
+  }
+
+  // Admin-created students skip the phone onboarding call, so nothing else ever fills
+  // these in — left empty, they silently fail the "Is the profile 100% complete" gate
+  // in N8N and route the student into the incomplete-profile flow the first time they
+  // call in, even though the admin considers the account fully set up. Block creation
+  // instead of allowing it to silently produce a broken profile.
+  function validateRequiredForCreate() {
+    clearFieldErrors();
+    let ok = true;
+    REQUIRED_ON_CREATE.forEach(key => {
+      const el = document.getElementById('edit-' + key);
+      if (!el.value.trim()) {
+        document.getElementById('err-' + key).classList.add('visible');
+        el.classList.add('field-invalid');
+        ok = false;
+      }
+    });
+    if (document.querySelectorAll('#edit-preferred-days input:checked').length === 0) {
+      document.getElementById('err-preferred-days').classList.add('visible');
+      ok = false;
+    }
+    return ok;
+  }
+
   window.saveEditStudent = async function() {
     const id = document.getElementById('edit-student-id').value;
     const phone = document.getElementById('edit-phone').value.trim();
@@ -1248,6 +1299,11 @@
     if (!phone) return alert('Phone number is required.');
     if (studentModalMode === 'add' && !email) return alert('Email is required.');
     if (studentModalMode === 'add' && !document.getElementById('edit-english-level').value) return alert('Please set an English level before creating a student.');
+    if (studentModalMode === 'add' && !validateRequiredForCreate()) return;
+    const lessonDuration = document.getElementById('edit-lesson-duration').value;
+    if (lessonDuration && !['10', '15'].includes(lessonDuration)) {
+      return alert('Lesson duration must be 10 or 15 minutes.');
+    }
     const days = Array.from(document.querySelectorAll('#edit-preferred-days input:checked')).map(cb => cb.value).join(',');
     const payload = {
       name:                      document.getElementById('edit-name').value || null,
@@ -1260,7 +1316,7 @@
       allocated_lesson_count:    parseInt(document.getElementById('edit-allocated-lesson-count').value) || null,
       current_lesson_id:         parseInt(document.getElementById('edit-current-lesson-id').value) || null,
       lesson_frequency:          parseInt(document.getElementById('edit-lesson-frequency').value) || null,
-      lesson_duration:           document.getElementById('edit-lesson-duration').value || null,
+      lesson_duration:           lessonDuration || null,
       allocated_time_this_month: parseInt(document.getElementById('edit-allocated-time').value) || null,
       total_time_used:           parseInt(document.getElementById('edit-total-time-used').value) || 0,
       used_time_this_month:      parseInt(document.getElementById('edit-used-time-this-month').value) || 0,
@@ -1309,7 +1365,11 @@
       method: 'DELETE',
       headers: { 'Authorization': 'Bearer ' + session.access_token }
     });
-    if (!res.ok) { alert('Failed to delete student.'); return; }
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      alert('Failed to delete student: ' + (body.error || res.statusText));
+      return;
+    }
     loadStudents(session.access_token);
   }
 
@@ -1400,7 +1460,11 @@
       method: 'DELETE',
       headers: { 'Authorization': 'Bearer ' + session.access_token }
     });
-    if (!res.ok) { alert('Failed to delete teacher.'); return; }
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      alert('Failed to delete teacher: ' + (body.error || res.statusText));
+      return;
+    }
     await loadTeachers(session.access_token);
     await loadStudents(session.access_token);
     renderTeachers();
@@ -1927,9 +1991,22 @@ async function loadMsgConvList() {
   const convMap = {};
   (Array.isArray(convs) ? convs : []).forEach(c => { convMap[c.other_participant.id] = c; });
 
+  // Most recently messaged first within each section; contacts with no conversation
+  // yet fall to the end of their section, alphabetically.
+  function sortByRecency(list) {
+    return [...list].sort((a, b) => {
+      const at = convMap[a.id]?.last_message?.created_at;
+      const bt = convMap[b.id]?.last_message?.created_at;
+      if (at && bt) return new Date(bt) - new Date(at);
+      if (at) return -1;
+      if (bt) return 1;
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  }
+
   // Teachers first, then students
-  const teachers = contacts.filter(c => c.role === 'teacher');
-  const students = contacts.filter(c => c.role === 'student');
+  const teachers = sortByRecency(contacts.filter(c => c.role === 'teacher'));
+  const students = sortByRecency(contacts.filter(c => c.role === 'student'));
 
   const renderSection = (label, list) => {
     if (!list.length) return '';

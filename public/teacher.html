@@ -118,8 +118,10 @@
   .history-date { flex-shrink: 0; width: 48px; text-align: center; }
   .history-date .day { font-size: 18px; font-weight: 600; }
   .history-date .month { font-size: 11px; text-transform: uppercase; color: var(--muted); }
+  .history-date-small { font-size: 11px; color: var(--muted); white-space: nowrap; }
   .history-info { flex: 1; }
   .history-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .history-lesson-id { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); margin-bottom: 4px; }
   .history-summary { font-size: 13px; color: var(--muted); }
   .score-chip { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
   .score-high { background: var(--green-light); color: var(--green); }
@@ -467,17 +469,17 @@ function renderHistory(history, token) {
       <div class="list-item">
         <div class="history-row" onclick="toggleDetail('${detailId}')">
           <div class="history-row-header">
-            <div class="history-date">
-              <div class="day">${d.getDate()}</div>
-              <div class="month">${d.toLocaleDateString([], { month:'short' })}</div>
-            </div>
             <div class="history-info">
+              ${item.lesson_id ? `<div class="history-lesson-id">Lesson ${item.lesson_id}</div>` : ''}
               <div class="history-title">${item.lessons?.title || 'Lesson Attempt'}</div>
               <div class="history-summary">${item.call_summary || 'No summary.'}</div>
             </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              ${hasRecording ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16"/></svg>' : ''}
-              <span class="score-chip ${scoreClass}">${score}%</span>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                ${hasRecording ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16"/></svg>' : ''}
+                <span class="score-chip ${scoreClass}">${score}%</span>
+              </div>
+              <div class="history-date-small">${d.toLocaleDateString([], { month:'short', day:'numeric' })}</div>
             </div>
           </div>
         </div>
@@ -507,7 +509,11 @@ function renderHistory(history, token) {
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
             <div class="feedback-block ai">
               <div class="feedback-label ai">AI Feedback</div>
-              <div class="feedback-text">${item.student_feedback || 'No AI feedback available.'}</div>
+              <div class="feedback-text">${
+                typeof item.grading_rationale === 'string' && item.grading_rationale.startsWith('{')
+                  ? (() => { try { const g = JSON.parse(item.grading_rationale); return (g.strengths ? '<strong>Strengths:</strong> ' + g.strengths + '<br><br>' : '') + (g.areas_for_improvement ? '<strong>Areas to improve:</strong> ' + g.areas_for_improvement : ''); } catch(e) { return item.grading_rationale; } })()
+                  : (item.grading_rationale || 'No AI feedback available.')
+              }</div>
             </div>
             <div class="feedback-block teacher">
               <div class="feedback-label teacher">Teacher Feedback</div>
@@ -524,18 +530,6 @@ function renderHistory(history, token) {
               </button>
             </div>
           </div>
-
-          <details style="cursor:pointer;">
-            <summary style="font-size:12px; color:var(--muted); list-style:none; display:flex; align-items:center; gap:4px; user-select:none;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-              Grading details
-            </summary>
-            <div style="margin-top:8px; font-size:12px; color:var(--muted); line-height:1.6; padding:12px; background:var(--off); border-radius:8px;">${
-              typeof item.grading_rationale === 'string' && item.grading_rationale.startsWith('{')
-                ? (() => { try { const g = JSON.parse(item.grading_rationale); return (g.strengths ? '<strong>Strengths:</strong> ' + g.strengths + '<br><br>' : '') + (g.areas_for_improvement ? '<strong>Areas to improve:</strong> ' + g.areas_for_improvement : ''); } catch(e) { return item.grading_rationale; } })()
-                : (item.grading_rationale || 'N/A')
-            }</div>
-          </details>
 
         </div>
       </div>
@@ -656,9 +650,22 @@ async function loadMsgConvList() {
   const convMap = {};
   (Array.isArray(convs) ? convs : []).forEach(c => { convMap[c.other_participant.id] = c; });
 
+  // Most recently messaged first within each group; contacts with no conversation yet
+  // fall to the end of their group, alphabetically.
+  function sortByRecency(list) {
+    return [...list].sort((a, b) => {
+      const at = convMap[a.id]?.last_message?.created_at;
+      const bt = convMap[b.id]?.last_message?.created_at;
+      if (at && bt) return new Date(bt) - new Date(at);
+      if (at) return -1;
+      if (bt) return 1;
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  }
+
   // Pin admins at top, students below
-  const admins = contacts.filter(c => c.role === 'school_admin' || c.role === 'system_admin');
-  const students = contacts.filter(c => c.role === 'student');
+  const admins = sortByRecency(contacts.filter(c => c.role === 'school_admin' || c.role === 'system_admin'));
+  const students = sortByRecency(contacts.filter(c => c.role === 'student'));
   const ordered = [...admins, ...students];
 
   el.innerHTML = ordered.map(contact => {
