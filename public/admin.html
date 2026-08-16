@@ -1087,8 +1087,9 @@
       return '<span style="display:inline-block; margin:0 8px 6px 0; padding:5px 8px; background:#f3f4f6; border-radius:6px;"><strong>' + labels[key] + ':</strong> ' + (assessed && Number.isFinite(numeric) ? Math.round(numeric) + '%' : 'Not assessed') + '</span>';
     }).join('');
     const rawOverall = attempt && attempt.overall_score != null ? attempt.overall_score : attempt && attempt.score;
-    const overall = Number(rawOverall);
-    const status = attempt && attempt.pass_status === 'passed' ? 'Passed' : attempt && attempt.pass_status === 'not_yet_passed' ? 'Not yet passed' : attempt && attempt.pass_status === 'incomplete' ? 'Incomplete' : attempt && attempt.pass_status === 'pending' ? 'Pending' : '—';
+    const overall = rawOverall == null || rawOverall === '' ? null : Number(rawOverall);
+    const storedStatus = attempt && attempt.pass_status;
+    const status = storedStatus === 'passed' ? 'Passed' : storedStatus === 'not_yet_passed' ? 'Not yet passed' : storedStatus === 'incomplete' ? 'Incomplete' : storedStatus === 'pending' ? 'Pending' : overall != null && Number.isFinite(overall) ? (overall >= 70 ? 'Passed' : 'Not yet passed') : '—';
     return '<div style="margin:8px 0 4px; line-height:1.5;">' + cards + '</div><div style="color:var(--muted);"><strong>Overall:</strong> ' + (Number.isFinite(overall) ? Math.round(overall) + '%' : '—') + ' · <strong>Result:</strong> ' + status + '</div>';
   }
 
