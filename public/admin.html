@@ -641,7 +641,11 @@
       </div>
       <div class="form-group" style="margin-bottom:0">
         <label class="form-label">Lesson Frequency <small style="color:var(--muted)">(per week)</small></label>
-        <input type="number" id="edit-lesson-frequency" class="form-input" min="0" />
+        <select id="edit-lesson-frequency" class="form-input">
+          <option value="">— Not set —</option>
+          <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+          <option value="4">4</option><option value="5">5</option>
+        </select>
       </div>
       <div class="form-group" style="margin-bottom:0">
         <label class="form-label">Lesson Duration <small style="color:var(--muted)">(mins)</small></label>
@@ -649,7 +653,6 @@
           <option value="">— Not set —</option>
           <option value="10">10</option>
           <option value="15">15</option>
-          <option value="20">20</option>
         </select>
       </div>
       <div class="form-group" style="margin-bottom:0">
@@ -1258,6 +1261,10 @@
     if (!phone) return alert('Phone number is required.');
     if (studentModalMode === 'add' && !email) return alert('Email is required.');
     if (studentModalMode === 'add' && !document.getElementById('edit-english-level').value) return alert('Please set an English level before creating a student.');
+    const lessonFrequency = document.getElementById('edit-lesson-frequency').value;
+    const lessonDuration = document.getElementById('edit-lesson-duration').value;
+    if (lessonFrequency && !['1', '2', '3', '4', '5'].includes(lessonFrequency)) return alert('Lesson frequency must be between 1 and 5 per week.');
+    if (lessonDuration && !['10', '15'].includes(lessonDuration)) return alert('Lesson duration must be 10 or 15 minutes.');
     const days = Array.from(document.querySelectorAll('#edit-preferred-days input:checked')).map(cb => cb.value).join(',');
     const payload = {
       name:                      document.getElementById('edit-name').value || null,
@@ -1269,8 +1276,8 @@
       goal:                      document.getElementById('edit-goal').value || null,
       allocated_lesson_count:    parseInt(document.getElementById('edit-allocated-lesson-count').value) || null,
       current_lesson_id:         parseInt(document.getElementById('edit-current-lesson-id').value) || null,
-      lesson_frequency:          parseInt(document.getElementById('edit-lesson-frequency').value) || null,
-      lesson_duration:           document.getElementById('edit-lesson-duration').value || null,
+      lesson_frequency:          lessonFrequency ? parseInt(lessonFrequency, 10) : null,
+      lesson_duration:           lessonDuration || null,
       allocated_time_this_month: parseInt(document.getElementById('edit-allocated-time').value) || null,
       total_time_used:           parseInt(document.getElementById('edit-total-time-used').value) || 0,
       used_time_this_month:      parseInt(document.getElementById('edit-used-time-this-month').value) || 0,

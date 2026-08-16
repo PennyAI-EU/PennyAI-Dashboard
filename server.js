@@ -682,6 +682,47 @@ app.get("/api/admin/teachers", requireAdmin, async (req, res) => {
   res.json(data);
 });
 
+const VALID_PREFERENCE_DAYS = new Set([
+  "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"
+]);
+
+function normalizeSchedulePreferences(source) {
+  const values = {};
+  if (Object.prototype.hasOwnProperty.call(source, "lesson_frequency")) {
+    if (source.lesson_frequency === null || source.lesson_frequency === "") {
+      values.lesson_frequency = null;
+    } else {
+      const frequency = Number(source.lesson_frequency);
+      if (!Number.isInteger(frequency) || frequency < 1 || frequency > 5) {
+        return { error: "Lesson frequency must be between 1 and 5 lessons per week." };
+      }
+      values.lesson_frequency = frequency;
+    }
+  }
+  if (Object.prototype.hasOwnProperty.call(source, "lesson_duration")) {
+    if (source.lesson_duration === null || source.lesson_duration === "") {
+      values.lesson_duration = null;
+    } else {
+      const duration = Number(source.lesson_duration);
+      if (![10, 15].includes(duration)) {
+        return { error: "Lesson duration must be 10 or 15 minutes." };
+      }
+      values.lesson_duration = String(duration);
+    }
+  }
+  if (Object.prototype.hasOwnProperty.call(source, "preferred_days")) {
+    const rawDays = Array.isArray(source.preferred_days)
+      ? source.preferred_days
+      : String(source.preferred_days ?? "").split(",");
+    const days = rawDays.map(day => String(day).trim().toLowerCase()).filter(Boolean);
+    if (days.some(day => !VALID_PREFERENCE_DAYS.has(day))) {
+      return { error: "Preferred days must use English weekday names." };
+    }
+    values.preferred_days = [...new Set(days)].join(",");
+  }
+  return { values };
+}
+
 app.post("/api/admin/students", requireAdmin, async (req, res) => {
   const allowed = [
     "name", "email", "phone", "english_level", "goal", "consent_given",
@@ -700,6 +741,10 @@ app.post("/api/admin/students", requireAdmin, async (req, res) => {
   }
   if (!row.phone) return res.status(400).json({ error: "Phone number is required." });
   if (!row.email) return res.status(400).json({ error: "Email is required." });
+
+  const schedule = normalizeSchedulePreferences(row);
+  if (schedule.error) return res.status(400).json({ error: schedule.error });
+  Object.assign(row, schedule.values);
 
   const e164Phone = toE164(row.phone);
 
@@ -755,6 +800,9 @@ app.put("/api/admin/students/:id", requireAdmin, async (req, res) => {
       updates[key] = req.body[key];
     }
   }
+  const schedule = normalizeSchedulePreferences(updates);
+  if (schedule.error) return res.status(400).json({ error: schedule.error });
+  Object.assign(updates, schedule.values);
   const { error } = await supabase.from("users").update(updates).eq("id", id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });

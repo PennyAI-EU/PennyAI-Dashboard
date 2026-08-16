@@ -372,7 +372,10 @@
 
         <div class="form-group">
           <label class="form-label" for="password">Password</label>
-          <input class="form-input" id="password" type="password" placeholder="At least 8 characters" autocomplete="new-password" required minlength="8"/>
+          <div style="position:relative">
+            <input class="form-input" id="password" type="password" placeholder="At least 8 characters" autocomplete="new-password" required minlength="8" style="padding-right:76px"/>
+            <button type="button" data-password-toggle="password" aria-pressed="false" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#2563eb;font:inherit;cursor:pointer;padding:4px 6px">Show</button>
+          </div>
         </div>
 
         <div id="form-error" class="form-error"></div>
@@ -607,5 +610,17 @@
 })();
 </script>
 
+<script>
+document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+  const input = document.getElementById(button.dataset.passwordToggle);
+  if (!input) return;
+  button.addEventListener('click', () => {
+    const visible = input.type === 'text';
+    input.type = visible ? 'password' : 'text';
+    button.textContent = visible ? 'Show' : 'Hide';
+    button.setAttribute('aria-pressed', String(!visible));
+  });
+});
+</script>
 </body>
 </html>
