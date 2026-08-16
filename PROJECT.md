@@ -206,6 +206,8 @@ The following features have been scoped and documented but are deferred to a lat
 4. System activates the student
 
 **Teacher assignment rules**
+Staging deployment pipeline verified 5 August 2026.
+Staging moved to Preview scope for deployment protection — 6 August 2026
 - Admin assigns teacher at enrollment
 - Assignment is changeable later
 - Student can exist temporarily with no teacher (just-enrolled, not yet assigned)
