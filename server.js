@@ -22,6 +22,32 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
   },
 });
 
+// supabase.auth.getUser(token) always makes a network round trip to the Auth
+// server (~500-600ms observed) to validate the JWT, and nearly every API route
+// on the dashboard's load path calls it once — that latency was compounding
+// into several seconds of load time. This project signs JWTs with an asymmetric
+// key (ES256), so getClaims() can verify the same token locally via WebCrypto
+// against a cached JWKS instead, with no per-request network call after the
+// first. Returns the same { data: { user }, error } shape as getUser() so
+// every existing call site works unchanged.
+async function getUserFromToken(token) {
+  const { data, error } = await supabase.auth.getClaims(token);
+  if (error || !data) return { data: { user: null }, error };
+  const c = data.claims;
+  return {
+    data: {
+      user: {
+        id: c.sub,
+        email: c.email,
+        phone: c.phone,
+        user_metadata: c.user_metadata || {},
+        app_metadata: c.app_metadata || {},
+      },
+    },
+    error: null,
+  };
+}
+
 const DEFAULT_PASSWORD = 'Penny2026!';
 
 // Normalize phone to E164 (+digits). If already has +, keep it; otherwise prepend +.
@@ -29,6 +55,31 @@ function toE164(phone) {
   if (!phone) return phone;
   const digits = phone.replace(/\D/g, '');
   return '+' + digits;
+}
+
+// Admin-created students skip the phone onboarding call that normally collects
+// self_rating/avg_self_rating, so those stay null — which fails the "Is the profile
+// 100% complete" gate in N8N and routes them into the incomplete-profile flow on their
+// first call, even though the admin already fully configured their level. Per Max: once
+// a teacher/admin has decided a student's level, the individual sub-scores don't need to
+// mean anything — just derive a placeholder avg_self_rating from the level (even split
+// across a 0-10 scale, 6 buckets) and set every self_rating sub-field to that same value.
+// Level codes can be conversational (e.g. "BC1" = B1 delivered conversationally) — the
+// inserted "C" doesn't change the underlying score, so it's stripped before mapping.
+const LEVEL_SCORE_MIDPOINT = { A1: 0.83, A2: 2.5, B1: 4.17, B2: 5.83, C1: 7.5, C2: 9.17 };
+function deriveSelfRatingFromLevel(englishLevel) {
+  if (!englishLevel) return null;
+  const base = englishLevel.length === 3 ? englishLevel[0] + englishLevel[2] : englishLevel;
+  const score = LEVEL_SCORE_MIDPOINT[base];
+  if (score === undefined) return null;
+  return {
+    avg_self_rating: score,
+    self_rating: {
+      grammar: score, speaking: score, listening: score,
+      vocabulary: score, pronunciation: score,
+      reading_writing: score, overall_comfort: score,
+    },
+  };
 }
 
 const mailer = nodemailer.createTransport({
@@ -39,12 +90,16 @@ const mailer = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
-  tls: { rejectUnauthorized: false }, // Hostinger sometimes uses self-signed certs
+  tls: { rejectUnauthorized: false, minVersion: 'TLSv1.2' },
 });
 
 async function sendWelcomeEmail(email, name, password) {
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER) return; // silently skip if not configured
-  const loginUrl = process.env.APP_URL || 'https://penny.icaoenglish.org';
+  console.log(`[email] attempting to send welcome email to ${email}`);
+  console.log(`[email] SMTP config — host:${process.env.SMTP_HOST} port:${process.env.SMTP_PORT} secure:${process.env.SMTP_SECURE} user:${process.env.SMTP_USER} from:${process.env.SMTP_FROM}`);
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
+    throw new Error('SMTP_HOST or SMTP_USER not set — email not sent');
+  }
+  const loginUrl = process.env.APP_URL || 'https://www.pennyai.eu';
   const firstName = (name || 'there').split(' ')[0];
   const html = `
 <!DOCTYPE html>
@@ -121,12 +176,16 @@ async function sendWelcomeEmail(email, name, password) {
 </body>
 </html>`;
 
-  await mailer.sendMail({
-    from: `"Penny AI" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+  console.log(`[email] verifying SMTP connection...`);
+  await mailer.verify();
+  console.log(`[email] SMTP connection verified — sending...`);
+  const info = await mailer.sendMail({
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to: email,
     subject: `Welcome to Penny AI — your account is ready, ${firstName}!`,
     html,
   });
+  console.log(`[email] sent successfully — messageId:${info.messageId} response:${info.response}`);
 }
 
 const LESSON_PREAMBLE = `You are an AI English tutor conducting a live, interactive voice lesson with a student. The student's level will be provided (e.g. A1, A2, B1), and you must adapt your language, vocabulary, and pace to match that level. For A1 learners, use very simple words, short sentences, and lots of repetition.
@@ -227,7 +286,7 @@ app.post("/api/check-onboarding", async (req, res) => {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) {
     console.log("[check-onboarding] PENDING — invalid/expired token:", userError?.message);
     return res.status(401).json({ error: "Invalid token" });
@@ -279,7 +338,7 @@ app.get("/api/me", async (req, res) => {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
 
   let { data, error } = await supabase.from("users").select("*").eq("id", user.id).maybeSingle();
@@ -344,7 +403,7 @@ app.post("/create-call", async (req, res) => {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
 
   const phone = user.user_metadata?.phone;
@@ -400,6 +459,7 @@ async function recalculateCampaignSchedules(campaign_id) {
   try {
     const { data: campaign } = await supabase.from("campaigns").select("*").eq("id", campaign_id).single();
     if (!campaign) return;
+    if (campaign.status !== 'active') return; // don't schedule calls for paused/inactive campaigns
 
     const daily_limit = campaign.daily_limit || 50;
     const window_start = campaign.window_start || '09:00:00';
@@ -410,9 +470,12 @@ async function recalculateCampaignSchedules(campaign_id) {
     const endParts = window_end.split(':');
     const startMinutes = parseInt(startParts[0]) * 60 + parseInt(startParts[1] || 0);
     const endMinutes = parseInt(endParts[0]) * 60 + parseInt(endParts[1] || 0);
-    
+
+    // window_start/window_end are stored in UTC (e.g. "09:00:00+00"). All Date math below
+    // uses UTC accessors so the computed schedule matches what was actually configured,
+    // regardless of the server process's local timezone.
     let durationMinutes = endMinutes - startMinutes;
-    if (durationMinutes <= 0) durationMinutes = 480; 
+    if (durationMinutes <= 0) durationMinutes += 1440; // window wraps past midnight (e.g. 09:00 -> 08:00 next day)
 
     const intervalMinutes = durationMinutes / daily_limit;
 
@@ -426,8 +489,8 @@ async function recalculateCampaignSchedules(campaign_id) {
     if (!prospects || prospects.length === 0) return;
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0); 
-    
+    today.setUTCHours(0, 0, 0, 0);
+
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     let currentDate = new Date(today);
     let prospectIndex = 0;
@@ -437,19 +500,19 @@ async function recalculateCampaignSchedules(campaign_id) {
     }
 
     while (prospectIndex < prospects.length) {
-      if (allowedDays.includes(dayNames[currentDate.getDay()])) {
+      if (allowedDays.includes(dayNames[currentDate.getUTCDay()])) {
         for (let i = 0; i < daily_limit && prospectIndex < prospects.length; i++) {
           const scheduledDate = new Date(currentDate);
           const totalMinutes = startMinutes + (i * intervalMinutes);
           const hrs = Math.floor(totalMinutes / 60);
           const mins = Math.floor(totalMinutes % 60);
-          
-          scheduledDate.setHours(hrs, mins, 0, 0);
+
+          scheduledDate.setUTCHours(hrs, mins, 0, 0);
           await supabase.from("prospects").update({ scheduled_at: scheduledDate.toISOString() }).eq("id", prospects[prospectIndex].id);
           prospectIndex++;
         }
       }
-      currentDate.setDate(currentDate.getDate() + 1);
+      currentDate.setUTCDate(currentDate.getUTCDate() + 1);
     }
   } catch (err) {
     console.error("Error recalculating schedules:", err);
@@ -461,7 +524,7 @@ app.get("/api/next-call", async (req, res) => {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
 
   const phone = user.user_metadata?.phone || user.phone;
@@ -488,7 +551,7 @@ app.get("/api/next-call", async (req, res) => {
 app.get("/api/upcoming-calls", async (req, res) => {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
   const phone = user.user_metadata?.phone || user.phone;
   if (!phone) return res.status(400).json({ error: "Phone not found" });
@@ -502,18 +565,39 @@ app.get("/api/upcoming-calls", async (req, res) => {
   res.json(data || []);
 });
 
+// lesson_attempts.lesson_id stores the human-readable lessons.lesson_id (e.g. "4.02"),
+// not the lessons.id UUID, and the FK constraint between them was dropped — so PostgREST
+// can no longer resolve an embedded `lessons(title)` select (it 400s). Look titles up manually.
+async function attachLessonTitles(attempts) {
+  const lessonIds = [...new Set((attempts || []).filter(a => a.lesson_id).map(a => a.lesson_id))];
+  let titleMap = {};
+  if (lessonIds.length > 0) {
+    const { data: lessons } = await supabase
+      .from("lessons")
+      .select("lesson_id, title")
+      .in("lesson_id", lessonIds);
+    if (lessons) lessons.forEach(l => { titleMap[l.lesson_id] = l.title; });
+  }
+  return (attempts || []).map(a => ({
+    ...a,
+    lessons: { title: titleMap[a.lesson_id] || null },
+  }));
+}
+
 app.get("/api/history", async (req, res) => {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
 
-  const { data: attempts, error: attError } = await supabase
+  const { data: rawAttempts, error: attError } = await supabase
     .from("lesson_attempts")
-    .select("*, lessons(title)")
+    .select("*")
     .eq("user_id", user.id)
     .order("attempt_time", { ascending: false });
   if (attError) return res.status(500).json({ error: attError.message });
+
+  const attempts = await attachLessonTitles(rawAttempts);
 
   const callIds = (attempts || []).filter(a => a.call_id).map(a => a.call_id);
   let callLogsMap = {};
@@ -527,8 +611,8 @@ app.get("/api/history", async (req, res) => {
 
   const merged = (attempts || []).map(a => ({
     ...a,
-    recording_url: callLogsMap[a.call_id]?.["Recording Link"] || null,
-    transcript:    callLogsMap[a.call_id]?.["Transcript"] || null,
+    recording_url: a.recording_url || callLogsMap[a.call_id]?.["Recording Link"] || null,
+    transcript:    a.transcript || callLogsMap[a.call_id]?.["Transcript"] || null,
     duration_sec:  callLogsMap[a.call_id]?.["Duration (Sec)"] || null,
   }));
   res.json(merged);
@@ -538,7 +622,7 @@ app.get("/api/history", async (req, res) => {
 async function requireAuth(req, res, next) {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
   const phone = user.user_metadata?.phone || user.phone;
   if (!phone) return res.status(401).json({ error: "No phone on user" });
@@ -551,7 +635,7 @@ async function requireAuth(req, res, next) {
 async function requireTeacher(req, res, next) {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
   const phone = user.user_metadata?.phone || user.phone;
   if (!phone) return res.status(401).json({ error: "No phone on user" });
@@ -587,12 +671,14 @@ app.get("/api/teacher/students/:id/history", requireTeacher, async (req, res) =>
   if (sErr || !student || student.teacher_id !== req.teacherDbId) {
     return res.status(403).json({ error: "Not your student" });
   }
-  const { data: attempts, error } = await supabase
+  const { data: rawAttempts, error } = await supabase
     .from("lesson_attempts")
-    .select("*, lessons(title)")
+    .select("*")
     .eq("user_id", id)
     .order("attempt_time", { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
+
+  const attempts = await attachLessonTitles(rawAttempts);
 
   const callIds = (attempts || []).filter(a => a.call_id).map(a => a.call_id);
   let callLogsMap = {};
@@ -602,8 +688,8 @@ app.get("/api/teacher/students/:id/history", requireTeacher, async (req, res) =>
   }
   res.json((attempts || []).map(a => ({
     ...a,
-    recording_url: callLogsMap[a.call_id]?.["Recording Link"] || null,
-    transcript:    callLogsMap[a.call_id]?.["Transcript"] || null,
+    recording_url: a.recording_url || callLogsMap[a.call_id]?.["Recording Link"] || null,
+    transcript:    a.transcript || callLogsMap[a.call_id]?.["Transcript"] || null,
   })));
 });
 
@@ -641,7 +727,7 @@ async function requireAdmin(req, res, next) {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
 
   const phone = user.user_metadata?.phone || user.phone;
@@ -682,6 +768,12 @@ app.get("/api/admin/teachers", requireAdmin, async (req, res) => {
   res.json(data);
 });
 
+const ALLOWED_LESSON_DURATIONS = new Set(["10", "15"]);
+
+function isValidLessonDuration(value) {
+  return value == null || value === "" || ALLOWED_LESSON_DURATIONS.has(String(value));
+}
+
 app.post("/api/admin/students", requireAdmin, async (req, res) => {
   const allowed = [
     "name", "email", "phone", "english_level", "goal", "consent_given",
@@ -700,6 +792,14 @@ app.post("/api/admin/students", requireAdmin, async (req, res) => {
   }
   if (!row.phone) return res.status(400).json({ error: "Phone number is required." });
   if (!row.email) return res.status(400).json({ error: "Email is required." });
+  if (!isValidLessonDuration(row.lesson_duration)) {
+    return res.status(400).json({ error: "Lesson duration must be 10 or 15 minutes." });
+  }
+  if (row.lesson_duration === "") row.lesson_duration = null;
+  else if (row.lesson_duration != null) row.lesson_duration = String(row.lesson_duration);
+
+  const derivedRating = deriveSelfRatingFromLevel(row.english_level);
+  if (derivedRating) Object.assign(row, derivedRating);
 
   const e164Phone = toE164(row.phone);
 
@@ -720,12 +820,21 @@ app.post("/api/admin/students", requireAdmin, async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 
-  // Fire welcome email — non-blocking, don't fail the request if it errors
-  sendWelcomeEmail(row.email, row.name, DEFAULT_PASSWORD).catch(err =>
-    console.error("[welcome email] failed to send:", err.message)
-  );
+  // Try to send welcome email — report result but never fail student creation over it
+  let emailSent = false;
+  try {
+    await Promise.race([
+      sendWelcomeEmail(row.email, row.name, DEFAULT_PASSWORD),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('email timeout after 10s')), 10000)),
+    ]);
+    emailSent = true;
+    console.log(`[student create] welcome email sent OK to ${row.email}`);
+  } catch (err) {
+    console.error(`[student create] welcome email FAILED for ${row.email} — ${err.message}`);
+    console.error(`[student create] error stack:`, err.stack);
+  }
 
-  res.json({ ...data, defaultPassword: DEFAULT_PASSWORD });
+  res.json({ ...data, defaultPassword: DEFAULT_PASSWORD, emailSent });
 });
 
 app.put("/api/admin/students/:id/allocation", requireAdmin, async (req, res) => {
@@ -755,6 +864,14 @@ app.put("/api/admin/students/:id", requireAdmin, async (req, res) => {
       updates[key] = req.body[key];
     }
   }
+  if (Object.prototype.hasOwnProperty.call(updates, "lesson_duration")) {
+    if (!isValidLessonDuration(updates.lesson_duration)) {
+      return res.status(400).json({ error: "Lesson duration must be 10 or 15 minutes." });
+    }
+    updates.lesson_duration = updates.lesson_duration === "" || updates.lesson_duration == null
+      ? null
+      : String(updates.lesson_duration);
+  }
   const { error } = await supabase.from("users").update(updates).eq("id", id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
@@ -764,6 +881,12 @@ app.delete("/api/admin/students/:id", requireAdmin, async (req, res) => {
   const { id } = req.params;
   const { error } = await supabase.from("users").delete().eq("id", id);
   if (error) return res.status(500).json({ error: error.message });
+  try {
+    const { error: authError } = await supabase.auth.admin.deleteUser(id);
+    if (authError) console.error("Failed to delete Auth account for student", id, authError);
+  } catch (authError) {
+    console.error("Failed to delete Auth account for student", id, authError);
+  }
   res.json({ success: true });
 });
 
@@ -809,6 +932,12 @@ app.delete("/api/admin/teachers/:id", requireAdmin, async (req, res) => {
   await supabase.from("users").update({ teacher_id: null }).eq("teacher_id", id);
   const { error } = await supabase.from("users").delete().eq("id", id);
   if (error) return res.status(500).json({ error: error.message });
+  try {
+    const { error: authError } = await supabase.auth.admin.deleteUser(id);
+    if (authError) console.error("Failed to delete Auth account for teacher", id, authError);
+  } catch (authError) {
+    console.error("Failed to delete Auth account for teacher", id, authError);
+  }
   res.json({ success: true });
 });
 
@@ -951,19 +1080,19 @@ app.get("/api/admin/students/:id/attempts", requireAdmin, async (req, res) => {
   const { data, error } = await supabase
     .from("lesson_attempts")
     .select(`
+      lesson_id,
       attempt_time,
       score,
       completion_percentage,
       call_summary,
       student_feedback,
-      grading_rationale,
-      lessons ( title )
+      grading_rationale
     `)
     .eq("user_id", id)
     .order("attempt_time", { ascending: false });
 
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  res.json(await attachLessonTitles(data));
 });
 
 app.post("/api/admin/schedule-call", requireAdmin, async (req, res) => {
@@ -1106,8 +1235,8 @@ app.post("/api/messages/dm/:targetUserId", requireAuth, async (req, res) => {
 
   if (!conv && !error) {
     const newRow = { participant_a: a, participant_b: b };
-    const scId = school_id || target.school_id;
-    if (scId) newRow.school_id = scId;
+    // conversations.school_id is typed uuid in the DB but schools.id/users.school_id are bigint —
+    // a schema mismatch (see DOCUMENTATION.md). Not read anywhere yet, so omit until the column type is fixed.
     const { data: created, error: ce } = await supabase.from("conversations").insert(newRow).select("id").single();
     if (ce) return res.status(500).json({ error: ce.message });
     conv = created;

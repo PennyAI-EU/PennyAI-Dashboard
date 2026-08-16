@@ -215,9 +215,11 @@
   }
   .item-date .day { font-size: 18px; font-weight: 600; }
   .item-date .month { font-size: 11px; text-transform: uppercase; color: var(--muted); }
+  .item-date-small { font-size: 11px; color: var(--muted); white-space: nowrap; }
 
   .item-content { flex: 1; }
   .item-title { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+  .item-lesson-id { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); margin-bottom: 4px; }
   .item-meta { font-size: 13px; color: var(--muted); }
 
   .item-score {
@@ -678,7 +680,11 @@
     </div>
     <div class="form-group">
       <label class="form-label">Duration (minutes)</label>
-      <input type="number" id="edit-pref-duration" class="form-input" />
+      <select id="edit-pref-duration" class="form-input">
+        <option value="">— Select duration —</option>
+        <option value="10">10 minutes</option>
+        <option value="15">15 minutes</option>
+      </select>
     </div>
     <div class="form-group">
       <label class="form-label">Preferred Days (e.g., Monday, Wednesday)</label>
@@ -779,7 +785,12 @@ window.saveProfile = async function() {
   }).eq('id', session.user.id);
 
   if(error) { alert("Error saving profile: " + error.message); return; }
-  
+
+  // Keep Auth user_metadata.name in sync — updateUser() updates the caller's own metadata,
+  // no service role needed. Non-fatal if it fails: the users-table save (source of truth) already succeeded.
+  const { error: authError } = await supabase.auth.updateUser({ data: { name: name } });
+  if (authError) console.error('Failed to sync name to Auth metadata:', authError.message);
+
   // Update local state & UI
   dashboardData.profile.name = name;
   dashboardData.profile.bio = bio;
@@ -802,6 +813,10 @@ window.openPreferencesModal = function() {
 window.savePreferences = async function() {
   const freq = document.getElementById('edit-pref-frequency').value;
   const dur = parseInt(document.getElementById('edit-pref-duration').value, 10);
+  if (![10, 15].includes(dur)) {
+    alert('Please choose a 10- or 15-minute lesson.');
+    return;
+  }
   const daysStr = document.getElementById('edit-pref-days').value;
   const daysArr = daysStr.split(',').map(d => d.trim()).filter(d => d);
   
@@ -810,7 +825,7 @@ window.savePreferences = async function() {
 
   const { error } = await supabase.from('users').update({
     lesson_frequency: freq,
-    lesson_duration: dur || null,
+    lesson_duration: String(dur),
     preferred_days: daysArr
   }).eq('id', session.user.id);
 
@@ -1031,22 +1046,22 @@ function updateUI(data) {
       return `
         <div class="list-item" style="flex-direction:column; align-items:stretch; cursor:pointer;" onclick="toggleHistoryItem('${detailsId}')">
           <div style="display:flex; align-items:center; gap:20px;">
-            <div class="item-date">
-              <div class="day">${d.getDate()}</div>
-              <div class="month">${d.toLocaleDateString([], { month: 'short' })}</div>
-            </div>
             <div class="item-content">
+              ${item.lesson_id ? `<div class="item-lesson-id">Lesson ${item.lesson_id}</div>` : ''}
               <div class="item-title">${item.lessons?.title || 'Lesson Attempt'}</div>
               <div class="item-meta">${item.call_summary || 'No summary available.'}</div>
             </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              ${hasRecording ? '<svg title="Recording available" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16"/></svg>' : ''}
-              <div class="item-score ${scoreClass}">${score == null ? '—' : score + '%'}</div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                ${hasRecording ? '<svg title="Recording available" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16"/></svg>' : ''}
+                <div class="item-score ${scoreClass}">${score}%</div>
+              </div>
+              <div class="item-date-small">${d.toLocaleDateString([], { month: 'short', day: 'numeric' })}</div>
             </div>
           </div>
           ${skillScoreMarkup(item)}
 
-          <div id="${detailsId}" style="display:none; margin-top:16px; padding:16px 0 0; font-size:13px;">
+          <div id="${detailsId}" onclick="event.stopPropagation()" style="display:none; margin-top:16px; padding:16px 0 0; font-size:13px;">
             ${hasRecording ? `
             <div style="margin-bottom:12px;">
               <strong style="display:block; margin-bottom:8px;">Recording</strong>
@@ -1068,7 +1083,11 @@ function updateUI(data) {
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
               <div>
                 <strong style="display:block; margin-bottom:4px; color:var(--accent);">AI Feedback</strong>
-                <div style="color:var(--text);">${item.student_feedback || 'No feedback provided.'}</div>
+                <div style="color:var(--text);">${
+                  typeof item.grading_rationale === 'string' && item.grading_rationale.startsWith('{')
+                    ? (() => { try { const g = JSON.parse(item.grading_rationale); return (g.strengths ? '<strong>Strengths:</strong> ' + g.strengths + '<br>' : '') + (g.areas_for_improvement ? '<strong>Areas to improve:</strong> ' + g.areas_for_improvement : ''); } catch(e) { return item.grading_rationale; } })()
+                    : (item.grading_rationale || 'No feedback provided.')
+                }</div>
               </div>
               ${hasTeacherFeedback ? `
               <div>
@@ -1076,17 +1095,6 @@ function updateUI(data) {
                 <div style="color:var(--text);">${item.teacher_feedback}</div>
               </div>` : ''}
             </div>
-            <details style="cursor:pointer;">
-              <summary style="font-size:12px; color:var(--muted); list-style:none; display:flex; align-items:center; gap:4px;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                Grading details
-              </summary>
-              <div style="margin-top:8px; font-size:12px; color:var(--muted); line-height:1.6;">${
-                typeof item.grading_rationale === 'string' && item.grading_rationale.startsWith('{')
-                  ? (() => { try { const g = JSON.parse(item.grading_rationale); return (g.strengths ? '<strong>Strengths:</strong> ' + g.strengths + '<br>' : '') + (g.areas_for_improvement ? '<strong>Areas to improve:</strong> ' + g.areas_for_improvement : ''); } catch(e) { return item.grading_rationale; } })()
-                  : (item.grading_rationale || 'N/A')
-              }</div>
-            </details>
           </div>
         </div>
       `;
@@ -1308,23 +1316,30 @@ endBtn.addEventListener('click', () => {
       return;
     }
 
-    // Onboarding check
-    const onboardRes = await fetch('/api/check-onboarding', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + session.access_token },
-    });
-    const { status } = await onboardRes.json();
-    if (status !== 'complete') {
-      window.location.href = '/signin.html';
-      return;
-    }
-
     const userId = session.user.id;
     const userPhone = session.user.user_metadata?.phone;
     const userEmail = session.user.email;
     const authMeta = session.user.user_metadata || {};
 
-    dashboardData = await getDashboardData(userId, userPhone, userEmail, authMeta);
+    // Onboarding check runs alongside the dashboard data fetch instead of blocking it first —
+    // both need their own getUser() + DB round trip, so doing them serially just adds a redundant
+    // wait on every load (signin.html already checked this once right before redirecting here).
+    const onboardPromise = fetch('/api/check-onboarding', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + session.access_token },
+    }).then(r => r.json());
+
+    const [{ status }, dashData] = await Promise.all([
+      onboardPromise,
+      getDashboardData(userId, userPhone, userEmail, authMeta),
+    ]);
+
+    if (status !== 'complete') {
+      window.location.href = '/signin.html';
+      return;
+    }
+
+    dashboardData = dashData;
     updateUI(dashboardData);
 
     document.getElementById('signout-btn').addEventListener('click', async () => {
@@ -1379,7 +1394,18 @@ async function initMessages() {
   const convMap = {};
   (Array.isArray(convs) ? convs : []).forEach(c => { convMap[c.other_participant.id] = c; });
 
-  el.innerHTML = contacts.map(contact => {
+  // Most recently messaged first; contacts with no conversation yet fall to the end,
+  // alphabetically.
+  const sortedContacts = [...contacts].sort((a, b) => {
+    const at = convMap[a.id]?.last_message?.created_at;
+    const bt = convMap[b.id]?.last_message?.created_at;
+    if (at && bt) return new Date(bt) - new Date(at);
+    if (at) return -1;
+    if (bt) return 1;
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
+  el.innerHTML = sortedContacts.map(contact => {
     const conv = convMap[contact.id];
     const lastMsg = conv?.last_message;
     const unread = conv?.unread_count || 0;

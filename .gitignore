@@ -2,3 +2,5 @@
 .env
 node_modules/
 WORK_LOG.md
+DOCUMENTATION.md
+GAP_ANALYSIS.md
