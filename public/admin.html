@@ -645,6 +645,11 @@
       </div>
       <div class="form-group" style="margin-bottom:0">
         <label class="form-label">Lesson Frequency <small style="color:var(--muted)">(per week)</small></label>
+        <select id="edit-lesson-frequency" class="form-input">
+          <option value="">— Not set —</option>
+          <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+          <option value="4">4</option><option value="5">5</option>
+        </select>
         <input type="number" id="edit-lesson-frequency" class="form-input" min="0" />
         <div class="field-error" id="err-lesson-frequency">This field is required.</div>
       </div>

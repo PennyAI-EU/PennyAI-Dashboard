@@ -675,21 +675,33 @@
   <div class="modal-card">
     <div class="modal-title">Edit Preferences</div>
     <div class="form-group">
-      <label class="form-label">Lesson Frequency (e.g., Twice a week)</label>
-      <input type="text" id="edit-pref-frequency" class="form-input" />
+      <label class="form-label" for="edit-pref-frequency">Lessons per week</label>
+      <select id="edit-pref-frequency" class="form-input">
+        <option value="1">1 lesson per week</option>
+        <option value="2">2 lessons per week</option>
+        <option value="3">3 lessons per week</option>
+        <option value="4">4 lessons per week</option>
+        <option value="5">5 lessons per week</option>
+      </select>
     </div>
     <div class="form-group">
-      <label class="form-label">Duration (minutes)</label>
+      <label class="form-label" for="edit-pref-duration">Lesson duration</label>
       <select id="edit-pref-duration" class="form-input">
-        <option value="">— Select duration —</option>
         <option value="10">10 minutes</option>
         <option value="15">15 minutes</option>
       </select>
     </div>
     <div class="form-group">
-      <label class="form-label">Preferred Days (e.g., Monday, Wednesday)</label>
-      <input type="text" id="edit-pref-days" class="form-input" />
+      <label class="form-label" for="edit-pref-days">Preferred days</label>
+      <select id="edit-pref-days" class="form-input" multiple size="7" aria-describedby="edit-pref-days-help">
+        <option value="monday">Monday</option><option value="tuesday">Tuesday</option>
+        <option value="wednesday">Wednesday</option><option value="thursday">Thursday</option>
+        <option value="friday">Friday</option><option value="saturday">Saturday</option>
+        <option value="sunday">Sunday</option>
+      </select>
+      <div id="edit-pref-days-help" style="font-size:12px;color:var(--muted);margin-top:6px;">Hold Ctrl (Windows) or Command (Mac) to choose more than one day.</div>
     </div>
+    <div id="preferences-error" role="alert" hidden style="color:#b91c1c;font-size:13px;margin-top:8px;"></div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('preferencesModal')">Cancel</button>
       <button class="btn-primary" onclick="savePreferences()">Save</button>
@@ -736,6 +748,29 @@ let analyser = null;
 let dataArray = null;
 let micStream = null;
 let agentSpeakingUntil = 0;
+
+const PREFERENCE_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+const PREFERENCE_FREQUENCIES = ['1', '2', '3', '4', '5'];
+const PREFERENCE_DURATIONS = ['10', '15'];
+
+function normalizeFrequency(value) {
+  const raw = String(value ?? '').trim().toLowerCase();
+  const numeric = raw.match(/^([1-5])(?:\s|$)/);
+  if (numeric) return numeric[1];
+  const aliases = { 'once a week': '1', 'twice a week': '2', 'three times a week': '3', 'four times a week': '4', 'five times a week': '5' };
+  return aliases[raw] || '';
+}
+
+function normalizeDays(value) {
+  const values = Array.isArray(value) ? value : String(value ?? '').split(',');
+  return values.map(day => String(day).trim().toLowerCase()).filter(day => PREFERENCE_DAYS.includes(day));
+}
+
+function showPreferenceError(message) {
+  const error = document.getElementById('preferences-error');
+  error.textContent = message || '';
+  error.hidden = !message;
+}
 
 const modal = document.getElementById('callModal');
 const statusEl = document.getElementById('callStatusText');
@@ -801,39 +836,43 @@ window.saveProfile = async function() {
 
 window.openPreferencesModal = function() {
   if(!dashboardData) return;
-  document.getElementById('edit-pref-frequency').value = dashboardData.profile.preferences.frequency || '';
-  document.getElementById('edit-pref-duration').value = dashboardData.profile.preferences.duration || '';
-  
-  let days = dashboardData.profile.preferences.days;
-  document.getElementById('edit-pref-days').value = Array.isArray(days) ? days.join(', ') : (days || '');
+  const frequency = normalizeFrequency(dashboardData.profile.preferences.frequency);
+  const duration = String(dashboardData.profile.preferences.duration || '');
+  document.getElementById('edit-pref-frequency').value = PREFERENCE_FREQUENCIES.includes(frequency) ? frequency : '1';
+  document.getElementById('edit-pref-duration').value = PREFERENCE_DURATIONS.includes(duration) ? duration : '10';
+  const days = normalizeDays(dashboardData.profile.preferences.days);
+  Array.from(document.getElementById('edit-pref-days').options).forEach(option => {
+    option.selected = days.includes(option.value);
+  });
+  showPreferenceError('');
   
   document.getElementById('preferencesModal').classList.add('active');
 }
 
 window.savePreferences = async function() {
   const freq = document.getElementById('edit-pref-frequency').value;
-  const dur = parseInt(document.getElementById('edit-pref-duration').value, 10);
-  if (![10, 15].includes(dur)) {
-    alert('Please choose a 10- or 15-minute lesson.');
-    return;
-  }
-  const daysStr = document.getElementById('edit-pref-days').value;
-  const daysArr = daysStr.split(',').map(d => d.trim()).filter(d => d);
+  const dur = document.getElementById('edit-pref-duration').value;
+  const daysArr = Array.from(document.getElementById('edit-pref-days').selectedOptions).map(option => option.value);
+  if (!PREFERENCE_FREQUENCIES.includes(freq)) return showPreferenceError('Choose between 1 and 5 lessons per week.');
+  if (!PREFERENCE_DURATIONS.includes(dur)) return showPreferenceError('Choose a lesson duration of 10 or 15 minutes.');
+  if (!daysArr.length) return showPreferenceError('Choose at least one preferred day.');
   
   const { data: { session } } = await supabase.auth.getSession();
   if(!session) return;
 
   const { error } = await supabase.from('users').update({
-    lesson_frequency: freq,
-    lesson_duration: String(dur),
-    preferred_days: daysArr
+    lesson_frequency: Number(freq),
+    lesson_duration: dur,
+    // users.preferred_days is stored as text; keep the validated values
+    // comma-separated so direct updates cannot cause a type error.
+    preferred_days: daysArr.join(',')
   }).eq('id', session.user.id);
 
   if(error) { alert("Error saving preferences: " + error.message); return; }
   
   // Update local state & UI
   dashboardData.profile.preferences.frequency = freq;
-  dashboardData.profile.preferences.duration = dur || null;
+  dashboardData.profile.preferences.duration = dur;
   dashboardData.profile.preferences.days = daysArr;
   updateUI(dashboardData);
   closeModal('preferencesModal');
