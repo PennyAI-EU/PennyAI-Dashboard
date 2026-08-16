@@ -928,6 +928,7 @@ function parseSkillScores(raw) {
 
 function getOverallScore(item) {
   const raw = item && item.overall_score != null ? item.overall_score : item && item.score;
+  if (raw == null || raw === '') return null;
   const n = Number(raw);
   return Number.isFinite(n) ? Math.round(n) : null;
 }
@@ -948,7 +949,8 @@ function skillScoreMarkup(item) {
     return '<div class="skill-score-card"><div class="label">' + labels[key] + '</div><div class="value">' + display + '</div></div>';
   }).join('');
   const overall = getOverallScore(item);
-  const status = item && item.pass_status === 'passed' ? 'Passed' : item && item.pass_status === 'not_yet_passed' ? 'Not yet passed' : item && item.pass_status === 'incomplete' ? 'Incomplete' : item && item.pass_status === 'pending' ? 'Pending' : '—';
+  const storedStatus = item && item.pass_status;
+  const status = storedStatus === 'passed' ? 'Passed' : storedStatus === 'not_yet_passed' ? 'Not yet passed' : storedStatus === 'incomplete' ? 'Incomplete' : storedStatus === 'pending' ? 'Pending' : overall != null ? (overall >= 70 ? 'Passed' : 'Not yet passed') : '—';
   return '<div class="skill-score-grid">' + cards + '</div><div class="skill-score-summary"><span><strong>Overall:</strong> ' + (overall == null ? '—' : overall + '%') + '</span><span class="skill-pass-status"><strong>Result:</strong> ' + status + '</span></div>';
 }
 
