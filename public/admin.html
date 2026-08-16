@@ -1091,6 +1091,25 @@
       ).join('');
   }
 
+  function adminSkillScoreMarkup(attempt) {
+    let scores = attempt && attempt.skill_scores;
+    if (typeof scores === 'string') { try { scores = JSON.parse(scores); } catch (_) { scores = {}; } }
+    scores = scores && typeof scores === 'object' ? scores : {};
+    const labels = { grammar: 'Grammar', vocabulary: 'Vocabulary', pronunciation: 'Pronunciation' };
+    const cards = Object.keys(labels).map(key => {
+      const record = scores[key];
+      const value = record && typeof record === 'object' ? record.score : record;
+      const assessed = !(record && typeof record === 'object' && record.assessed === false) && value != null && value !== '';
+      const numeric = Number(value);
+      return '<span style="display:inline-block; margin:0 8px 6px 0; padding:5px 8px; background:#f3f4f6; border-radius:6px;"><strong>' + labels[key] + ':</strong> ' + (assessed && Number.isFinite(numeric) ? Math.round(numeric) + '%' : 'Not assessed') + '</span>';
+    }).join('');
+    const rawOverall = attempt && attempt.overall_score != null ? attempt.overall_score : attempt && attempt.score;
+    const overall = rawOverall == null || rawOverall === '' ? null : Number(rawOverall);
+    const storedStatus = attempt && attempt.pass_status;
+    const status = storedStatus === 'passed' ? 'Passed' : storedStatus === 'not_yet_passed' ? 'Not yet passed' : storedStatus === 'incomplete' ? 'Incomplete' : storedStatus === 'pending' ? 'Pending' : overall != null && Number.isFinite(overall) ? (overall >= 70 ? 'Passed' : 'Not yet passed') : '—';
+    return '<div style="margin:8px 0 4px; line-height:1.5;">' + cards + '</div><div style="color:var(--muted);"><strong>Overall:</strong> ' + (Number.isFinite(overall) ? Math.round(overall) + '%' : '—') + ' · <strong>Result:</strong> ' + status + '</div>';
+  }
+
   window.toggleStudentDetails = async function(id) {
     const row = document.getElementById('details-' + id);
     if (row.style.display === 'none') {
@@ -1106,9 +1125,12 @@
           <div style="background:white; padding:12px; border:1px solid var(--border); border-radius:8px; margin-bottom:8px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
               <strong>${a.lessons?.title || 'Lesson'}</strong>
-              <span class="badge ${a.score >= 80 ? 'called' : 'warm'}">${a.score || 0}% Score</span>
+              <span class="badge ${(a.overall_score ?? a.score) >= 80 ? 'called' : 'warm'}">${a.overall_score ?? a.score ?? '—'}${((a.overall_score ?? a.score) != null ? '%' : '')} Score</span>
             </div>
             <div style="margin-bottom:4px; color:var(--muted);">Date: ${new Date(a.attempt_time).toLocaleString()}</div>
+            ${adminSkillScoreMarkup(a)}
+            <div style="margin-bottom:4px;"><strong>Feedback:</strong> ${a.student_feedback || 'N/A'}</div>
+            <div><strong>Rationale:</strong> ${a.grading_rationale || 'N/A'}</div>
             <div><strong>AI Feedback:</strong> ${
               typeof a.grading_rationale === 'string' && a.grading_rationale.startsWith('{')
                 ? (() => { try { const g = JSON.parse(a.grading_rationale); return (g.strengths ? '<strong>Strengths:</strong> ' + g.strengths + '<br>' : '') + (g.areas_for_improvement ? '<strong>Areas to improve:</strong> ' + g.areas_for_improvement : ''); } catch(e) { return a.grading_rationale; } })()
