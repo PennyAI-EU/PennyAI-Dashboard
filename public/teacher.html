@@ -125,6 +125,12 @@
   .score-high { background: var(--green-light); color: var(--green); }
   .score-mid { background: #fef9c3; color: #854d0e; }
   .score-low { background: #fee2e2; color: #991b1b; }
+  .skill-score-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:12px 0 16px; }
+  .skill-score-card { border:1px solid var(--border); border-radius:8px; padding:10px; background:var(--off); }
+  .skill-score-card .label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  .skill-score-card .value { margin-top:4px; font-size:18px; font-weight:700; color:var(--text); }
+  .skill-score-summary { display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; margin-top:4px; font-size:13px; color:var(--muted); }
+  .skill-pass-status { font-weight:700; }
 
   /* HISTORY DETAIL */
   .history-detail { display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
@@ -448,6 +454,39 @@ function renderUpcoming(calls) {
   }).join('');
 }
 
+function parseSkillScores(raw) {
+  if (!raw) return {};
+  if (typeof raw === 'string') { try { raw = JSON.parse(raw); } catch (_) { return {}; } }
+  if (!raw || typeof raw !== 'object') return {};
+  return raw;
+}
+
+function getOverallScore(item) {
+  const raw = item && item.overall_score != null ? item.overall_score : item && item.score;
+  const n = Number(raw);
+  return Number.isFinite(n) ? Math.round(n) : null;
+}
+
+function getScoreClass(score) {
+  return score == null ? '' : score >= 80 ? 'score-high' : score >= 60 ? 'score-mid' : 'score-low';
+}
+
+function skillScoreMarkup(item) {
+  const scores = parseSkillScores(item && item.skill_scores);
+  const labels = { grammar: 'Grammar', vocabulary: 'Vocabulary', pronunciation: 'Pronunciation' };
+  const cards = Object.keys(labels).map(key => {
+    const record = scores[key];
+    const value = record && typeof record === 'object' ? record.score : record;
+    const assessed = !(record && typeof record === 'object' && record.assessed === false) && value != null && value !== '';
+    const numeric = Number(value);
+    const display = assessed && Number.isFinite(numeric) ? Math.round(numeric) + '%' : 'Not assessed';
+    return '<div class="skill-score-card"><div class="label">' + labels[key] + '</div><div class="value">' + display + '</div></div>';
+  }).join('');
+  const overall = getOverallScore(item);
+  const status = item && item.pass_status === 'passed' ? 'Passed' : item && item.pass_status === 'not_yet_passed' ? 'Not yet passed' : item && item.pass_status === 'incomplete' ? 'Incomplete' : item && item.pass_status === 'pending' ? 'Pending' : '—';
+  return '<div class="skill-score-grid">' + cards + '</div><div class="skill-score-summary"><span><strong>Overall:</strong> ' + (overall == null ? '—' : overall + '%') + '</span><span class="skill-pass-status"><strong>Result:</strong> ' + status + '</span></div>';
+}
+
 function renderHistory(history, token) {
   const el = document.getElementById('detail-history');
   if (!history || history.length === 0) {
@@ -456,8 +495,8 @@ function renderHistory(history, token) {
   }
   el.innerHTML = history.map((item, idx) => {
     const d = new Date(item.attempt_time);
-    const score = item.score || 0;
-    const scoreClass = score >= 80 ? 'score-high' : score >= 60 ? 'score-mid' : 'score-low';
+    const score = getOverallScore(item);
+    const scoreClass = getScoreClass(score);
     const hasRecording = !!item.recording_url;
     const hasTranscript = !!item.transcript;
     const detailId = `hd-${idx}`;
@@ -477,10 +516,12 @@ function renderHistory(history, token) {
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
               ${hasRecording ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16"/></svg>' : ''}
-              <span class="score-chip ${scoreClass}">${score}%</span>
+              <span class="score-chip ${scoreClass}">${score == null ? '—' : score + '%'}</span>
             </div>
           </div>
         </div>
+
+        ${skillScoreMarkup(item)}
 
         <div id="${detailId}" class="history-detail">
 
