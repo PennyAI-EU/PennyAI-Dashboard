@@ -41,7 +41,11 @@
     ['Grammar', 'grammar_score'],
     ['Fluency', 'fluency_score']
   ].map(([label, field]) => {
-    const values = completedAttempts().map(attempt => Number(attempt[field])).filter(Number.isFinite);
+    const values = completedAttempts()
+      .map(attempt => attempt[field])
+      .filter(value => value !== null && value !== undefined && value !== '')
+      .map(Number)
+      .filter(Number.isFinite);
     return values.length ? [label, Number((values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(1))] : null;
   }).filter(Boolean);
   const card = (attempt, label, page) => `<article class="proto-card white"><h3>${esc(lessonTitle(attempt))}</h3><p>${esc(label)} · Final score: ${score(attempt)}%</p><span class="proto-pill">${attempt.attempt_status === 'passed' ? 'Passed' : attempt.attempt_status === 'failed' ? 'Retry recommended' : 'Continue when ready'}</span><a class="proto-btn dark" href="?view=${page}">${page === 'review' ? 'Review' : 'View details'} →</a></article>`;
