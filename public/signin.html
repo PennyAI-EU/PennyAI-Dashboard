@@ -410,7 +410,7 @@
       } else if (status === 'teacher') {
         window.location.href = '/teacher.html';
       } else if (status === 'complete') {
-        window.location.href = '/dashboard.html';
+        window.location.href = '/learner-portal.html';
       } else {
         formSection.style.display = 'none';
         pendingSection.classList.add('visible');
@@ -470,7 +470,7 @@
       const status = await checkOnboarding(signInData.session.access_token);
       if (status === 'admin') window.location.href = '/admin.html';
       else if (status === 'teacher') window.location.href = '/teacher.html';
-      else if (status === 'complete') window.location.href = '/dashboard.html';
+      else if (status === 'complete') window.location.href = '/learner-portal.html';
       else {
         formSection.style.display = 'none';
         pendingSection.classList.add('visible');

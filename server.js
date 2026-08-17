@@ -565,22 +565,21 @@ app.get("/api/upcoming-calls", async (req, res) => {
   res.json(data || []);
 });
 
-// lesson_attempts.lesson_id stores the human-readable lessons.lesson_id (e.g. "4.02"),
-// not the lessons.id UUID, and the FK constraint between them was dropped — so PostgREST
-// can no longer resolve an embedded `lessons(title)` select (it 400s). Look titles up manually.
+// Resolve lesson metadata for learner and teacher history. lesson_attempts.lesson_id
+// is the lessons.id UUID in the staging schema.
 async function attachLessonTitles(attempts) {
   const lessonIds = [...new Set((attempts || []).filter(a => a.lesson_id).map(a => a.lesson_id))];
   let titleMap = {};
   if (lessonIds.length > 0) {
     const { data: lessons } = await supabase
       .from("lessons")
-      .select("lesson_id, title")
-      .in("lesson_id", lessonIds);
-    if (lessons) lessons.forEach(l => { titleMap[l.lesson_id] = l.title; });
+      .select("id, title, level, lesson_number, objectives, target_phrases")
+      .in("id", lessonIds);
+    if (lessons) lessons.forEach(l => { titleMap[l.id] = l; });
   }
   return (attempts || []).map(a => ({
     ...a,
-    lessons: { title: titleMap[a.lesson_id] || null },
+    lessons: titleMap[a.lesson_id] || { title: null },
   }));
 }
 
@@ -616,6 +615,82 @@ app.get("/api/history", async (req, res) => {
     duration_sec:  callLogsMap[a.call_id]?.["Duration (Sec)"] || null,
   }));
   res.json(merged);
+});
+
+// Learner dashboard data is intentionally assembled server-side. The browser
+// receives only the authenticated learner's records, while service credentials
+// and accounting logic remain private to this API.
+app.get("/api/learner-dashboard", async (req, res) => {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+
+  const { data: { user: authUser }, error: authError } = await getUserFromToken(token);
+  if (authError || !authUser) return res.status(401).json({ error: "Invalid token" });
+
+  let { data: learner, error: learnerError } = await supabase
+    .from("users").select("*").eq("id", authUser.id).maybeSingle();
+  if (!learner && !learnerError) {
+    const phone = authUser.user_metadata?.phone || authUser.phone;
+    if (phone) ({ data: learner, error: learnerError } = await supabase.from("users").select("*").eq("phone", phone).maybeSingle());
+  }
+  if (learnerError) return res.status(500).json({ error: learnerError.message });
+  if (!learner) return res.status(404).json({ error: "Learner record not found" });
+
+  const [lessonResult, attemptsResult, ledgerResult, triggerByUserResult, triggerByPhoneResult] = await Promise.all([
+    learner.current_lesson_id && learner.english_level
+      ? supabase.from("lessons").select("id, title, level, lesson_number, type, lesson_instruction, objectives, target_phrases")
+          .eq("lesson_number", learner.current_lesson_id).eq("level", learner.english_level).maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+    supabase.from("lesson_attempts").select("*").eq("user_id", learner.id).order("attempt_time", { ascending: false }),
+    supabase.from("call_usage_ledger").select("minutes_charged, applied_at").eq("user_id", learner.id),
+    supabase.from("call_triggers").select("id, scheduled_time, call_status, name, call_purpose")
+      .eq("user_id", learner.id).eq("call_status", "pending").order("scheduled_time", { ascending: true }),
+    learner.phone
+      ? supabase.from("call_triggers").select("id, scheduled_time, call_status, name, call_purpose")
+          .eq("phone_number", learner.phone).eq("call_status", "pending").order("scheduled_time", { ascending: true })
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+
+  const errors = [lessonResult.error, attemptsResult.error, ledgerResult.error, triggerByUserResult.error, triggerByPhoneResult.error].filter(Boolean);
+  if (errors.length) return res.status(500).json({ error: errors[0].message });
+
+  const attempts = await attachLessonTitles(attemptsResult.data || []);
+  const periodStart = learner.subscription_period_started_at ? new Date(learner.subscription_period_started_at) : null;
+  const periodEnd = learner.subscription_period_ends_at ? new Date(learner.subscription_period_ends_at) : null;
+  const minutesUsed = (ledgerResult.data || []).reduce((sum, entry) => {
+    const appliedAt = entry.applied_at ? new Date(entry.applied_at) : null;
+    const inPeriod = (!periodStart || (appliedAt && appliedAt >= periodStart)) && (!periodEnd || (appliedAt && appliedAt < periodEnd));
+    return sum + (inPeriod ? Number(entry.minutes_charged || 0) : 0);
+  }, 0);
+  const minutesAllocated = Number(learner.subscription_minutes_allocated ?? learner.allocated_time_this_month ?? 0);
+  const combinedTriggers = [...(triggerByUserResult.data || []), ...(triggerByPhoneResult.data || [])];
+  const seenTriggerIds = new Set();
+  const upcoming = combinedTriggers.filter(t => !seenTriggerIds.has(t.id) && seenTriggerIds.add(t.id));
+
+  const normalizeStatus = attempt => {
+    if (attempt.attempt_status) return attempt.attempt_status;
+    if (attempt.pass_status === "passed") return "passed";
+    if (attempt.pass_status === "incomplete") return "incomplete";
+    return "failed";
+  };
+  const normalizedAttempts = attempts.map(attempt => ({ ...attempt, attempt_status: normalizeStatus(attempt) }));
+
+  res.json({
+    profile: {
+      name: learner.name || authUser.user_metadata?.name || "Learner",
+      englishLevel: learner.english_level,
+      pronunciationEnabled: Boolean(learner.pronunciation_enabled),
+    },
+    subscription: {
+      minutesAllocated,
+      minutesUsed,
+      completionPercentage: minutesAllocated > 0 ? Math.min(100, Number(((minutesUsed / minutesAllocated) * 100).toFixed(1))) : 0,
+      periodEndsAt: learner.subscription_period_ends_at || null,
+    },
+    nextLesson: lessonResult.data || null,
+    upcomingCalls: upcoming,
+    attempts: normalizedAttempts,
+  });
 });
 
 // --- TEACHER API ENDPOINTS ---
