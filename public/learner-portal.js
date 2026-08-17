@@ -25,6 +25,9 @@
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const firstName = () => (liveData?.profile?.name || 'Sofia').trim().split(/\s+/)[0] || 'Learner';
   const nextLesson = () => liveData?.nextLesson || null;
+  const lessonSummary = lesson => lesson
+    ? 'Practice speaking, reasoning, and useful English in your next lesson with Penny.'
+    : 'Your next lesson details will appear here.';
   const attempts = () => liveData?.attempts || [];
   const score = attempt => {
     const value = Number(attempt?.final_score ?? attempt?.overall_score ?? attempt?.score);
@@ -41,7 +44,7 @@
     <section class="proto-grid two"><article class="proto-panel"><span class="proto-label">UPCOMING LESSON</span><h3>${esc(lesson?.title || 'No lesson scheduled yet')}</h3><p>${lesson ? `${esc(lesson.level)} Lesson ${lesson.lesson_number} · ${esc(lesson.type || 'Voice lesson')}` : 'Your teacher or Penny will schedule the next lesson.'}</p><a class="proto-btn" href="?view=details">View lesson →</a></article><article class="proto-panel"><span class="proto-label">LATEST RESULT</span><h3>${esc(latest ? lessonTitle(latest) : 'No completed lessons yet')}</h3><b class="purple-number">${latest ? `${score(latest)}% · Passed` : '—'}</b><p>${latest ? 'Vocabulary, grammar and fluency met the required standard.' : 'Your result will appear here after your first completed lesson.'}</p><a class="subtle" href="?view=result">View result →</a></article></section>`; }
   function lessons() { const lesson = nextLesson(); const passed = statusAttempts('passed'); const failed = statusAttempts('failed'); const incompleteAttempts = statusAttempts('incomplete'); return `
     <div class="proto-tabs"><span class="active">Upcoming</span><span>Completed</span></div>
-    <article class="proto-panel lesson-feature"><span class="proto-pill mint">UPCOMING</span><h2>${esc(lesson?.title || 'No lesson scheduled')}</h2><p>${esc(lesson?.lesson_instruction || 'Your next lesson details will appear here.')}</p><b>${lesson ? `${esc(lesson.level)} Lesson ${lesson.lesson_number} · Penny voice lesson` : 'Check back soon.'}</b><a class="proto-btn" href="?view=details">View details →</a></article>
+    <article class="proto-panel lesson-feature"><span class="proto-pill mint">UPCOMING</span><h2>${esc(lesson?.title || 'No lesson scheduled')}</h2><p>${esc(lessonSummary(lesson))}</p><b>${lesson ? `${esc(lesson.level)} Lesson ${lesson.lesson_number} · Penny voice lesson` : 'Check back soon.'}</b><a class="proto-btn" href="?view=details">View details →</a></article>
     <h2 class="proto-heading">Completed lessons</h2><section class="proto-cards two">${passed.length ? passed.map(a => card(a, 'Completed', 'review')).join('') : '<article class="proto-card white"><h3>No completed lessons yet</h3><p>Your completed lessons will be shown here.</p></article>'}</section>
     <h2 class="proto-heading">Lessons not passed yet</h2><section class="proto-cards two">${failed.length ? failed.map(a => card(a, 'Not passed yet', 'failed')).join('') : '<article class="proto-card white"><h3>No lessons need a retry</h3><p>Great work—there are no lessons awaiting another attempt.</p></article>'}</section>
     <h2 class="proto-heading">Incomplete lessons</h2><section class="proto-cards two">${incompleteAttempts.length ? incompleteAttempts.map(a => card(a, 'Incomplete', 'incomplete')).join('') : '<article class="proto-card white"><h3>No incomplete lessons</h3><p>Your incomplete lessons will be shown here if a lesson ends early.</p></article>'}</section>`; }

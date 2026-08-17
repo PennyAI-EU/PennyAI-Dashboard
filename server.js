@@ -638,7 +638,7 @@ app.get("/api/learner-dashboard", async (req, res) => {
 
   const [lessonResult, attemptsResult, ledgerResult, triggerByUserResult, triggerByPhoneResult] = await Promise.all([
     learner.current_lesson_id && learner.english_level
-      ? supabase.from("lessons").select("id, title, level, lesson_number, type, lesson_instruction, objectives, target_phrases")
+      ? supabase.from("lessons").select("id, title, level, lesson_number, type, objectives, target_phrases")
           .eq("lesson_number", learner.current_lesson_id).eq("level", learner.english_level).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
     supabase.from("lesson_attempts").select("*").eq("user_id", learner.id).order("attempt_time", { ascending: false }),
