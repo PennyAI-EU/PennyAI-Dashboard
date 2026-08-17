@@ -405,10 +405,12 @@
 
       const status = await checkOnboarding(accessToken);
 
-      if (status === 'admin') {
+      if (status === 'system_admin') {
+        window.location.href = '/super-admin-portal.html';
+      } else if (status === 'admin') {
         window.location.href = '/admin.html';
       } else if (status === 'teacher') {
-        window.location.href = '/teacher.html';
+        window.location.href = '/teacher-portal.html';
       } else if (status === 'complete') {
         window.location.href = '/learner-portal.html';
       } else {
@@ -468,8 +470,9 @@
 
       modal.classList.remove('visible');
       const status = await checkOnboarding(signInData.session.access_token);
-      if (status === 'admin') window.location.href = '/admin.html';
-      else if (status === 'teacher') window.location.href = '/teacher.html';
+      if (status === 'system_admin') window.location.href = '/super-admin-portal.html';
+      else if (status === 'admin') window.location.href = '/admin.html';
+      else if (status === 'teacher') window.location.href = '/teacher-portal.html';
       else if (status === 'complete') window.location.href = '/learner-portal.html';
       else {
         formSection.style.display = 'none';

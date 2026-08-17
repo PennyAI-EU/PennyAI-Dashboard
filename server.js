@@ -314,7 +314,12 @@ app.post("/api/check-onboarding", async (req, res) => {
     return res.json({ status: "pending", reason: "phone_not_in_users_table", phone });
   }
 
-  if (data.role === 'school_admin' || data.role === 'system_admin') {
+  if (data.role === 'system_admin') {
+    console.log("[check-onboarding] SYSTEM ADMIN — phone:", phone);
+    return res.json({ status: "system_admin" });
+  }
+
+  if (data.role === 'school_admin') {
     console.log("[check-onboarding] ADMIN — phone:", phone);
     return res.json({ status: "admin" });
   }
@@ -727,6 +732,55 @@ async function requireTeacher(req, res, next) {
   req.teacherName = data.name;
   next();
 }
+
+async function requireSystemAdmin(req, res, next) {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+  const { data: { user }, error: userError } = await getUserFromToken(token);
+  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+  const phone = user.user_metadata?.phone || user.phone;
+  if (!phone) return res.status(401).json({ error: "No phone on user" });
+  const { data, error } = await supabase
+    .from("users")
+    .select("id, name, role")
+    .eq("phone", phone)
+    .maybeSingle();
+  if (error || !data || data.role !== "system_admin") {
+    return res.status(403).json({ error: "System administrator access required" });
+  }
+  req.systemAdmin = data;
+  next();
+}
+
+app.get("/api/super-admin/overview", requireSystemAdmin, async (req, res) => {
+  try {
+    const [schools, users, teachers, students, lessons, attempts, calls] = await Promise.all([
+      supabase.from("schools").select("id", { count: "exact", head: true }),
+      supabase.from("users").select("id", { count: "exact", head: true }),
+      supabase.from("users").select("id", { count: "exact", head: true }).eq("role", "teacher"),
+      supabase.from("users").select("id", { count: "exact", head: true }).eq("role", "student"),
+      supabase.from("lessons").select("id", { count: "exact", head: true }),
+      supabase.from("lesson_attempts").select("id", { count: "exact", head: true }),
+      supabase.from("call_logs").select("id", { count: "exact", head: true })
+    ]);
+    const failed = [schools, users, teachers, students, lessons, attempts, calls].find(result => result.error);
+    if (failed?.error) return res.status(500).json({ error: failed.error.message });
+    res.json({
+      adminName: req.systemAdmin.name || "Super Admin",
+      counts: {
+        schools: schools.count || 0,
+        users: users.count || 0,
+        teachers: teachers.count || 0,
+        students: students.count || 0,
+        lessons: lessons.count || 0,
+        lessonAttempts: attempts.count || 0,
+        callLogs: calls.count || 0
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Unable to load platform overview" });
+  }
+});
 
 app.get("/api/teacher/students", requireTeacher, async (req, res) => {
   const { data, error } = await supabase

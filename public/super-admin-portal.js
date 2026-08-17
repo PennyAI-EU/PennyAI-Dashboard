@@ -1,28 +1,84 @@
-(function(){
+(function () {
   'use strict';
-  const views=['overview','schools','users','crm','campaigns','analytics','lessons','voice','billing','agents','support','audit','settings'];
-  const current=views.includes(new URLSearchParams(location.search).get('view'))?new URLSearchParams(location.search).get('view'):'overview';
-  const nav=[['overview','Overview'],['schools','Schools'],['users','Users & Roles'],['crm','CRM'],['campaigns','Campaigns'],['analytics','Analytics'],['lessons','Lessons'],['voice','Voice & Calls'],['billing','Billing'],['agents','AI Agents'],['support','Support'],['audit','Audit & Security'],['settings','Platform Settings']];
-  const pages={
-    overview:{tag:'PLATFORM COMMAND CENTRE',title:'Platform overview',desc:'Global performance, operational health and items requiring intervention.',action:'Create report',stats:[['Active schools','28','+3 this month'],['Learners','12,846','87% active'],['Calls today','4,218','98.6% connected'],['MRR','€184.6K','+8.4%'],['Open alerts','7','2 critical']],panel:'Platform health',cols:['Service','Status','Latency','24h volume','Environment'],rows:[['Supabase','Healthy','182 ms','1.8M queries','EU'],['n8n workflows','Healthy','240 ms','18,402 runs','All'],['Retell voice','Degraded','1.4 s','4,218 calls','Spain']],controls:[['2 schools exceed monthly minutes','Review usage'],['Voice failure rate above threshold in Spain','Investigate'],['7 GDPR requests awaiting review','Due today']]},
-    schools:{tag:'TENANT OPERATIONS',title:'Schools',desc:'Provision, monitor and manage every school tenant across the Penny AI platform.',action:'Add school',stats:[['Schools','28','25 active'],['Trial tenants','6','3 convert soon'],['White-label','11','39% adoption'],['At-risk','3','Needs attention'],['New MRR','€22.4K','This month']],panel:'School directory',cols:['School','Plan','Learners','Usage','Status'],rows:[['Cambridge North','Enterprise','1,842','78%','Active'],['Roma Language Lab','Growth','684','92%','Review'],['Aviation English Hub','Enterprise','1,120','61%','Active']],controls:[['Provision new school workspace','Start setup'],['Suspend or reactivate tenant','Review policy'],['Branding, domains and entitlements','Open controls']]},
-    users:{tag:'IDENTITY & ACCESS',title:'Users and roles',desc:'Platform-wide identity, access approvals and role governance.',action:'Add user',stats:[['Users','15,602','Across 28 schools'],['Learners','12,846','82.3%'],['Teachers','1,964','12.6%'],['Admins','764','4.9%'],['Risk flags','28','Access review']],panel:'Global user directory',cols:['User','Role','School','Last active','Status'],rows:[['Sofia Conti','School Admin','Roma Language Lab','8 min ago','Active'],['Luca Bianchi','Teacher','Milano English','16 min ago','Active'],['Nora James','Learner','Cambridge North','1 day ago','Invited']],controls:[['Super Admin access requests','2 pending'],['Dormant privileged accounts','4 accounts'],['Quarterly access certification','92% complete']]},
-    crm:{tag:'COMMERCIAL OPERATIONS',title:'Platform CRM',desc:'Manage school prospects, sales stages, ownership and conversion outcomes.',action:'Create report',stats:[['Prospects','342','+41 this week'],['Qualified','118','34.5%'],['Demos booked','46','Next 14 days'],['Pipeline','€638K','Weighted value'],['Stalled','19','Needs follow-up']],panel:'Sales pipeline',cols:['Account','Stage','Owner','Value','Next action'],rows:[['Bright Future Academy','Demo booked','Emma AI','€36K','Monday 10:00'],['EuroLingua Group','Proposal','Max Malik','€84K','Review terms'],['AeroSpeak Institute','Qualified','Emma AI','€52K','Send case study']],controls:[['Lead routing and ownership','Rules active'],['Qualification criteria','Version 4.2'],['School onboarding handoff','6 ready']]},
-    campaigns:{tag:'EMMA GROWTH',title:'Campaigns',desc:'Create, approve and monitor global and school-level growth campaigns.',action:'Create campaign',stats:[['Active','18','Across 9 regions'],['Contacts','84,220','Reachable'],['Conversion','7.8%','+1.1 pts'],['Spend','€31.4K','63% budget'],['Compliance','100%','Consent checks']],panel:'Campaign portfolio',cols:['Campaign','Audience','Owner','Conversion','Status'],rows:[['Autumn school launch','EU decision makers','Emma AI','9.2%','Active'],['Teacher referral drive','Existing schools','Growth team','12.8%','Active'],['Aviation English pilot','Training centres','Max Malik','5.6%','Draft']],controls:[['Approve school campaign templates','4 pending'],['Master scripts and qualification rules','Open library'],['Suppression lists and consent controls','Compliant']]},
-    analytics:{tag:'GLOBAL INTELLIGENCE',title:'Analytics',desc:'Compare learning, commercial and platform performance across every tenant.',action:'Create report',stats:[['Lesson completion','84.2%','+3.8 pts'],['Avg CEFR gain','0.7','Per 12 weeks'],['Voice success','97.9%','30-day'],['School retention','94.6%','Annualized'],['Data freshness','3 min','All systems']],panel:'Cross-tenant benchmarks',cols:['Metric','Top quartile','Median','At risk','Trend'],rows:[['Weekly active learners','82%','67%','<45%','Improving'],['Lesson completion','93%','81%','<60%','Stable'],['Teacher response time','18m','46m','>4h','Improving']],controls:[['Learning outcomes by school and CEFR','Build report'],['Usage, margin and capacity','Open report'],['Growth funnel and attribution','Open report']]},
-    lessons:{tag:'CONTENT GOVERNANCE',title:'Lessons',desc:'Control global curriculum, lesson releases, resources and school customization.',action:'Create lesson',stats:[['Published lessons','486','A2–C2'],['Drafts','38','12 awaiting QA'],['Attempts today','9,842','84% complete'],['Resources','1,204','All formats'],['QA flags','14','Review required']],panel:'Curriculum library',cols:['Lesson','Level','Type','Version','Status'],rows:[['Comparing options','B2','Guided call','4.01','Published'],['Travel confidence','A2','Conversation','2.08','QA review'],['Aviation readback','C1','Scenario','1.12','Draft']],controls:[['Global lesson release queue','12 awaiting QA'],['School overrides and version inheritance','7 customized'],['Documents and Retell dialogues','Open library']]},
-    voice:{tag:'VOICE OPERATIONS',title:'Voice and call operations',desc:'Monitor Retell, telephone numbers, dispatchers, retries and call quality globally.',action:'Review controls',stats:[['Calls today','4,218','+11.8%'],['Connected','97.9%','30-day'],['Avg latency','1.4 s','Target <1.8 s'],['Minutes','38,420','Today'],['Failures','89','2.1%']],panel:'Live call operations',cols:['Environment','Number','Agent','Success','Status'],rows:[['Staging','+39 0965 1960070','Penny Lesson','98.6%','Healthy'],['Production EU','+39 0965 1960060','Penny Core','97.9%','Healthy'],['Production Growth','Pooled','Emma Growth','95.4%','Review']],controls:[['Dispatcher queue and retry policy','View queue'],['Missed-call email automation','Healthy'],['Recordings, transcripts and logs','Open explorer']]},
-    billing:{tag:'REVENUE & ENTITLEMENTS',title:'Billing and subscriptions',desc:'Manage plans, school entitlements, invoices, usage charging and margin.',action:'Review controls',stats:[['MRR','€184.6K','+8.4%'],['ARR','€2.22M','Forecast'],['Outstanding','€18.7K','11 invoices'],['Gross margin','71.8%','+2.3 pts'],['Usage revenue','€42.1K','This month']],panel:'School subscriptions',cols:['School','Plan','Renewal','Usage','Status'],rows:[['Cambridge North','Enterprise','12 Sep','78%','Current'],['Roma Language Lab','Growth','30 Aug','92%','Review'],['AeroSpeak Institute','Enterprise','18 Oct','61%','Current']],controls:[['Plans, add-ons and entitlement catalogue','Manage catalogue'],['Invoice review and payment exceptions','11 open'],['Voice usage ledger and reconciliation','Reconciled']]},
-    agents:{tag:'AI ORCHESTRATION',title:'AI agents',desc:'Configure and govern Penny, Emma and platform AI behavior across environments.',action:'Create agent',stats:[['Agents','14','6 production'],['Prompt versions','82','12 active'],['Evaluations','96.4%','Pass rate'],['Cost today','€318','Within budget'],['Safety flags','3','Review']],panel:'Agent registry',cols:['Agent','Purpose','Environment','Version','Status'],rows:[['Penny Core','Learning coach','Production','v12.4','Published'],['Penny Onboarding','Placement intake','Staging','v8.1','Testing'],['Emma Growth','School prospecting','Production','v6.7','Published']],controls:[['Prompts, variables and release history','Open registry'],['Simulation tests and evaluation suites','23 suites'],['Model routing, cost and safety policies','Review controls']]},
-    support:{tag:'PLATFORM SUPPORT',title:'Support operations',desc:'Resolve school incidents, learner cases and escalations with a complete audit trail.',action:'New case',stats:[['Open cases','42','8 urgent'],['First response','18 min','Target <30m'],['SLA met','96.8%','30-day'],['Escalations','7','Engineering'],['CSAT','4.7/5','1,264 replies']],panel:'Support queue',cols:['Case','School','Category','Priority','Owner'],rows:[['#PEN-1842','Roma Language Lab','Voice quality','High','Nadia'],['#PEN-1839','Cambridge North','User access','Medium','Luca'],['#PEN-1831','AeroSpeak Institute','Billing','Low','Marta']],controls:[['Safety referral from Penny','2 open'],['School admin technical escalation','5 open'],['GDPR and data subject requests','7 awaiting review']]},
-    audit:{tag:'SECURITY CENTRE',title:'Audit and security',desc:'Review privileged activity, policy compliance, incidents and data protection requests.',action:'Review controls',stats:[['Audit events','28,418','Last 24h'],['Privileged actions','214','Fully logged'],['Security alerts','7','2 critical'],['GDPR requests','11','7 pending'],['Policy coverage','100%','Server-side']],panel:'Privileged activity',cols:['Actor','Action','Target','Time','Risk'],rows:[['M. Malik','Updated Retell key','Staging','08:42','Medium'],['S. Conti','Exported school report','Roma','08:18','Low'],['System','Blocked repeated login','User 8F42','07:56','High']],controls:[['Role and tenant policy verification','Passing'],['Secrets, credentials and isolation','Restricted'],['Retention, consent and deletion','Review queue']]},
-    settings:{tag:'PLATFORM CONFIGURATION',title:'Platform settings',desc:'Manage environments, integrations, feature flags, regional defaults and operational policies.',action:'Review controls',stats:[['Environments','3','Staging + prod'],['Integrations','9','All connected'],['Feature flags','24','6 gradual rollout'],['Regions','4','EU primary'],['Config alerts','2','Needs review']],panel:'Environment controls',cols:['Environment','Database','Workflows','Voice','Status'],rows:[['Staging','Supabase Staging','n8n Staging','Retell Staging','Healthy'],['Production EU','Supabase EU','n8n Production','Retell Production','Healthy'],['Disaster recovery','Warm standby','Paused','Reserved','Ready']],controls:[['Integrations, secrets and API credentials','Restricted access'],['Feature flags, defaults and regions','Open controls'],['Monitoring, backups and recovery','Review status']]}
+
+  const views = ['overview', 'schools', 'users', 'curriculum', 'calls', 'security', 'settings'];
+  const view = views.includes(new URLSearchParams(location.search).get('view'))
+    ? new URLSearchParams(location.search).get('view')
+    : 'overview';
+  const navigation = [
+    ['overview', 'Overview'],
+    ['schools', 'Schools'],
+    ['users', 'Users & roles'],
+    ['curriculum', 'Curriculum'],
+    ['calls', 'Voice & calls'],
+    ['security', 'Security'],
+    ['settings', 'Platform settings']
+  ];
+  const titles = {
+    overview: ['Platform overview', 'A staging-only view of Penny AI platform activity.'],
+    schools: ['Schools', 'School management will be connected here.'],
+    users: ['Users & roles', 'Platform-level role controls will be connected here.'],
+    curriculum: ['Curriculum', 'Global lesson management will be connected here.'],
+    calls: ['Voice & calls', 'Platform call operations will be connected here.'],
+    security: ['Security', 'Audit and security controls will be connected here.'],
+    settings: ['Platform settings', 'Environment and feature controls will be connected here.']
   };
-  const p=pages[current];
-  const statusClass=value=>/review|draft|degraded|medium|pending|testing/i.test(value)?'review':/high|critical|failed/i.test(value)?'danger':'';
-  const stats=p.stats.map(x=>`<article class="super-stat"><span>${x[0]}</span><b>${x[1]}</b><small>${x[2]}</small></article>`).join('');
-  const rows=p.rows.map(r=>`<div class="super-row">${r.map((x,i)=>i===r.length-1?`<span class="status ${statusClass(x)}">${x}</span>`:`<${i?'span':'b'}>${x}</${i?'span':'b'}>`).join('')}</div>`).join('');
-  const controls=p.controls.map(x=>`<div class="control-item"><b>${x[0]}</b><small>${x[1]}</small></div>`).join('');
-  const navigation=nav.map(x=>`<a class="${current===x[0]?'active':''}" href="?view=${x[0]}">${x[1]}</a>`).join('');
-  document.getElementById('superAdminPortal').innerHTML=`<aside class="super-sidebar"><div class="super-brand">PennyAI<small>SUPER ADMIN • PLATFORM</small></div><nav class="super-nav">${navigation}</nav><div class="super-security">Platform Operations<br>Authorized personnel only</div><a class="preview-return" href="/figma-hub.html">← Preview hub</a></aside><main class="super-main"><header class="super-top"><div><h1>${p.title}</h1><p>Platform Operations · demonstration workspace</p></div><div class="super-user"><input placeholder="Search platform…"><span class="super-avatar">MM</span></div></header><div class="super-content"><section class="super-hero"><div><small>${p.tag}</small><h2>${p.title}</h2><p>${p.desc}</p></div><div class="super-actions"><button class="super-button light">Export</button><button class="super-button">${p.action}</button></div></section><section class="super-stats">${stats}</section><section class="super-grid"><article class="super-panel"><span class="live-tag">LIVE</span><h3>${p.panel}</h3><p>Platform-wide demonstration data</p><div class="super-table"><div class="super-row head">${p.cols.map(x=>`<span>${x}</span>`).join('')}</div>${rows}</div></article><aside class="super-panel"><h3>${current==='overview'?'Executive attention queue':'Platform controls'}</h3><p>Privileged actions remain logged</p><div class="control-list">${controls}</div></aside></section><div class="super-notice"><span>Visual prototype only · no live services or production data connected</span><b>Isolated staging</b></div></div></main><nav class="super-mobile"><a class="${current==='overview'?'active':''}" href="?view=overview">Home</a><a class="${current==='schools'?'active':''}" href="?view=schools">Schools</a><a class="${current==='users'?'active':''}" href="?view=users">Users</a><a class="${current==='agents'?'active':''}" href="?view=agents">AI</a><a href="?view=settings">More</a></nav>`;
+  let data = { adminName: 'Super Admin', counts: {} };
+
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+  const initials = name => String(name || 'SA').split(/\s+/).map(part => part[0]).join('').slice(0, 2).toUpperCase();
+  const count = key => Number(data.counts[key] || 0).toLocaleString('en-US');
+  const navLink = ([key, label]) => `<a class="${view === key ? 'active' : ''}" href="?view=${key}">${esc(label)}</a>`;
+  const comingSoon = (title, message) => `<section class="super-panel super-empty"><span class="live-tag">COMING SOON</span><h2>${esc(title)}</h2><p>${esc(message)}</p><p class="super-muted">This workspace intentionally does not display sample data. It will show real staging information once this area is connected.</p></section>`;
+
+  function overview() {
+    return `<section class="super-hero"><div><small>STAGING COMMAND CENTRE</small><h2>Welcome, ${esc(data.adminName.split(/\s+/)[0])}</h2><p>These numbers are loaded from the Penny AI staging environment.</p></div><div class="super-actions"><a class="super-button" href="?view=users">Review users</a></div></section>
+      <section class="super-stats">
+        <article class="super-stat"><span>Schools</span><b>${count('schools')}</b><small>Staging records</small></article>
+        <article class="super-stat"><span>All users</span><b>${count('users')}</b><small>All roles</small></article>
+        <article class="super-stat"><span>Teachers</span><b>${count('teachers')}</b><small>Teacher accounts</small></article>
+        <article class="super-stat"><span>Learners</span><b>${count('students')}</b><small>Learner accounts</small></article>
+        <article class="super-stat"><span>Lesson attempts</span><b>${count('lessonAttempts')}</b><small>Recorded attempts</small></article>
+      </section>
+      <section class="super-grid">
+        <article class="super-panel"><span class="live-tag">LIVE STAGING DATA</span><h3>Platform foundation</h3><p>The current staging environment contains ${count('lessons')} lessons and ${count('callLogs')} recorded call logs. Counts are read-only in this first release.</p><div class="control-list"><div class="control-item"><b>Schools</b><small>${count('schools')} staging school record${data.counts.schools === 1 ? '' : 's'}</small></div><div class="control-item"><b>Identity</b><small>${count('teachers')} teachers and ${count('students')} learners</small></div><div class="control-item"><b>Learning activity</b><small>${count('lessonAttempts')} lesson attempt${data.counts.lessonAttempts === 1 ? '' : 's'} recorded</small></div></div></article>
+        <aside class="super-panel"><h3>Next connections</h3><p>Build these after the dashboard review.</p><div class="control-list"><div class="control-item"><b>School management</b><small>Coming soon</small></div><div class="control-item"><b>Role management</b><small>Coming soon</small></div><div class="control-item"><b>Audit history</b><small>Coming soon</small></div></div></aside>
+      </section>
+      <div class="super-notice"><span>Staging only. No production data, settings, or credentials are shown here.</span><b>Read-only foundation</b></div>`;
+  }
+
+  function content() {
+    if (view === 'overview') return overview();
+    const [title, description] = titles[view];
+    return comingSoon(title, description);
+  }
+
+  function render() {
+    const [title, description] = titles[view];
+    document.getElementById('superAdminPortal').innerHTML = `<aside class="super-sidebar"><div class="super-brand">PENNY AI<small>SUPER ADMIN · STAGING</small></div><nav class="super-nav">${navigation.map(navLink).join('')}</nav><div class="super-security">Restricted staging workspace<br>System administrators only</div><button class="preview-return" id="signOutButton">Sign out</button></aside><main class="super-main"><header class="super-top"><div><h1>${esc(title)}</h1><p>${esc(description)}</p></div><div class="super-user"><span class="super-avatar">${esc(initials(data.adminName))}</span></div></header><div class="super-content">${content()}</div></main><nav class="super-mobile">${navigation.slice(0, 5).map(navLink).join('')}</nav>`;
+  }
+
+  async function initialize() {
+    try {
+      const config = await fetch('/api/config').then(response => response.json());
+      const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+      const client = createClient(config.supabaseUrl, config.supabaseAnonKey);
+      const { data: { session } } = await client.auth.getSession();
+      if (!session) { window.location.href = '/signin.html'; return; }
+      const response = await fetch('/api/super-admin/overview', { headers: { Authorization: `Bearer ${session.access_token}` } });
+      if (response.status === 401 || response.status === 403) { window.location.href = '/signin.html'; return; }
+      if (!response.ok) throw new Error('Unable to load the platform overview');
+      data = await response.json();
+      render();
+      document.getElementById('signOutButton').addEventListener('click', async () => {
+        await client.auth.signOut();
+        window.location.href = '/signin.html';
+      });
+    } catch (error) {
+      console.error(error);
+      document.getElementById('superAdminPortal').innerHTML = '<main class="super-main"><div class="super-content"><section class="super-panel super-empty"><h2>Unable to load the Super Admin workspace</h2><p>Please sign in again and confirm this account has the System Admin role in staging.</p></section></div></main>';
+    }
+  }
+
+  initialize();
 })();
