@@ -35,6 +35,15 @@
   };
   const statusAttempts = status => attempts().filter(attempt => attempt.attempt_status === status);
   const lessonTitle = attempt => attempt?.lessons?.title || 'English lesson';
+  const completedAttempts = () => attempts().filter(attempt => ['passed', 'failed'].includes(attempt.attempt_status));
+  const skillAverages = () => [
+    ['Vocabulary', 'vocabulary_score'],
+    ['Grammar', 'grammar_score'],
+    ['Fluency', 'fluency_score']
+  ].map(([label, field]) => {
+    const values = completedAttempts().map(attempt => Number(attempt[field])).filter(Number.isFinite);
+    return values.length ? [label, Number((values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(1))] : null;
+  }).filter(Boolean);
   const card = (attempt, label, page) => `<article class="proto-card white"><h3>${esc(lessonTitle(attempt))}</h3><p>${esc(label)} · Final score: ${score(attempt)}%</p><span class="proto-pill">${attempt.attempt_status === 'passed' ? 'Passed' : attempt.attempt_status === 'failed' ? 'Retry recommended' : 'Continue when ready'}</span><a class="proto-btn dark" href="?view=${page}">${page === 'review' ? 'Review' : 'View details'} →</a></article>`;
   const top = titleMap[view];
   function link(page,label) { return `<a class="proto-nav ${view === page || (page === 'lessons' && ['details','live'].includes(view)) ? 'active' : ''}" href="?view=${page}">${label}</a>`; }
@@ -68,9 +77,9 @@
   function failed() { return `<section class="state-card warning-state"><span class="proto-pill">LESSON RESULT</span><h2>Not passed this time</h2><p>Your final score was 73.4%, but Vocabulary was 38.0%. A score below 40.0% in any assessed skill means this lesson needs another attempt.</p><p class="state-note">This attempt used your lesson minutes. Penny will guide you through a focused retry.</p><a class="proto-btn dark" href="?view=details">View retry lesson →</a></section>`; }
   function incomplete() { return `<section class="state-card info-state"><span class="proto-pill">LESSON INCOMPLETE</span><h2>Your lesson ended early</h2><p>You completed less than one-third of the planned lesson time, so no lesson minutes were used.</p><a class="proto-btn dark" href="?view=details">Return to lesson details →</a></section>`; }
   function outOfMinutes() { return `<section class="state-card coral-state"><span class="proto-pill">LESSON MINUTES USED</span><h2>You have no minutes remaining this cycle</h2><p>Your next lesson will unlock when your subscription renews or your plan is updated.</p><a class="proto-btn dark" href="?view=home">Back to Home →</a></section>`; }
-  function progress() { return `
-    <section class="proto-cards three stat-row"><article class="proto-card lavender"><span>Current level</span><h2>B1</h2><p>68% to B2</p></article><article class="proto-card mint"><span>Lesson streak</span><h2>4 weeks</h2><p>Best: 6 weeks</p></article><article class="proto-card coral"><span>Minutes used</span><h2>15 / 50</h2><p>35 remaining</p></article></section>
-    <section class="proto-grid progress-grid"><article class="proto-panel"><h3>Level progress</h3><p>Fluency and listening are improving fastest.</p>${[['Grammar',55],['Fluency',68],['Listening',74],['Vocabulary',61]].map(x=>`<div class="skill-line"><span>${x[0]}</span>${pct(x[1])}</div>`).join('')}</article><article class="proto-panel account"><h3>Account & support</h3>${[['Messages','2 unread'],['Notifications','3 new'],['Profile & settings','Language, timezone'],['Help center','Guides and contact']].map(x=>`<div><b>${x[0]}</b><small>${x[1]}</small><span>→</span></div>`).join('')}</article></section>`; }
+  function progress() { const skills = skillAverages(); const completed = completedAttempts().length; const used = Number(liveData?.subscription?.minutesUsed || 0); const allocated = Number(liveData?.subscription?.minutesAllocated || 0); const remaining = Math.max(0, allocated - used); return `
+    <section class="proto-cards three stat-row"><article class="proto-card lavender"><span>Current level</span><h2>${esc(liveData?.profile?.englishLevel || '—')}</h2><p>Your current course level</p></article><article class="proto-card mint"><span>Completed lessons</span><h2>${completed}</h2><p>${completed === 1 ? 'Result recorded' : 'Results recorded'}</p></article><article class="proto-card coral"><span>Minutes used</span><h2>${used} / ${allocated || '—'}</h2><p>${allocated ? `${remaining} remaining` : 'Plan allocation pending'}</p></article></section>
+    <section class="proto-grid progress-grid"><article class="proto-panel"><h3>Skill progress</h3>${skills.length ? `<p>Average scores from completed assessed lessons.</p>${skills.map(([label, value])=>`<div class="skill-line"><span>${label} ${value.toFixed(1)}%</span>${pct(value)}</div>`).join('')}` : '<p>Your Vocabulary, Grammar, and Fluency scores will appear here after a completed assessed lesson.</p>'}</article><article class="proto-panel account"><span class="proto-label">COMING SOON</span><h3>Account & support</h3><p>Messages, notifications, profile settings, and help will be added when these features are connected.</p></article></section>`; }
   const renderers = {home,lessons,details,live,result,review,failed,incomplete,'out-of-minutes':outOfMinutes,'self-study':selfStudy,practice,progress};
   function render() {
     const name = liveData?.profile?.name || 'Learner';
