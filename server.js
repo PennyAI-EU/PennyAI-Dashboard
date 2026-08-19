@@ -22,6 +22,37 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
   },
 });
 
+// Production safety gate for new Retell web calls. This intentionally fails
+// closed: a missing control row or database error keeps web calls paused.
+async function webCallsAreEnabled() {
+  try {
+    const { data, error } = await supabase
+      .from("production_controls")
+      .select("enabled")
+      .eq("control_key", "calls_enabled")
+      .maybeSingle();
+
+    if (error) {
+      console.error("[web-call-safety] Unable to read calls_enabled:", error.message);
+      return false;
+    }
+
+    return data?.enabled === true;
+  } catch (error) {
+    console.error("[web-call-safety] Unexpected calls_enabled lookup failure:", error.message);
+    return false;
+  }
+}
+
+async function requireWebCallsEnabled(res) {
+  if (await webCallsAreEnabled()) return true;
+
+  res.status(503).json({
+    error: "Web calls are temporarily unavailable while we complete our launch checks. Please try again later.",
+  });
+  return false;
+}
+
 // supabase.auth.getUser(token) always makes a network round trip to the Auth
 // server (~500-600ms observed) to validate the JWT, and nearly every API route
 // on the dashboard's load path calls it once — that latency was compounding
@@ -383,6 +414,8 @@ app.post("/create-demo-call", async (req, res) => {
   }
 
   try {
+    if (!(await requireWebCallsEnabled(res))) return;
+
     const webCallResponse = await retell.call.createWebCall({
       agent_id: process.env.RETELL_AGENT_ID,
       retell_llm_dynamic_variables: { instruction: `${LESSON_PREAMBLE}\n\n${finalInstruction}` },
@@ -434,6 +467,8 @@ app.post("/create-call", async (req, res) => {
   }
 
   try {
+    if (!(await requireWebCallsEnabled(res))) return;
+
     const webCallResponse = await retell.call.createWebCall({
       agent_id: process.env.RETELL_AGENT_ID,
       retell_llm_dynamic_variables: { 
