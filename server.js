@@ -286,6 +286,7 @@ app.post("/api/register", async (req, res) => {
       name,
       email,
       call_status: "pending",
+      call_purpose: "onboarding",
       scheduled_time: new Date().toISOString(),
     });
 
