@@ -139,6 +139,29 @@
     box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
   }
 
+  /* -- PASSWORD SHOW/HIDE -- */
+  .pw-wrap { position: relative; display: block; }
+  .pw-wrap .form-input { padding-right: 44px; }
+  .pw-toggle {
+    position: absolute; top: 50%; right: 6px;
+    transform: translateY(-50%);
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: none; padding: 0;
+    color: var(--muted); cursor: pointer;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .pw-toggle:hover { color: var(--text); background: var(--off); }
+  .pw-toggle:focus-visible {
+    outline: none; color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+  }
+  .pw-toggle svg { width: 18px; height: 18px; pointer-events: none; }
+  .pw-toggle .icon-hide { display: none; }
+  .pw-toggle.is-visible .icon-show { display: none; }
+  .pw-toggle.is-visible .icon-hide { display: block; }
+
   .form-row-split {
     display: flex; justify-content: space-between;
     align-items: center; margin-bottom: 22px;
@@ -272,7 +295,10 @@
 
         <div class="form-group">
           <label class="form-label" for="password">Password</label>
-          <input class="form-input" id="password" type="password" placeholder="Your password" autocomplete="current-password" required/>
+          <span class="pw-wrap"><input class="form-input" id="password" type="password" placeholder="Your password" autocomplete="current-password" required/><button class="pw-toggle" type="button" data-pw-toggle="password" aria-label="Show password" aria-pressed="false" tabindex="0">
+            <svg class="icon-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="icon-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button></span>
         </div>
 
         <div class="form-row-split">
@@ -318,11 +344,17 @@
     <p>You're signed in with a default password. Please choose a new one before continuing.</p>
     <div class="form-group">
       <label class="form-label" for="new-password">New password</label>
-      <input class="form-input" id="new-password" type="password" placeholder="At least 8 characters" autocomplete="new-password"/>
+      <span class="pw-wrap"><input class="form-input" id="new-password" type="password" placeholder="At least 8 characters" autocomplete="new-password"/><button class="pw-toggle" type="button" data-pw-toggle="new-password" aria-label="Show password" aria-pressed="false" tabindex="0">
+            <svg class="icon-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="icon-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button></span>
     </div>
     <div class="form-group">
       <label class="form-label" for="confirm-password">Confirm password</label>
-      <input class="form-input" id="confirm-password" type="password" placeholder="Repeat your new password" autocomplete="new-password"/>
+      <span class="pw-wrap"><input class="form-input" id="confirm-password" type="password" placeholder="Repeat your new password" autocomplete="new-password"/><button class="pw-toggle" type="button" data-pw-toggle="confirm-password" aria-label="Show password" aria-pressed="false" tabindex="0">
+            <svg class="icon-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="icon-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button></span>
     </div>
     <div id="pw-error" class="form-error"></div>
     <button class="btn-submit" id="pw-save-btn" style="margin-top:8px;">Save and continue →</button>
@@ -468,6 +500,24 @@
       }
     });
   }
+})();
+</script>
+
+<script>
+/* Password show/hide toggles */
+(function () {
+  document.querySelectorAll('.pw-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var input = document.getElementById(btn.getAttribute('data-pw-toggle'));
+      if (!input) return;
+      var show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      btn.classList.toggle('is-visible', show);
+      btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+      btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      input.focus();
+    });
+  });
 })();
 </script>
 
