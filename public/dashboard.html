@@ -9,19 +9,30 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
+    /* Figma: Penny AI Learner portal */
     --white: #ffffff;
-    --off: #f7f6f3;
-    --border: #e8e6e0;
-    --text: #1a1a1a;
-    --muted: #6b6b6b;
-    --accent: #2563eb;
-    --accent-dark: #1d4ed8;
-    --accent-light: #eff4ff;
+    --off: #f7f8fc;              /* page background */
+    --sidebar-bg: #eef0fb;
+    --border: #e3e5f0;
+    --text: #181b30;
+    --muted: #636b82;
+    --accent: #5b5ce2;           /* primary purple */
+    --accent-dark: #4a4bd0;
+    --accent-light: #f0f2fc;
+    --pink: #f45aa0;
+    --ink: #181b30;
     --green: #16a34a;
     --green-light: #f0fdf4;
+    /* activity pastels — Figma base, deepened ~20% for vibrancy */
+    --hero-mint: #cbebdd;
+    --card-lilac: #c9a9ec;
+    --card-mint: #a2e2d4;
+    --card-peach: #ffb3aa;
+    --chip-ink: #29475c;
     --radius: 12px;
     --radius-lg: 20px;
-    --sidebar-width: 260px;
+    --radius-xl: 24px;
+    --sidebar-width: 226px;
   }
   body {
     font-family: 'DM Sans', sans-serif;
@@ -135,12 +146,12 @@
     margin-left: var(--sidebar-width);
     flex: 1;
     min-height: 100vh;
-    padding: 40px clamp(24px, 5vw, 60px);
+    padding: 0 clamp(18px, 3vw, 32px) 48px;
   }
   
   .section {
     display: none;
-    max-width: 1000px;
+    max-width: 1160px;
     margin: 0 auto;
     animation: fadeIn 0.3s ease-out;
   }
@@ -401,32 +412,191 @@
   .btn-secondary:hover { background: var(--off); }
   .modal-actions { display:flex; justify-content:flex-end; gap:12px; margin-top: 24px; }
 
+
+  /* ===== FIGMA LEARNER PORTAL ===== */
+  .sidebar { background: var(--sidebar-bg); border-right: none; padding: 22px 14px; }
+  .brand { display:flex; align-items:center; gap:10px; padding: 4px 6px 26px; text-decoration:none; }
+  .brand-mark {
+    width:36px; height:36px; border-radius:12px; background: var(--accent);
+    color:#fff; font-weight:700; font-size:15px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .brand-name { font-size:15px; font-weight:700; letter-spacing:.02em; color: var(--text); }
+
+  .nav-item {
+    background: var(--white); border-radius: 12px;
+    padding: 13px 16px; margin-bottom: 8px;
+    font-size: 13.5px; font-weight: 500; color: var(--text);
+    display:flex; align-items:center; gap:10px; cursor:pointer;
+    border: none; transition: background .15s, color .15s, transform .1s;
+  }
+  .nav-item:hover { background:#fafbff; transform: translateY(-1px); }
+  .nav-item.active { background: var(--accent); color:#fff; }
+  .nav-item.active svg { color:#fff; }
+  .nav-item.is-soon { opacity:.62; cursor: not-allowed; }
+  .nav-item.is-soon:hover { transform:none; background: var(--white); }
+  .nav-item svg { width:17px; height:17px; flex-shrink:0; }
+
+  .proto-note {
+    background: var(--white); border-radius:14px; padding:14px 16px; margin-top:14px;
+  }
+  .proto-note b { display:block; font-size:12px; color: var(--accent); margin-bottom:5px; font-weight:600; }
+  .proto-note span { font-size:11px; color: var(--muted); line-height:1.5; }
+
+  /* TOP BAR */
+  .topbar {
+    background: var(--white);
+    margin: 0 calc(-1 * clamp(18px, 3vw, 32px));
+    padding: 22px clamp(18px, 3vw, 32px);
+    display:flex; align-items:center; gap:16px;
+    margin-bottom: 28px;
+  }
+  .topbar-greet { flex:1; min-width:0; }
+  .topbar-greet h1 { font-size:24px; font-weight:700; letter-spacing:-.3px; color:var(--text); }
+  .topbar-greet p { font-size:13px; color:var(--muted); margin-top:5px; }
+  .icon-btn {
+    width:44px; height:44px; border-radius:14px; background:var(--accent-light);
+    border:none; cursor:pointer; position:relative; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--muted); transition: background .15s;
+  }
+  .icon-btn:hover { background:#e6e9fa; }
+  .icon-btn svg { width:19px; height:19px; }
+  .icon-badge {
+    position:absolute; top:7px; right:8px; min-width:16px; height:16px; padding:0 4px;
+    border-radius:8px; background:var(--pink); color:#fff;
+    font-size:10px; font-weight:700; line-height:16px; text-align:center;
+  }
+  .topbar-profile { display:flex; align-items:center; gap:11px; flex-shrink:0; }
+  .topbar-avatar {
+    width:44px; height:44px; border-radius:22px; background:var(--pink); color:#fff;
+    font-size:13px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .topbar-meta strong { display:block; font-size:12.5px; font-weight:600; color:var(--text); }
+  .topbar-meta span { display:block; font-size:10.5px; color:var(--muted); margin-top:2px; }
+
+  /* HERO */
+  .journey-hero {
+    background: var(--hero-mint); border-radius: var(--radius-xl);
+    padding: 28px; margin-bottom: 30px;
+    display:flex; align-items:flex-start; justify-content:space-between; gap:24px;
+  }
+  .level-chip {
+    display:inline-block; background:var(--white); border-radius:99px;
+    padding:7px 13px; font-size:11px; font-weight:600;
+    letter-spacing:.04em; color:var(--chip-ink); margin-bottom:20px;
+  }
+  .journey-hero h2 { font-size:30px; font-weight:700; letter-spacing:-.5px; color:var(--text); }
+  .journey-hero .hero-sub { font-size:14px; color:var(--muted); margin-top:9px; }
+  .btn-ink {
+    display:inline-flex; align-items:center; gap:7px; margin-top:22px;
+    background: var(--ink); color:#fff; border:none; border-radius:12px;
+    padding:13px 18px; font-family:inherit; font-size:13px; font-weight:600;
+    cursor:pointer; transition: transform .12s, opacity .15s;
+  }
+  .btn-ink:hover:not(:disabled) { transform: translateY(-1px); }
+  .btn-ink:disabled { opacity:.45; cursor:not-allowed; }
+  .hero-progress { text-align:right; flex-shrink:0; }
+  .hero-progress b { display:block; font-size:32px; font-weight:700; color:var(--text); letter-spacing:-1px; }
+  .hero-progress span { display:block; font-size:12px; color:var(--muted); margin-top:6px; }
+
+  /* ACTIVITY CARDS */
+  .home-h2 { font-size:19px; font-weight:700; color:var(--text); margin-bottom:16px; }
+  .activity-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:22px; margin-bottom:30px; }
+  .activity-card {
+    border-radius:20px; padding:20px; min-height:150px;
+    border:none; text-align:left; font-family:inherit; cursor:pointer;
+    display:flex; flex-direction:column;
+    transition: transform .14s, box-shadow .14s;
+  }
+  .activity-card:hover { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(24,27,48,.13); }
+  .activity-card h3 { font-size:17px; font-weight:700; color:var(--text); }
+  .activity-card p { font-size:12.5px; color:#4c556d; margin-top:9px; line-height:1.55; }
+  .activity-card .soon-tag {
+    margin-top:auto; align-self:flex-start;
+    background: rgba(255,255,255,.72); border-radius:99px;
+    padding:5px 11px; font-size:10.5px; font-weight:600;
+    letter-spacing:.03em; color:var(--chip-ink);
+  }
+  .activity-card.is-soon { cursor:default; }
+  .activity-card.is-soon:hover { transform:none; box-shadow:none; }
+  .card-lilac { background: var(--card-lilac); }
+  .card-mint  { background: var(--card-mint); }
+  .card-peach { background: var(--card-peach); }
+
+  /* BOTTOM ROW */
+  .home-bottom { display:grid; grid-template-columns: 2fr 1fr; gap:22px; }
+  .panel { background:var(--white); border-radius:20px; padding:22px; }
+  .panel-eyebrow {
+    font-size:11px; font-weight:600; letter-spacing:.06em;
+    color:var(--accent); text-transform:uppercase;
+  }
+  .panel h3 { font-size:20px; font-weight:700; color:var(--text); margin-top:14px; line-height:1.35; }
+  .panel .panel-meta { font-size:13px; color:var(--muted); margin-top:12px; }
+  .panel h4 { font-size:18px; font-weight:700; color:var(--text); }
+  .goal-count { font-size:24px; font-weight:700; color:var(--accent); margin-top:18px; }
+  .goal-track { height:9px; border-radius:99px; background:var(--border); margin-top:14px; overflow:hidden; }
+  .goal-fill { height:100%; border-radius:99px; background:var(--accent); width:0%; transition: width .5s ease; }
+  .goal-note { font-size:12px; color:var(--muted); margin-top:13px; line-height:1.5; }
+  .btn-accent {
+    display:inline-flex; align-items:center; gap:7px; margin-top:22px;
+    background:var(--accent); color:#fff; border:none; border-radius:12px;
+    padding:13px 18px; font-family:inherit; font-size:13px; font-weight:600;
+    cursor:pointer; transition: background .15s, transform .12s;
+  }
+  .btn-accent:hover { background:var(--accent-dark); transform: translateY(-1px); }
+
+  @media (max-width: 980px) {
+    .activity-grid { grid-template-columns: 1fr; }
+    .home-bottom { grid-template-columns: 1fr; }
+    .journey-hero { flex-direction:column; }
+    .hero-progress { text-align:left; }
+  }
+  @media (max-width: 800px) {
+    .brand-name, .proto-note { display:none; }
+    .brand { justify-content:center; padding-bottom:20px; }
+    .topbar { flex-wrap:wrap; }
+    .topbar-meta { display:none; }
+    .topbar-greet h1 { font-size:20px; }
+  }
 </style>
 </head>
 <body>
 
 <aside class="sidebar">
-  <a class="nav-logo" href="/">Penny<span>AI</span></a>
+  <a class="brand" href="/">
+    <div class="brand-mark">P</div>
+    <div class="brand-name">PENNY AI</div>
+  </a>
   
   <nav class="nav-menu">
     <div class="nav-item active" id="nav-overview" onclick="showSection('overview')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-      <span>Overview</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>
+      <span>Home</span>
     </div>
     <div class="nav-item" id="nav-lessons" onclick="showSection('lessons')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       <span>My Lessons</span>
     </div>
+    <div class="nav-item is-soon" id="nav-selfstudy" title="Coming soon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.25 4 3v15l8 3 8-3V3z"/><path d="M12 6.25V21"/></svg>
+      <span>Self-Study</span>
+    </div>
+    <div class="nav-item is-soon" id="nav-practice" title="Coming soon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/><path d="M19 11a7 7 0 0 1-14 0"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+      <span>Practice with Penny</span>
+    </div>
     <div class="nav-item" id="nav-history" onclick="showSection('history')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-      <span>History</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg>
+      <span>Progress</span>
     </div>
     <div class="nav-item" id="nav-profile" onclick="showSection('profile')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       <span>Profile</span>
     </div>
     <div class="nav-item" id="nav-messages" onclick="showSection('messages')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <span>Messages</span>
       <span id="nav-msg-badge" style="display:none; background:#ef4444; color:white; border-radius:50%; width:16px; height:16px; font-size:10px; font-weight:700; align-items:center; justify-content:center; margin-left:auto; flex-shrink:0;"></span>
     </div>
@@ -449,51 +619,71 @@
 
 <main class="main-content">
   
-  <!-- OVERVIEW SECTION -->
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-greet">
+      <h1><span id="greet-time">Welcome back</span>, <span id="greet-name">learner</span></h1>
+      <p>Ready for another step towards confident English?</p>
+    </div>
+    <button class="icon-btn" id="topbar-bell" onclick="showSection('messages')" aria-label="Messages">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="icon-badge" id="topbar-bell-badge" style="display:none;">0</span>
+    </button>
+    <div class="topbar-profile">
+      <div class="topbar-avatar" id="topbar-initials">—</div>
+      <div class="topbar-meta">
+        <strong id="topbar-name">Loading…</strong>
+        <span id="topbar-level">—</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- HOME SECTION -->
   <section id="section-overview" class="section active">
-    <div class="section-header">
-      <h1>Welcome back, <span id="greet-name">learner</span>.</h1>
-      <p>Here's what's happening with your English journey.</p>
-    </div>
 
-    <div class="grid">
-      <div class="card">
-        <div class="card-label">English Level</div>
-        <div class="card-value" id="stat-level">—</div>
-        <div class="card-sub">Your current proficiency</div>
+    <div class="journey-hero">
+      <div>
+        <div class="level-chip" id="hero-chip">LEVEL PENDING</div>
+        <h2>Continue your journey</h2>
+        <div class="hero-sub" id="hero-sub">Your next lesson is being prepared.</div>
+        <button class="btn-ink" id="hero-continue" onclick="showSection('lessons')" disabled>Continue lesson →</button>
       </div>
-      <div class="card">
-        <div class="card-label">Lessons Completed</div>
-        <div class="card-value" id="stat-completed">—</div>
-        <div class="card-sub">Total sessions finished</div>
-      </div>
-      <div class="card">
-        <div class="card-label">Lesson Balance</div>
-        <div class="card-value" id="stat-remaining">—</div>
-        <div class="card-sub" id="stat-balance-sub">of <span id="stat-allocated">—</span> allocated</div>
-      </div>
-      <div class="card">
-        <div class="card-label">Learning Time</div>
-        <div class="card-value" id="stat-total-time">— <small style="font-size: 14px; font-weight: 400; color: var(--muted)">total mins</small></div>
-        <div class="card-sub" style="margin-top: 10px;">This month's usage</div>
-        <div class="progress-container" style="margin-top: 4px;">
-          <div class="progress-bar"><div class="progress-fill" id="time-progress"></div></div>
-          <div class="progress-labels">
-            <span id="time-used">0 used</span>
-            <span id="time-allocated">0 allocated</span>
-          </div>
-        </div>
+      <div class="hero-progress">
+        <b id="hero-pct">0%</b>
+        <span id="hero-pct-label">level progress</span>
       </div>
     </div>
 
-    <div class="card" style="margin-bottom: 24px;">
-      <div class="card-label">Next Scheduled Call</div>
-      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
-        <div>
-          <div class="card-value" id="next-call-time">No pending calls</div>
-          <div class="card-sub" id="next-call-status">Check back later for your next session.</div>
-        </div>
-        <button class="btn-primary" onclick="showSection('lessons')">Manage Schedule</button>
+    <h2 class="home-h2">Choose your next activity</h2>
+    <div class="activity-grid">
+      <button class="activity-card card-lilac" onclick="showSection('lessons')">
+        <h3>My Lessons</h3>
+        <p id="act-lessons-sub">Your next live lesson is ready.</p>
+      </button>
+      <div class="activity-card card-mint is-soon">
+        <h3>Self-Study</h3>
+        <p>Unlimited practice at your pace.</p>
+        <span class="soon-tag">COMING SOON</span>
+      </div>
+      <div class="activity-card card-peach is-soon">
+        <h3>Practice with Penny</h3>
+        <p>Start an informal speaking call.</p>
+        <span class="soon-tag">COMING SOON</span>
+      </div>
+    </div>
+
+    <div class="home-bottom">
+      <div class="panel">
+        <div class="panel-eyebrow">Upcoming lesson</div>
+        <h3 id="upcoming-title">No lesson scheduled yet</h3>
+        <div class="panel-meta" id="upcoming-meta">Your teacher will schedule your next session.</div>
+        <button class="btn-accent" onclick="showSection('lessons')">View lesson →</button>
+      </div>
+      <div class="panel">
+        <h4>Weekly goal</h4>
+        <div class="goal-count" id="goal-count">0 of 0 lessons</div>
+        <div class="goal-track"><div class="goal-fill" id="goal-fill"></div></div>
+        <div class="goal-note" id="goal-note">Set a weekly frequency to track your goal.</div>
       </div>
     </div>
   </section>
@@ -928,47 +1118,100 @@ async function getDashboardData(userId, userPhone, userEmail, authMeta) {
   }
 }
 
+/* Null-safe DOM helpers — markup differs by section, so guard every lookup. */
+function setText(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
+function setHTML(id, val) { const el = document.getElementById(id); if (el) el.innerHTML = val; }
+function initialsOf(name) {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '—';
+  return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+}
+/* Lessons per level — used for the hero progress ring. Keep in step with the lessons table. */
+const LEVEL_LESSON_COUNTS = { A1: 10, A2: 10, B1: 10, B2: 10, C1: 10, C2: 10 };
+
 function updateUI(data) {
   if (!data) return;
 
   // Global user info
   const name = data.profile.name || 'Learner';
-  document.getElementById('greet-name').textContent = name.split(' ')[0];
-  document.getElementById('user-display-name').textContent = name;
-  document.getElementById('user-display-email').textContent = data.profile.email;
-  document.getElementById('avatar-initials').textContent = name.substring(0, 1).toUpperCase();
+  const first = name.split(' ')[0];
+  const hour = new Date().getHours();
+  setText('greet-time', hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening'));
+  setText('greet-name', first);
+  setText('user-display-name', name);
+  setText('user-display-email', data.profile.email);
+  setText('avatar-initials', name.substring(0, 1).toUpperCase());
+  setText('topbar-initials', initialsOf(name));
+  setText('topbar-name', name);
 
-  // Overview Stats
-  document.getElementById('stat-level').textContent = data.profile.englishLevel || '—';
-  document.getElementById('stat-completed').textContent = data.lessonProgress.completedCount;
-  const allocated = data.profile.allocatedLessons || 0;
-  const remaining = Math.max(0, allocated - data.lessonProgress.completedCount);
-  document.getElementById('stat-remaining').textContent = remaining;
-  document.getElementById('stat-allocated').textContent = allocated;
-  document.getElementById('stat-total-time').innerHTML = `${data.timeTracking.total || 0} <small style="font-size: 14px; font-weight: 400; color: var(--muted)">total mins</small>`;
-  
-  const timeUsed = data.timeTracking.used || 0;
-  const timeAllocated = data.timeTracking.allocated || 0;
-  const pct = timeAllocated > 0 ? Math.min(100, (timeUsed / timeAllocated) * 100) : 0;
-  document.getElementById('time-progress').style.width = pct + '%';
-  document.getElementById('time-used').textContent = `${timeUsed}m used`;
-  document.getElementById('time-allocated').textContent = `${timeAllocated}m allocated`;
+  // ---- HOME: hero ----
+  const level = data.profile.englishLevel && data.profile.englishLevel !== 'Pending...'
+    ? data.profile.englishLevel : null;
+  setText('topbar-level', level ? level + ' learner' : 'Level pending');
+  setText('hero-chip', level ? level + ' · IN PROGRESS' : 'LEVEL PENDING');
 
+  const lessonNo = data.lessonProgress.currentLessonId;
+  const nextLesson = data.lessonProgress.nextLessonDetails;
+  if (nextLesson && nextLesson.title) {
+    setText('hero-sub', 'Lesson ' + (lessonNo || '') + ' · ' + nextLesson.title);
+    setText('act-lessons-sub', 'Next up: ' + nextLesson.title);
+    const btn = document.getElementById('hero-continue');
+    if (btn) btn.disabled = false;
+  } else {
+    setText('hero-sub', 'Your next lesson is being prepared.');
+  }
+
+  const totalInLevel = (level && LEVEL_LESSON_COUNTS[level]) || 10;
+  const done = Math.max(0, (lessonNo || 1) - 1);
+  const levelPct = Math.min(100, Math.round((done / totalInLevel) * 100));
+  setText('hero-pct', levelPct + '%');
+  setText('hero-pct-label', level ? level + ' progress' : 'level progress');
+
+  // ---- HOME: weekly goal (target = lessons per week from preferences) ----
+  const target = Number(data.profile.preferences.frequency) || 0;
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const thisWeek = (data.history || []).filter(h => {
+    const t = new Date(h.attempt_time).getTime();
+    return !isNaN(t) && t >= weekAgo;
+  }).length;
+  if (target > 0) {
+    setText('goal-count', thisWeek + ' of ' + target + ' lesson' + (target === 1 ? '' : 's'));
+    const gf = document.getElementById('goal-fill');
+    if (gf) gf.style.width = Math.min(100, (thisWeek / target) * 100) + '%';
+    const left = target - thisWeek;
+    setText('goal-note', left > 0
+      ? left + ' more lesson' + (left === 1 ? '' : 's') + ' to reach your goal.'
+      : 'Goal reached this week. Nicely done.');
+  } else {
+    setText('goal-count', thisWeek + ' this week');
+    setText('goal-note', 'Set a weekly frequency in Profile to track a goal.');
+  }
+
+  // ---- HOME: upcoming lesson panel ----
   if (data.scheduling.nextCallTime) {
     const d = new Date(data.scheduling.nextCallTime);
-    document.getElementById('next-call-time').textContent = d.toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-    document.getElementById('next-call-status').textContent = 'Your next AI session is scheduled.';
+    const today = new Date();
+    const sameDay = d.toDateString() === today.toDateString();
+    const dayLabel = sameDay ? 'Today' : d.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+    const timeLabel = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const dur = data.profile.preferences.duration ? data.profile.preferences.duration + ' minutes' : null;
+    setText('upcoming-title', (nextLesson && nextLesson.title) || 'Your next lesson');
+    setText('upcoming-meta', [dayLabel, timeLabel, dur, level && lessonNo ? level + ' Lesson ' + lessonNo : null]
+      .filter(Boolean).join(' · '));
   }
 
-  // Lessons
+  // ---- LESSONS section ----
   if (data.lessonProgress.nextLessonDetails) {
-    document.getElementById('lesson-title').textContent = data.lessonProgress.nextLessonDetails.title || 'Lesson ' + data.lessonProgress.currentLessonId;
-    document.getElementById('lesson-instruction').textContent = data.lessonProgress.nextLessonDetails.lesson_instruction || 'No instructions provided.';
-    document.getElementById('btn-start-session').disabled = false;
+    setText('lesson-title', data.lessonProgress.nextLessonDetails.title || 'Lesson ' + data.lessonProgress.currentLessonId);
+    setText('lesson-instruction', data.lessonProgress.nextLessonDetails.lesson_instruction || 'No instructions provided.');
+    const startBtn = document.getElementById('btn-start-session');
+    if (startBtn) startBtn.disabled = false;
   }
-  document.getElementById('pref-frequency').textContent = data.profile.preferences.frequency || 'Not set';
-  document.getElementById('pref-duration').textContent = (data.profile.preferences.duration || '—') + ' mins';
-  document.getElementById('pref-days').textContent = Array.isArray(data.profile.preferences.days) ? data.profile.preferences.days.join(', ') : (data.profile.preferences.days || 'Not set');
+  setText('pref-frequency', data.profile.preferences.frequency || 'Not set');
+  setText('pref-duration', (data.profile.preferences.duration || '—') + ' mins');
+  setText('pref-days', Array.isArray(data.profile.preferences.days)
+    ? data.profile.preferences.days.join(', ')
+    : (data.profile.preferences.days || 'Not set'));
 
   // Upcoming calls
   const upcomingEl = document.getElementById('upcoming-calls-list');
@@ -1321,9 +1564,16 @@ let msgMyId = null;
 
 function updateMsgBadge(count) {
   const badge = document.getElementById('nav-msg-badge');
-  if (!badge) return;
-  if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.style.display = 'flex'; }
-  else { badge.style.display = 'none'; }
+  if (badge) {
+    if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.style.display = 'flex'; }
+    else { badge.style.display = 'none'; }
+  }
+  // Mirror the same count on the top-bar bell.
+  const bell = document.getElementById('topbar-bell-badge');
+  if (bell) {
+    if (count > 0) { bell.textContent = count > 9 ? '9+' : count; bell.style.display = 'block'; }
+    else { bell.style.display = 'none'; }
+  }
 }
 
 function escHtml(s) {
