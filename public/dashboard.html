@@ -20,6 +20,9 @@
     --accent-dark: #4a4bd0;
     --accent-light: #f0f2fc;
     --pink: #f45aa0;
+    --amber: #ffbf00;
+    --amber-dark: #e8ae00;
+    --amber-light: #fff6dd;
     --ink: #181b30;
     --green: #16a34a;
     --green-light: #f0fdf4;
@@ -606,6 +609,16 @@
 
   /* Modals adopt the same radius scale */
   .modal-box, .modal-content { border-radius: 20px; }
+
+  /* ==== AMBER PRIMARY ACTIONS (matches landing page) ==== */
+  .btn-primary, .btn-accent {
+    background: var(--amber) !important; color: var(--ink) !important;
+  }
+  .btn-primary:hover:not(:disabled), .btn-accent:hover {
+    background: var(--amber-dark) !important;
+  }
+  .goal-fill { background: var(--amber); }
+  .goal-count { color: var(--ink); }
 </style>
 </head>
 <body>

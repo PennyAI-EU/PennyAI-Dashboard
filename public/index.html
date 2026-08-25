@@ -8,18 +8,31 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
+    /* Matched to the Penny AI dashboard (Figma Learner portal) */
     --white: #ffffff;
-    --off: #f7f6f3;
-    --border: #e8e6e0;
-    --text: #1a1a1a;
-    --muted: #6b6b6b;
-    --accent: #2563eb;
-    --accent-light: #eff4ff;
-    --accent-dark: #1d4ed8;
+    --off: #f7f8fc;
+    --border: #e3e5f0;
+    --text: #181b30;
+    --muted: #636b82;
+    --accent: #5b5ce2;
+    --accent-light: #f0f2fc;
+    --accent-dark: #4a4bd0;
+    --pink: #f45aa0;
+    --amber: #ffbf00;
+    --amber-dark: #e8ae00;
+    --amber-light: #fff6dd;
+    --ink: #181b30;
     --green: #16a34a;
     --green-light: #f0fdf4;
-    --radius: 10px;
-    --radius-lg: 16px;
+    /* neon pastels — deepened ~20% from Figma base, as on the dashboard */
+    --mint: #cbebdd;
+    --lilac: #c9a9ec;
+    --card-mint: #a2e2d4;
+    --peach: #ffb3aa;
+    --chip-ink: #29475c;
+    --radius: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 24px;
   }
   body {
     font-family: 'DM Sans', sans-serif;
@@ -451,7 +464,7 @@
   .call-modal.open { opacity: 1; pointer-events: all; }
 
   .call-modal-card {
-    background: linear-gradient(145deg, #1e3a8a 0%, #2563eb 60%, #1d4ed8 100%);
+    background: linear-gradient(145deg, #1e3a8a 0%, var(--accent) 60%, var(--accent-dark) 100%);
     border-radius: 24px;
     width: 100%; max-width: 400px;
     box-shadow: 0 24px 64px rgba(0,0,0,0.45);
@@ -538,6 +551,157 @@
     background: rgba(255,255,255,0.18);
     border-color: rgba(255,255,255,0.3);
   }
+
+  /* ===== PIECE 1: DASHBOARD-MATCHED ADDITIONS ===== */
+  nav { background: var(--white); }
+  .lang-toggle {
+    display:inline-flex; background: var(--accent-light); border-radius:99px; padding:3px; margin-right:6px;
+  }
+  .lang-toggle button {
+    border:none; background:none; cursor:pointer; font-family:inherit;
+    font-size:12px; font-weight:600; color:var(--muted);
+    padding:6px 12px; border-radius:99px; transition: background .15s, color .15s;
+  }
+  .lang-toggle button.active { background: var(--white); color: var(--accent); }
+
+  /* --- EMMA VIDEO CARD (replaces the mock chat in the hero) --- */
+  .emma-card {
+    background: var(--white); border-radius: var(--radius-xl);
+    padding: 18px; box-shadow: 0 14px 40px rgba(24,27,48,.10);
+  }
+  .emma-video {
+    position:relative; aspect-ratio: 16/10; border-radius: 18px; overflow:hidden;
+    background: linear-gradient(145deg, var(--mint) 0%, var(--card-mint) 55%, var(--lilac) 100%);
+    display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px;
+  }
+  .emma-play {
+    width:64px; height:64px; border-radius:50%; background: rgba(255,255,255,.92);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 6px 18px rgba(24,27,48,.18); cursor:pointer; border:none;
+    transition: transform .15s;
+  }
+  .emma-play:hover { transform: scale(1.06); }
+  .emma-play svg { width:24px; height:24px; margin-left:3px; color: var(--accent); }
+  .emma-ph-label {
+    background: rgba(255,255,255,.85); border-radius:99px; padding:7px 15px;
+    font-size:11.5px; font-weight:600; letter-spacing:.04em; color: var(--chip-ink);
+  }
+  .emma-cap {
+    position:absolute; left:14px; right:14px; bottom:14px;
+    background: rgba(24,27,48,.82); color:#fff; border-radius:12px;
+    padding:10px 14px; font-size:12.5px; line-height:1.5;
+  }
+  .emma-cta { margin-top:16px; }
+  .emma-cta .btn-trial {
+    display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+    background: var(--accent); color:#fff; border:none; border-radius:14px;
+    padding:15px 20px; font-family:inherit; font-size:15px; font-weight:600;
+    cursor:pointer; transition: background .15s, transform .12s;
+  }
+  .emma-cta .btn-trial:hover { background: var(--accent-dark); transform: translateY(-1px); }
+  .emma-cta small { display:block; text-align:center; font-size:12px; color:var(--muted); margin-top:11px; }
+
+  /* --- STATS BAR --- */
+  .stats-bar { background: var(--off); padding: 34px 24px; }
+  .stats-inner {
+    max-width: 1100px; margin: 0 auto;
+    display:grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
+  }
+  .stat-box { background: var(--white); border-radius: var(--radius-lg); padding: 22px; text-align:center; }
+  .stat-box b { display:block; font-size:28px; font-weight:700; color: var(--accent); letter-spacing:-.5px; }
+  .stat-box span { display:block; font-size:12.5px; color: var(--muted); margin-top:7px; }
+
+  /* --- CONTACT SECTION --- */
+  .contact-sec { padding: 88px 24px; background: var(--off); }
+  .contact-wrap {
+    max-width: 1000px; margin:0 auto; background: var(--mint);
+    border-radius: var(--radius-xl); padding: 44px;
+    display:grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items:center;
+  }
+  .contact-wrap h2 { font-size:30px; font-weight:700; letter-spacing:-.6px; margin-bottom:14px; }
+  .contact-wrap p { font-size:15px; color:#3c4a5c; }
+  .contact-form { background: var(--white); border-radius: var(--radius-lg); padding: 26px; }
+  .field { margin-bottom:14px; }
+  .field label { display:block; font-size:12.5px; font-weight:600; margin-bottom:6px; }
+  .field input, .field select, .field textarea {
+    width:100%; font-family:inherit; font-size:14px; color:var(--text);
+    border:1px solid var(--border); border-radius:10px; padding:11px 13px;
+    outline:none; background:var(--white); transition:border-color .15s, box-shadow .15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color:var(--accent); box-shadow:0 0 0 3px rgba(91,92,226,.12);
+  }
+  .phone-row { display:grid; grid-template-columns: 130px 1fr; gap:9px; }
+
+  /* --- TRIAL MODALS --- */
+  .pm-overlay {
+    position:fixed; inset:0; background:rgba(24,27,48,.55); backdrop-filter: blur(3px);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+    opacity:0; pointer-events:none; transition:opacity .2s; z-index:2000;
+  }
+  .pm-overlay.open { opacity:1; pointer-events:all; }
+  .pm-card {
+    background:var(--white); border-radius:var(--radius-xl); padding:32px;
+    width:100%; max-width:440px; box-shadow:0 24px 60px rgba(24,27,48,.28);
+  }
+  .pm-card h3 { font-size:22px; font-weight:700; letter-spacing:-.4px; margin-bottom:8px; }
+  .pm-card > p { font-size:13.5px; color:var(--muted); line-height:1.6; margin-bottom:22px; }
+  .pm-actions { display:flex; gap:10px; margin-top:22px; }
+  .pm-btn {
+    flex:1; border:none; border-radius:12px; padding:13px; cursor:pointer;
+    font-family:inherit; font-size:14px; font-weight:600; transition:background .15s, transform .12s;
+  }
+  .pm-btn-primary { background:var(--accent); color:#fff; }
+  .pm-btn-primary:hover { background:var(--accent-dark); transform:translateY(-1px); }
+  .pm-btn-ghost { background:var(--accent-light); color:var(--text); }
+  .pm-topics { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
+  .pm-topic {
+    border:2px solid var(--border); background:var(--white); border-radius:14px;
+    padding:15px 14px; cursor:pointer; text-align:left; font-family:inherit;
+    transition:border-color .15s, background .15s, transform .12s;
+  }
+  .pm-topic:hover { transform:translateY(-2px); }
+  .pm-topic.sel { border-color:var(--accent); background:var(--accent-light); }
+  .pm-topic b { display:block; font-size:14px; font-weight:600; color:var(--text); }
+  .pm-topic span { display:block; font-size:11.5px; color:var(--muted); margin-top:4px; line-height:1.45; }
+  .pm-code { display:flex; gap:9px; justify-content:center; margin:6px 0 4px; }
+  .pm-code input {
+    width:46px; height:56px; text-align:center; font-family:inherit;
+    font-size:22px; font-weight:700; color:var(--text);
+    border:1px solid var(--border); border-radius:12px; outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .pm-code input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(91,92,226,.12); }
+  .pm-note { font-size:12px; color:var(--muted); text-align:center; margin-top:16px; }
+  .pm-note a { color:var(--accent); font-weight:600; text-decoration:none; }
+  .pm-soon {
+    background:#fff6d6; border-radius:12px; padding:11px 14px;
+    font-size:12px; color:#7a5410; margin-top:18px; text-align:center;
+  }
+
+  @media (max-width: 900px) {
+    .stats-inner { grid-template-columns: repeat(2, 1fr); }
+    .contact-wrap { grid-template-columns: 1fr; padding:30px; }
+  }
+
+  /* ==== AMBER SURFACES / INK TEXT / PURPLE SMALL-ACCENT ==== */
+  .btn-primary, .btn-primary-lg, .pm-btn-primary, .emma-cta .btn-trial {
+    background: var(--amber) !important; color: var(--ink) !important;
+  }
+  .btn-primary:hover, .btn-primary-lg:hover, .pm-btn-primary:hover, .emma-cta .btn-trial:hover {
+    background: var(--amber-dark) !important;
+  }
+  .stat-box b { color: var(--ink); }
+  .stat-box { border-bottom: 3px solid var(--amber); }
+
+  /* amber applied to remaining accents */
+  .lang-toggle button.active { color: var(--ink); }
+  .pm-topic.sel { border-color: var(--amber); background: var(--amber-light); }
+  .field input:focus, .field select:focus, .field textarea:focus,
+  .pm-code input:focus {
+    border-color: var(--amber); box-shadow: 0 0 0 3px rgba(255,191,0,.22);
+  }
+  .emma-play svg { color: var(--amber-dark); }
 </style>
 </head>
 <body>
@@ -546,8 +710,12 @@
 <nav>
   <a class="logo" href="#">Penny<span>AI</span></a>
   <div class="nav-links">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button class="active" data-lang="en" type="button">EN</button>
+      <button data-lang="it" type="button">IT</button>
+    </div>
     <a class="nav-link" href="/signin.html">Login</a>
-    <a class="btn-primary" href="/signup.html">Start Learning</a>
+    <a class="btn-primary js-open-trial" href="#">Try a free lesson</a>
   </div>
 </nav>
 
@@ -569,50 +737,37 @@
       <p class="trust-line">No classrooms. No pressure. Just real conversations that work.</p>
     </div>
 
-    <!-- RIGHT: demo card -->
+    <!-- RIGHT: Emma video + trial CTA -->
     <div class="hero-visual">
-      <div class="hero-card">
-        <div class="hero-card-header">
-          <div class="avatar">AI</div>
-          <div>
-            <div class="card-title">Penny AI Tutor</div>
-            <div class="card-sub">Adapts to your level in real time</div>
-          </div>
-          <div class="live-badge"><div class="dot"></div>Live session</div>
-        </div>
-        <div class="chat-body">
-          <div class="msg">
-            <div class="msg-avatar">AI</div>
-            <div>
-              <div class="bubble">Tell me about your last weekend. Try to use past tense naturally.</div>
-            </div>
-          </div>
-          <div class="msg user">
-            <div class="msg-avatar">You</div>
-            <div>
-              <div class="bubble">I go to the market with my friend and we buyed some fruits.</div>
-            </div>
-          </div>
-          <div class="msg">
-            <div class="msg-avatar">AI</div>
-            <div>
-              <div class="bubble">Good effort! One fix: "buyed" isn't correct — the past tense of <em>buy</em> is <strong>bought</strong>. Try: "I <em>went</em> to the market and we <em>bought</em> some fruits."</div>
-              <div class="feedback-bar">
-                <span class="tag good">✓ Past tense attempt</span>
-                <span class="tag fix">Fix: bought</span>
-                <span class="tag good">✓ Natural phrasing</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div class="input-mock">Speak or type your reply...</div>
-          <button class="mic-btn">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+      <div class="emma-card">
+        <div class="emma-video">
+          <button class="emma-play" id="emmaPlay" type="button" aria-label="Play Emma's welcome video">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
           </button>
+          <div class="emma-ph-label">EMMA — WELCOME VIDEO</div>
+          <div class="emma-cap" id="emmaCap">
+            Placeholder — Emma's recorded welcome will play here, muted with captions.
+          </div>
+        </div>
+        <div class="emma-cta">
+          <button class="btn-trial js-open-trial" type="button">
+            Try a free lesson
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+          <small>5 minutes with Penny. No card needed.</small>
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-box"><b id="stat-lessons">—</b><span>Lessons taught</span></div>
+    <div class="stat-box"><b id="stat-hours">—</b><span>Hours of speaking practice</span></div>
+    <div class="stat-box"><b id="stat-levels">A1–C2</b><span>CEFR levels covered</span></div>
+    <div class="stat-box"><b id="stat-avail">24/7</b><span>Available any time</span></div>
   </div>
 </section>
 
@@ -690,42 +845,42 @@
     <div class="features-grid">
       <div class="feature-card">
         <div class="feature-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         </div>
         <h3>Adaptive Learning</h3>
         <p>Always learning at the right level. The AI adjusts in real time — no guesswork, no wasted sessions.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         </div>
         <h3>Real Conversations</h3>
         <p>Practice introductions, meetings, daily interactions, and more — situations that matter in real life.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </div>
         <h3>Instant Feedback</h3>
         <p>Know exactly what to improve after every session — grammar, vocabulary, fluency all covered.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
         </div>
         <h3>Flexible Sessions</h3>
         <p>Take lessons via web chat or scheduled phone calls — on your schedule, from anywhere.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         </div>
         <h3>Progress You Can See</h3>
         <p>Track improvement across speaking, vocabulary, and fluency with clear session-by-session data.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
         </div>
         <h3>Voice & Web</h3>
         <p>Talk through browser or get called on your phone. Both feel natural — both give you the same results.</p>
@@ -781,7 +936,7 @@
       <div class="schedule-card">
         <div class="schedule-card-header">
           <span>My weekly schedule</span>
-          <span style="font-size:12px; color:#6b6b6b;">This week</span>
+          <span style="font-size:12px; color:var(--muted);">This week</span>
         </div>
         <div class="schedule-items">
           <div class="schedule-item">
@@ -804,7 +959,7 @@
             <div class="schedule-dot"></div>
             <div class="schedule-item-label">Friday — Vocabulary</div>
             <div class="schedule-item-time">8:00 AM</div>
-            <div style="width:16px; height:16px; border-radius:50%; border:1px solid #e8e6e0;"></div>
+            <div style="width:16px; height:16px; border-radius:50%; border:1px solid var(--border);"></div>
           </div>
         </div>
       </div>
@@ -827,15 +982,15 @@
       <div class="feedback-rows">
         <div class="feedback-row">
           <div class="feedback-row-label"><span>Fluency</span><span class="val">82%</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width:82%; background:#2563eb;"></div></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:82%; background:var(--accent);"></div></div>
         </div>
         <div class="feedback-row">
           <div class="feedback-row-label"><span>Grammar accuracy</span><span class="val">71%</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width:71%; background:#2563eb;"></div></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:71%; background:var(--accent);"></div></div>
         </div>
         <div class="feedback-row">
           <div class="feedback-row-label"><span>Vocabulary range</span><span class="val">69%</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width:69%; background:#2563eb;"></div></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:69%; background:var(--accent);"></div></div>
         </div>
         <div class="feedback-row">
           <div class="feedback-row-label"><span>Pronunciation clarity</span><span class="val">88%</span></div>
@@ -852,6 +1007,48 @@
 </section>
 
 <!-- FINAL CTA -->
+<!-- CONTACT -->
+<section class="contact-sec" id="contact">
+  <div class="contact-wrap">
+    <div>
+      <h2>Talk to us about your team</h2>
+      <p>Schools, universities and companies: tell us how many learners you have and what you need them to be able to do. We'll come back with a plan and pricing that fits.</p>
+    </div>
+    <div class="contact-form">
+      <div class="field">
+        <label for="c-name">Name</label>
+        <input id="c-name" type="text" placeholder="Your name"/>
+      </div>
+      <div class="field">
+        <label for="c-email">Email</label>
+        <input id="c-email" type="email" placeholder="you@organisation.com"/>
+      </div>
+      <div class="field">
+        <label for="c-phone">Phone</label>
+        <div class="phone-row">
+          <select id="c-cc" aria-label="Country code">
+            <option value="+39">🇮🇹 +39</option>
+            <option value="+44">🇬🇧 +44</option>
+            <option value="+1">🇺🇸 +1</option>
+            <option value="+33">🇫🇷 +33</option>
+            <option value="+34">🇪🇸 +34</option>
+            <option value="+49">🇩🇪 +49</option>
+            <option value="+351">🇵🇹 +351</option>
+            <option value="+55">🇧🇷 +55</option>
+          </select>
+          <input id="c-phone" type="tel" placeholder="Phone number"/>
+        </div>
+      </div>
+      <div class="field">
+        <label for="c-msg">How can we help?</label>
+        <textarea id="c-msg" rows="3" placeholder="Number of learners, goals, timeline…"></textarea>
+      </div>
+      <button class="pm-btn pm-btn-primary" style="width:100%" type="button" id="contactSend">Send enquiry →</button>
+      <div class="pm-soon">Placeholder — not connected yet.</div>
+    </div>
+  </div>
+</section>
+
 <section class="final-cta">
   <div class="container-sm">
     <h2>If you can speak,<br/><em>you can improve</em></h2>
@@ -893,6 +1090,91 @@
       <button class="btn-secondary" id="cancelLevelBtn" style="flex: 1; justify-content: center;">Cancel</button>
       <button class="btn-primary" id="confirmLevelBtn" style="flex: 1; justify-content: center;">Start Session</button>
     </div>
+  </div>
+</div>
+
+<!-- ===== TRIAL FLOW (PIECE 1: VISUAL SHELL, NOT WIRED) ===== -->
+
+<!-- STEP 1: choose a topic -->
+<div class="pm-overlay" id="trialTopic" role="dialog" aria-modal="true" aria-label="Choose your lesson">
+  <div class="pm-card">
+    <h3>What would you like to practise?</h3>
+    <p>Pick a topic and Penny will run a five-minute speaking lesson with you.</p>
+    <div class="pm-topics">
+      <button class="pm-topic" type="button" data-topic="beginner">
+        <b>Starting out</b><span>Simple everyday English</span>
+      </button>
+      <button class="pm-topic" type="button" data-topic="everyday">
+        <b>Everyday conversation</b><span>Travel, people, daily life</span>
+      </button>
+      <button class="pm-topic" type="button" data-topic="business">
+        <b>Business English</b><span>Meetings, calls, email</span>
+      </button>
+      <button class="pm-topic" type="button" data-topic="aviation">
+        <b>Aviation English</b><span>Radio phrasing, ICAO</span>
+      </button>
+    </div>
+    <div class="pm-actions">
+      <button class="pm-btn pm-btn-ghost" type="button" data-close>Cancel</button>
+      <button class="pm-btn pm-btn-primary" type="button" id="topicNext">Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2: email + phone -->
+<div class="pm-overlay" id="trialDetails" role="dialog" aria-modal="true" aria-label="Your details">
+  <div class="pm-card">
+    <h3>Where should we send your code?</h3>
+    <p>We'll email you a six-digit code to start your free lesson.</p>
+    <div class="field">
+      <label for="t-email">Email address</label>
+      <input id="t-email" type="email" placeholder="you@example.com" autocomplete="email"/>
+    </div>
+    <div class="field">
+      <label for="t-phone">Phone number</label>
+      <div class="phone-row">
+        <select id="t-cc" aria-label="Country code">
+          <option value="+39">🇮🇹 +39</option>
+          <option value="+44">🇬🇧 +44</option>
+          <option value="+1">🇺🇸 +1</option>
+          <option value="+33">🇫🇷 +33</option>
+          <option value="+34">🇪🇸 +34</option>
+          <option value="+49">🇩🇪 +49</option>
+          <option value="+351">🇵🇹 +351</option>
+          <option value="+55">🇧🇷 +55</option>
+          <option value="+91">🇮🇳 +91</option>
+          <option value="+971">🇦🇪 +971</option>
+        </select>
+        <input id="t-phone" type="tel" placeholder="Phone number" autocomplete="tel"/>
+      </div>
+    </div>
+    <div class="pm-actions">
+      <button class="pm-btn pm-btn-ghost" type="button" data-close>Back</button>
+      <button class="pm-btn pm-btn-primary" type="button" id="detailsNext">Send my code →</button>
+    </div>
+    <div class="pm-note">One free lesson per email address.</div>
+  </div>
+</div>
+
+<!-- STEP 3: six-digit code -->
+<div class="pm-overlay" id="trialCode" role="dialog" aria-modal="true" aria-label="Enter your code">
+  <div class="pm-card">
+    <h3>Enter your code</h3>
+    <p>We've sent a six-digit code to <b id="codeEmail">your email</b>. It expires in 15 minutes.</p>
+    <div class="pm-code">
+      <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 1"/>
+      <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2"/>
+      <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3"/>
+      <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4"/>
+      <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5"/>
+      <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6"/>
+    </div>
+    <div class="pm-actions">
+      <button class="pm-btn pm-btn-ghost" type="button" data-close>Back</button>
+      <button class="pm-btn pm-btn-primary" type="button" id="codeNext">Start my lesson →</button>
+    </div>
+    <div class="pm-note">Didn't get it? <a href="#" id="resendCode">Send it again</a></div>
+    <div class="pm-soon">Placeholder — verification is not connected yet.</div>
   </div>
 </div>
 
@@ -1124,5 +1406,90 @@
     }
   }
 </script>
+<script>
+/* ===== PIECE 1: TRIAL FLOW — navigation only, no backend calls yet ===== */
+(function () {
+  var topic = document.getElementById('trialTopic');
+  var details = document.getElementById('trialDetails');
+  var codeM = document.getElementById('trialCode');
+  var chosenTopic = null;
+
+  function open(el) { if (el) el.classList.add('open'); }
+  function close(el) { if (el) el.classList.remove('open'); }
+  function closeAll() { [topic, details, codeM].forEach(close); }
+
+  /* Any "try a free lesson" button starts the flow. */
+  document.querySelectorAll('.js-open-trial').forEach(function (b) {
+    b.addEventListener('click', function (e) { e.preventDefault(); closeAll(); open(topic); });
+  });
+
+  /* Topic selection */
+  document.querySelectorAll('.pm-topic').forEach(function (t) {
+    t.addEventListener('click', function () {
+      document.querySelectorAll('.pm-topic').forEach(function (x) { x.classList.remove('sel'); });
+      t.classList.add('sel');
+      chosenTopic = t.getAttribute('data-topic');
+    });
+  });
+
+  var topicNext = document.getElementById('topicNext');
+  if (topicNext) topicNext.addEventListener('click', function () {
+    if (!chosenTopic) { alert('Please choose a topic first.'); return; }
+    close(topic); open(details);
+  });
+
+  var detailsNext = document.getElementById('detailsNext');
+  if (detailsNext) detailsNext.addEventListener('click', function () {
+    var em = document.getElementById('t-email');
+    if (!em || !em.value.trim()) { alert('Please enter your email address.'); return; }
+    var label = document.getElementById('codeEmail');
+    if (label) label.textContent = em.value.trim();
+    close(details); open(codeM);
+  });
+
+  /* Code boxes: auto-advance and backspace, so it feels right even unwired. */
+  var boxes = codeM ? codeM.querySelectorAll('.pm-code input') : [];
+  boxes.forEach(function (inp, i) {
+    inp.addEventListener('input', function () {
+      inp.value = inp.value.replace(/\D/g, '').slice(0, 1);
+      if (inp.value && boxes[i + 1]) boxes[i + 1].focus();
+    });
+    inp.addEventListener('keydown', function (e) {
+      if (e.key === 'Backspace' && !inp.value && boxes[i - 1]) boxes[i - 1].focus();
+    });
+  });
+
+  var codeNext = document.getElementById('codeNext');
+  if (codeNext) codeNext.addEventListener('click', function () {
+    alert('Verification is not connected yet — this is the visual shell.');
+  });
+
+  /* Close buttons and backdrop clicks */
+  document.querySelectorAll('[data-close]').forEach(function (b) {
+    b.addEventListener('click', closeAll);
+  });
+  [topic, details, codeM].forEach(function (el) {
+    if (!el) return;
+    el.addEventListener('click', function (e) { if (e.target === el) closeAll(); });
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeAll(); });
+
+  /* Language toggle — visual only for now. */
+  document.querySelectorAll('.lang-toggle button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.lang-toggle button').forEach(function (x) { x.classList.remove('active'); });
+      b.classList.add('active');
+    });
+  });
+
+  /* Emma video placeholder */
+  var play = document.getElementById('emmaPlay');
+  if (play) play.addEventListener('click', function () {
+    var cap = document.getElementById('emmaCap');
+    if (cap) cap.textContent = 'Video placeholder — Emma\'s recorded welcome will play here.';
+  });
+})();
+</script>
+
 </body>
 </html>
