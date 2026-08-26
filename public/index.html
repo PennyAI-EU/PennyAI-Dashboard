@@ -715,7 +715,7 @@
       <button data-lang="it" type="button">IT</button>
     </div>
     <a class="nav-link" href="/signin.html">Login</a>
-    <a class="btn-primary js-open-trial" href="#">Try a free lesson</a>
+    <a class="btn-primary" href="/signup.html">Start Learning</a>
   </div>
 </nav>
 
@@ -731,8 +731,7 @@
       <h1>Speak English <em>confidently</em><br>faster than you think</h1>
       <p class="hero-sub">Practice real conversations with an AI tutor that adapts to your level, corrects you in real time, and shows you exactly how to improve after every session.</p>
       <div class="hero-ctas">
-        <a class="btn-primary-lg" href="#">Start Learning Now →</a>
-        <a class="btn-outline-lg js-try-free" href="#">Try a Free Session</a>
+        <a class="btn-primary-lg" href="/signup.html">Start Learning Now →</a>
       </div>
       <p class="trust-line">No classrooms. No pressure. Just real conversations that work.</p>
     </div>
@@ -750,8 +749,8 @@
           </div>
         </div>
         <div class="emma-cta">
-          <button class="btn-trial js-open-trial" type="button">
-            Try a free lesson
+          <button class="btn-trial js-try-free" type="button">
+            Try a Free Session
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </button>
           <small>5 minutes with Penny. No card needed.</small>
@@ -1232,10 +1231,14 @@
   let micStream         = null;
   let agentSpeakingUntil = 0; // timestamp until which agent is considered speaking
 
+  /* "Try a Free Session" now opens the gated trial flow (topic -> details -> code).
+     The old anonymous level picker is retained below and is opened by the trial flow
+     once the visitor's email has been verified. */
   document.querySelectorAll('.js-try-free').forEach(btn => {
-    btn.addEventListener('click', e => { 
-      e.preventDefault(); 
-      levelModal.classList.add('open');
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      if (window.__openTrialFlow) window.__openTrialFlow();
+      else levelModal.classList.add('open');
     });
   });
 
@@ -1418,10 +1421,8 @@
   function close(el) { if (el) el.classList.remove('open'); }
   function closeAll() { [topic, details, codeM].forEach(close); }
 
-  /* Any "try a free lesson" button starts the flow. */
-  document.querySelectorAll('.js-open-trial').forEach(function (b) {
-    b.addEventListener('click', function (e) { e.preventDefault(); closeAll(); open(topic); });
-  });
+  /* Exposed so the hero's "Try a Free Session" button can start the flow. */
+  window.__openTrialFlow = function () { closeAll(); open(topic); };
 
   /* Topic selection */
   document.querySelectorAll('.pm-topic').forEach(function (t) {
