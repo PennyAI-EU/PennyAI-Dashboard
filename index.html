@@ -1231,16 +1231,10 @@
   let micStream         = null;
   let agentSpeakingUntil = 0; // timestamp until which agent is considered speaking
 
-  /* "Try a Free Session" now opens the gated trial flow (topic -> details -> code).
-     The old anonymous level picker is retained below and is opened by the trial flow
-     once the visitor's email has been verified. */
-  document.querySelectorAll('.js-try-free').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.preventDefault();
-      if (window.__openTrialFlow) window.__openTrialFlow();
-      else levelModal.classList.add('open');
-    });
-  });
+  /* The trial-flow buttons are bound in the standalone script at the end of the page,
+     so they keep working even if the Retell SDK import in this module fails or is slow.
+     The old level picker below is opened by the trial flow after code verification. */
+  window.__openLevelPicker = function () { levelModal.classList.add('open'); };
 
   cancelLevelBtn.addEventListener('click', () => {
     levelModal.classList.remove('open');
@@ -1421,8 +1415,11 @@
   function close(el) { if (el) el.classList.remove('open'); }
   function closeAll() { [topic, details, codeM].forEach(close); }
 
-  /* Exposed so the hero's "Try a Free Session" button can start the flow. */
+  /* Bound here, not in the module script, so the flow works regardless of SDK load state. */
   window.__openTrialFlow = function () { closeAll(); open(topic); };
+  document.querySelectorAll('.js-try-free').forEach(function (b) {
+    b.addEventListener('click', function (e) { e.preventDefault(); window.__openTrialFlow(); });
+  });
 
   /* Topic selection */
   document.querySelectorAll('.pm-topic').forEach(function (t) {
