@@ -11,21 +11,27 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
+    /* Matched to the Penny AI learner and teacher portals */
     --white: #ffffff;
-    --off: #f7f6f3;
-    --border: #e8e6e0;
-    --text: #1a1a1a;
-    --muted: #6b6b6b;
-    --accent: #2563eb;
-    --accent-dark: #1d4ed8;
-    --accent-light: #eff4ff;
+    --off: #f7f8fc;
+    --sidebar-bg: #eef0fb;
+    --border: #e3e5f0;
+    --text: #181b30;
+    --ink: #181b30;
+    --muted: #636b82;
+    --accent: #5b5ce2;
+    --accent-dark: #4a4bd0;
+    --accent-light: #f0f2fc;
+    --pink: #f45aa0;
+    --amber: #ffbf00;
+    --amber-dark: #e8ae00;
     --green: #16a34a;
     --green-light: #f0fdf4;
     --yellow: #d97706;
     --yellow-light: #fffbeb;
     --radius: 12px;
     --radius-lg: 20px;
-    --sidebar-width: 260px;
+    --sidebar-width: 232px;
   }
   body {
     font-family: 'DM Sans', sans-serif;
@@ -271,12 +277,155 @@
   .transcript-speaker { font-weight: 600; white-space: nowrap; min-width: 44px; }
   .transcript-speaker.agent { color: var(--accent); }
   .transcript-speaker.user { color: var(--green); }
+
+  /* ================================================================
+     PENNY AI — ADMIN PORTAL COLOUR SYSTEM
+     Serves both school_admin and system_admin (superadmin).
+     Matches the learner and teacher portals: pastel sidebar,
+     deep top bar, each section tinted to its nav item, amber actions.
+     ================================================================ */
+  body { background: var(--off); }
+  body .sidebar { background: var(--sidebar-bg) !important; border-right: none !important; padding: 22px 14px; }
+  body .main-content { padding: 0 clamp(18px, 3vw, 32px) 48px !important; }
+
+  .brand { display:flex; align-items:center; gap:10px; padding: 4px 6px 22px; text-decoration:none; }
+  .brand-mark {
+    width:36px; height:36px; border-radius:12px; background: var(--accent);
+    color:#fff; font-weight:700; font-size:15px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .brand-name { font-size:15px; font-weight:700; letter-spacing:.02em; color: var(--text); }
+
+  body .nav-section-label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--muted);
+    padding: 14px 8px 7px;
+  }
+
+  /* --- SIDEBAR: one pastel per item --- */
+  body .nav-item {
+    border-radius: 12px; padding: 12px 15px; margin-bottom: 7px;
+    font-size: 13.5px; font-weight: 500; color: var(--text);
+  }
+  body .nav-item svg { opacity: 1; }
+  body .nav-item:hover { filter: brightness(0.97); transform: translateY(-1px); }
+
+  body #nav-prospects { background: #ffdcd6 !important; }   /* peach  */
+  body #nav-students  { background: #dcd0fb !important; }   /* lilac  */
+  body #nav-teachers  { background: #c9efe4 !important; }   /* mint   */
+  body #nav-lessons   { background: #cfe6fb !important; }   /* sky    */
+  body #nav-messages  { background: #d9f2c9 !important; }   /* green  */
+
+  body #nav-prospects.active { background: #e0654f !important; color: #fff !important; }
+  body #nav-students.active  { background: #7c5cd6 !important; color: #fff !important; }
+  body #nav-teachers.active  { background: #2f9e83 !important; color: #fff !important; }
+  body #nav-lessons.active   { background: #3d86c6 !important; color: #fff !important; }
+  body #nav-messages.active  { background: #5aa03c !important; color: #fff !important; }
+  body .nav-item.active svg  { color: #fff !important; }
+
+  /* --- TOP BAR: deep lilac --- */
+  .topbar {
+    background: #6b4fc4; border-radius: 0 0 22px 22px;
+    margin: 0 calc(-1 * clamp(18px, 3vw, 32px));
+    padding: 22px clamp(18px, 3vw, 32px);
+    display: flex; align-items: center; gap: 16px; margin-bottom: 28px;
+  }
+  .topbar-greet { flex: 1; min-width: 0; }
+  .topbar-greet h1 { font-size: 24px; font-weight: 700; letter-spacing: -.3px; color: #fff; }
+  .topbar-greet p { font-size: 13px; color: rgba(255,255,255,.78); margin-top: 5px; }
+  .icon-btn {
+    width:44px; height:44px; border-radius:14px; background: rgba(255,255,255,.18);
+    border:none; cursor:pointer; position:relative; flex-shrink:0; color:#fff;
+    display:flex; align-items:center; justify-content:center; transition: background .15s;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,.28); }
+  .icon-btn svg { width:19px; height:19px; }
+  .icon-badge {
+    position:absolute; top:7px; right:8px; min-width:16px; height:16px; padding:0 4px;
+    border-radius:8px; background:var(--pink); color:#fff;
+    font-size:10px; font-weight:700; line-height:16px; text-align:center;
+  }
+  .topbar-profile { display:flex; align-items:center; gap:11px; flex-shrink:0; }
+  .topbar-avatar {
+    width:44px; height:44px; border-radius:22px; background:var(--pink); color:#fff;
+    font-size:13px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .topbar-meta strong { display:block; font-size:12.5px; font-weight:600; color:#fff; }
+  .topbar-meta span { display:block; font-size:10.5px; color:rgba(255,255,255,.72); margin-top:2px; }
+
+  /* --- SECTION HEADERS --- */
+  body .section-header h1 { font-size: 24px; font-weight: 700; letter-spacing: -.3px; }
+  body .section-header p { font-size: 13px; }
+
+  /* --- SECTION TINTS: each panel matches its nav colour --- */
+  body #section-students .table-container {
+    background: #ece4fd !important; border: none !important;
+    border-radius: 20px; padding: 10px;
+  }
+  body #section-teachers .table-container {
+    background: #ddf3ec !important; border: none !important;
+    border-radius: 20px; padding: 10px;
+  }
+  body #section-lessons .table-container {
+    background: #dceafa !important; border: none !important;
+    border-radius: 20px; padding: 10px;
+  }
+  body #section-prospects .table-container {
+    background: #ffe8e3 !important; border: none !important;
+    border-radius: 20px; padding: 10px;
+  }
+  body #section-messages .list-card,
+  body #section-messages #msg-contact-list {
+    background: #e6f6dc !important; border: none !important;
+    border-radius: 20px; padding: 10px;
+  }
+
+  /* Rows float as white cards on the tinted panel */
+  body .table-container table { border-collapse: separate; border-spacing: 0 8px; }
+  body .table-container thead th {
+    background: transparent !important; border: none !important;
+    font-size: 11.5px; font-weight: 600; letter-spacing: .05em;
+    text-transform: uppercase; color: #4a5578 !important;
+  }
+  body .table-container tbody tr { background: #ffffff !important; }
+  body .table-container tbody td { border: none !important; }
+  body .table-container tbody tr td:first-child { border-radius: 14px 0 0 14px; }
+  body .table-container tbody tr td:last-child { border-radius: 0 14px 14px 0; }
+
+  body #section-messages #msg-contact-list > div {
+    background: #ffffff !important; border-radius: 14px;
+    margin-bottom: 8px; border-bottom: none !important;
+  }
+
+  /* --- CARDS + ACTIONS --- */
+  body .card { border-radius: 20px; border: none; }
+  body .card-label {
+    font-size: 11px; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  body .btn-primary, body .btn-accent, body .btn-save, body .btn-add {
+    background: var(--amber) !important; color: var(--ink) !important;
+    border-radius: 12px; font-weight: 600;
+  }
+  body .btn-primary:hover, body .btn-accent:hover,
+  body .btn-save:hover, body .btn-add:hover { background: var(--amber-dark) !important; }
+  body .modal-box, body .modal-content { border-radius: 20px; }
+
+  @media (max-width: 800px) {
+    .brand-name { display: none; }
+    .topbar-meta { display: none; }
+    .topbar-greet h1 { font-size: 20px; }
+  }
 </style>
 </head>
 <body>
 
 <aside class="sidebar">
-  <div class="nav-logo">Penny<span>AI</span> Admin</div>
+  <a class="brand" href="/">
+    <div class="brand-mark">P</div>
+    <div class="brand-name">PENNY AI</div>
+  </a>
   <nav class="nav-menu">
     <div class="nav-section-label">Growth</div>
     <div class="nav-item" id="nav-prospects" onclick="showSection('prospects')">
@@ -292,6 +441,10 @@
     <div class="nav-item" id="nav-teachers" onclick="showSection('teachers')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
       <span>Teachers</span>
+    </div>
+    <div class="nav-item" id="nav-lessons" onclick="showSection('lessons')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span>Lesson Library</span>
     </div>
     <div class="nav-item" id="nav-messages" onclick="showSection('messages')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -316,6 +469,25 @@
 </aside>
 
 <main class="main-content">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-greet">
+      <h1><span id="greet-time">Welcome back</span>, <span id="greet-name">admin</span></h1>
+      <p id="greet-sub">Manage students, teachers and campaigns.</p>
+    </div>
+    <button class="icon-btn" onclick="showSection('messages')" aria-label="Messages">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="icon-badge" id="topbar-bell-badge" style="display:none;">0</span>
+    </button>
+    <div class="topbar-profile">
+      <div class="topbar-avatar" id="topbar-initials">A</div>
+      <div class="topbar-meta">
+        <strong id="topbar-name">Administrator</strong>
+        <span id="topbar-role">Admin</span>
+      </div>
+    </div>
+  </header>
   <!-- STUDENTS SECTION -->
   <section id="section-students" class="section active">
     <div class="section-header">
@@ -988,6 +1160,26 @@
     document.getElementById('admin-name').textContent = adminName;
     document.getElementById('admin-email').textContent = adminEmail;
     document.getElementById('admin-avatar').textContent = adminName.charAt(0).toUpperCase();
+
+    /* Top bar: greeting by time of day, and role label so a superadmin can tell
+       at a glance which account they are signed in as. */
+    (function () {
+      var setT = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+      var hour = new Date().getHours();
+      setT('greet-time', hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening'));
+      setT('greet-name', String(adminName).split(' ')[0]);
+      setT('topbar-name', adminName);
+      var parts = String(adminName).trim().split(/\s+/).filter(Boolean);
+      setT('topbar-initials', parts.length
+        ? (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase()
+        : 'A');
+      var role = session.user.user_metadata?.role || '';
+      var isSuper = role === 'system_admin';
+      setT('topbar-role', isSuper ? 'Super Admin' : 'School Admin');
+      setT('greet-sub', isSuper
+        ? 'Full platform access — students, teachers, campaigns and lessons.'
+        : 'Manage your students, teachers and lessons.');
+    })();
 
     await Promise.all([loadStudents(session.access_token), loadTeachers(session.access_token)]);
     loadCampaigns(session.access_token);
@@ -1962,6 +2154,12 @@ let msgMyId = null;
 let dbUserId = null;
 
 function updateMsgBadge(count) {
+  /* Mirror the unread count on the top-bar bell as well as the nav item. */
+  var bell = document.getElementById('topbar-bell-badge');
+  if (bell) {
+    if (count > 0) { bell.textContent = count > 9 ? '9+' : count; bell.style.display = 'block'; }
+    else { bell.style.display = 'none'; }
+  }
   const badge = document.getElementById('nav-msg-badge');
   if (!badge) return;
   if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.style.display = 'flex'; }
