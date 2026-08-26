@@ -9,18 +9,25 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
+    /* Matched to the Penny AI learner portal */
     --white: #ffffff;
-    --off: #f7f6f3;
-    --border: #e8e6e0;
-    --text: #1a1a1a;
-    --muted: #6b6b6b;
-    --accent: #2563eb;
-    --accent-dark: #1d4ed8;
-    --accent-light: #eff4ff;
+    --off: #f7f8fc;
+    --sidebar-bg: #eef0fb;
+    --border: #e3e5f0;
+    --text: #181b30;
+    --ink: #181b30;
+    --muted: #636b82;
+    --accent: #5b5ce2;
+    --accent-dark: #4a4bd0;
+    --accent-light: #f0f2fc;
+    --pink: #f45aa0;
+    --amber: #ffbf00;
+    --amber-dark: #e8ae00;
     --green: #16a34a;
     --green-light: #f0fdf4;
     --radius: 12px;
-    --sidebar-width: 260px;
+    --radius-lg: 20px;
+    --sidebar-width: 226px;
   }
   body { font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--off); min-height: 100vh; display: flex; }
 
@@ -59,7 +66,7 @@
   .btn-signout svg { width: 18px; height: 18px; }
 
   /* MAIN */
-  .main-content { margin-left: var(--sidebar-width); flex: 1; min-height: 100vh; padding: 40px clamp(24px, 5vw, 60px); }
+  .main-content { margin-left: var(--sidebar-width); flex: 1; min-height: 100vh; padding: 0 clamp(18px, 3vw, 32px) 48px; }
   .section { display: none; max-width: 1000px; margin: 0 auto; animation: fadeIn 0.3s ease-out; }
   .section.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -177,12 +184,131 @@
     .nav-item { justify-content: center; padding: 12px; }
     .btn-signout { justify-content: center; }
   }
+
+  /* ================================================================
+     PENNY AI — TEACHER PORTAL COLOUR SYSTEM
+     Matches the learner portal: pastel sidebar, deep top bar,
+     each section tinted to its own nav item, amber for actions.
+     ================================================================ */
+  body { background: var(--off); }
+  body .sidebar { background: var(--sidebar-bg) !important; border-right: none !important; padding: 22px 14px; }
+
+  .brand { display:flex; align-items:center; gap:10px; padding: 4px 6px 26px; text-decoration:none; }
+  .brand-mark {
+    width:36px; height:36px; border-radius:12px; background: var(--accent);
+    color:#fff; font-weight:700; font-size:15px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .brand-name { font-size:15px; font-weight:700; letter-spacing:.02em; color: var(--text); }
+
+  /* --- SIDEBAR: one pastel per item --- */
+  body .nav-item {
+    border-radius: 12px; padding: 13px 16px; margin-bottom: 8px;
+    font-size: 13.5px; font-weight: 500; color: var(--text);
+  }
+  body .nav-item svg { opacity: 1; }
+  body #nav-students { background: #dcd0fb !important; }
+  body #nav-messages { background: #d9f2c9 !important; }
+  body #nav-students.active { background: #7c5cd6 !important; color: #fff !important; }
+  body #nav-messages.active { background: #5aa03c !important; color: #fff !important; }
+  body .nav-item.active svg { color: #fff !important; }
+  body .nav-item:hover { filter: brightness(0.97); transform: translateY(-1px); }
+
+  /* --- TOP BAR: deep lilac --- */
+  .topbar {
+    background: #6b4fc4; border-radius: 0 0 22px 22px;
+    margin: 0 calc(-1 * clamp(18px, 3vw, 32px));
+    padding: 22px clamp(18px, 3vw, 32px);
+    display: flex; align-items: center; gap: 16px; margin-bottom: 28px;
+  }
+  .topbar-greet { flex: 1; min-width: 0; }
+  .topbar-greet h1 { font-size: 24px; font-weight: 700; letter-spacing: -.3px; color: #fff; }
+  .topbar-greet p { font-size: 13px; color: rgba(255,255,255,.78); margin-top: 5px; }
+  .icon-btn {
+    width:44px; height:44px; border-radius:14px; background: rgba(255,255,255,.18);
+    border:none; cursor:pointer; position:relative; flex-shrink:0; color:#fff;
+    display:flex; align-items:center; justify-content:center; transition: background .15s;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,.28); }
+  .icon-btn svg { width:19px; height:19px; }
+  .icon-badge {
+    position:absolute; top:7px; right:8px; min-width:16px; height:16px; padding:0 4px;
+    border-radius:8px; background:var(--pink); color:#fff;
+    font-size:10px; font-weight:700; line-height:16px; text-align:center;
+  }
+  .topbar-profile { display:flex; align-items:center; gap:11px; flex-shrink:0; }
+  .topbar-avatar {
+    width:44px; height:44px; border-radius:22px; background:var(--pink); color:#fff;
+    font-size:13px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .topbar-meta strong { display:block; font-size:12.5px; font-weight:600; color:#fff; }
+  .topbar-meta span { display:block; font-size:10.5px; color:rgba(255,255,255,.72); margin-top:2px; }
+
+  /* --- SECTION HEADERS --- */
+  body .section-header h1 { font-size: 24px; font-weight: 700; letter-spacing: -.3px; }
+  body .section-header p { font-size: 13px; }
+  body .section { max-width: 1160px; }
+
+  /* --- MY STUDENTS: sky-tinted table --- */
+  body #section-students .table-container, body #section-students .card {
+    background: #dceafa !important; border: none !important;
+    border-radius: 20px; padding: 10px;
+  }
+  body #section-students table { border-collapse: separate; border-spacing: 0 8px; }
+  body #section-students thead th {
+    background: transparent !important; border: none !important;
+    color: #2c5f92 !important; font-size: 12px; font-weight: 600;
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+  body #section-students tbody tr { background: #ffffff !important; }
+  body #section-students tbody td { border: none !important; }
+  body #section-students tbody tr td:first-child { border-radius: 14px 0 0 14px; }
+  body #section-students tbody tr td:last-child { border-radius: 0 14px 14px 0; }
+
+  /* --- STUDENT DETAIL: lilac header card, teal sessions --- */
+  body #section-student-detail .card { background: #dceafa !important; border: none !important; border-radius: 20px; }
+
+  /* --- MESSAGES: green tint --- */
+  body #section-messages .list-card,
+  body #section-messages #msg-conv-list {
+    background: #e6f6dc !important; border: none !important;
+    border-radius: 20px; padding: 10px;
+  }
+  body #section-messages #msg-conv-list > div {
+    background: #ffffff !important; border-radius: 14px;
+    margin-bottom: 8px; border-bottom: none !important;
+  }
+
+  /* --- CARDS + ACTIONS --- */
+  body .card { border-radius: 20px; border: none; }
+  body .card-label {
+    font-size: 11px; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  body .btn-primary, body .btn-accent, body .btn-save {
+    background: var(--amber) !important; color: var(--ink) !important;
+    border-radius: 12px; font-weight: 600;
+  }
+  body .btn-primary:hover, body .btn-accent:hover, body .btn-save:hover {
+    background: var(--amber-dark) !important;
+  }
+  body .level-badge { background: var(--accent-light); color: var(--accent); }
+
+  @media (max-width: 800px) {
+    .brand-name { display: none; }
+    .topbar-meta { display: none; }
+    .topbar-greet h1 { font-size: 20px; }
+  }
 </style>
 </head>
 <body>
 
 <aside class="sidebar">
-  <a class="nav-logo" href="/">Penny<span>AI</span></a>
+  <a class="brand" href="/">
+    <div class="brand-mark">P</div>
+    <div class="brand-name">PENNY AI</div>
+  </a>
   <nav class="nav-menu">
     <div class="nav-item active" id="nav-students" onclick="showSection('students')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
@@ -210,6 +336,25 @@
 </aside>
 
 <main class="main-content">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-greet">
+      <h1><span id="greet-time">Welcome back</span>, <span id="greet-name">teacher</span></h1>
+      <p>Here's how your students are progressing.</p>
+    </div>
+    <button class="icon-btn" onclick="showSection('messages')" aria-label="Messages">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="icon-badge" id="topbar-bell-badge" style="display:none;">0</span>
+    </button>
+    <div class="topbar-profile">
+      <div class="topbar-avatar" id="topbar-initials">T</div>
+      <div class="topbar-meta">
+        <strong id="topbar-name">Teacher</strong>
+        <span>Teacher</span>
+      </div>
+    </div>
+  </header>
 
   <!-- STUDENTS LIST SECTION -->
   <section id="section-students" class="section active">
@@ -343,6 +488,19 @@ async function init() {
   const name = session.user.user_metadata?.name || 'Teacher';
   document.getElementById('teacher-name').textContent = name;
   document.getElementById('teacher-avatar').textContent = name.charAt(0).toUpperCase();
+
+  /* Top bar: greeting varies by time of day; initials from first + last name. */
+  (function () {
+    var setT = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+    var hour = new Date().getHours();
+    setT('greet-time', hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening'));
+    setT('greet-name', String(name).split(' ')[0]);
+    setT('topbar-name', name);
+    var parts = String(name).trim().split(/\s+/).filter(Boolean);
+    setT('topbar-initials', parts.length
+      ? (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase()
+      : 'T');
+  })();
 
   document.getElementById('signout-btn').addEventListener('click', async () => {
     await supabase.auth.signOut();
@@ -621,6 +779,12 @@ let msgMyId = null;
 let dbUserId = null;
 
 function updateMsgBadge(count) {
+  /* Mirror the count on the top-bar bell as well as the nav item. */
+  var bell = document.getElementById('topbar-bell-badge');
+  if (bell) {
+    if (count > 0) { bell.textContent = count > 9 ? '9+' : count; bell.style.display = 'block'; }
+    else { bell.style.display = 'none'; }
+  }
   const badge = document.getElementById('nav-msg-badge');
   if (!badge) return;
   if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.style.display = 'flex'; }
