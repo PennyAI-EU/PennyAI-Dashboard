@@ -619,6 +619,180 @@
   }
   .goal-fill { background: var(--amber); }
   .goal-count { color: var(--ink); }
+
+  /* ==== PASTEL SIDEBAR + DEEP UPCOMING PANEL ==== */
+  /* Each nav item carries its own light neon pastel; the active item deepens. */
+  #nav-overview   { background: #dcd0fb; }   /* lilac  */
+  #nav-lessons    { background: #c9efe4; }   /* mint   */
+  #nav-selfstudy  { background: #ffdcd6; }   /* peach  */
+  #nav-practice   { background: #fdeeb5; }   /* amber  */
+  #nav-history    { background: #cfe6fb; }   /* sky    */
+  #nav-profile    { background: #fbd6ea; }   /* pink   */
+  #nav-messages   { background: #d9f2c9; }   /* green  */
+
+  .nav-item:hover { filter: brightness(0.97); transform: translateY(-1px); background-image: none; }
+  .nav-item.is-soon:hover { filter: none; }
+
+  /* Active item: deeper fill of its own colour, white label */
+  #nav-overview.active  { background: #7c5cd6; color: #fff; }
+  #nav-lessons.active   { background: #2f9e83; color: #fff; }
+  #nav-history.active   { background: #3d86c6; color: #fff; }
+  #nav-profile.active   { background: #d1568f; color: #fff; }
+  #nav-messages.active  { background: #5aa03c; color: #fff; }
+  .nav-item.active svg  { color: #fff; }
+
+  /* Upcoming lesson: deeper shade of the mint family, white text */
+  .home-bottom .panel:first-child {
+    background: #2f7a68;
+  }
+  .home-bottom .panel:first-child .panel-eyebrow { color: #bff0e0; }
+  .home-bottom .panel:first-child h3 { color: #fff; }
+  .home-bottom .panel:first-child .panel-meta { color: rgba(255,255,255,.82); }
+
+  /* ==== DEEP TREATMENT: TOP BAR + MY LESSONS CARD ==== */
+  /* Greeting bar: deep lilac, white text */
+  .topbar {
+    background: #6b4fc4;
+    border-radius: 0 0 22px 22px;
+  }
+  .topbar-greet h1 { color: #fff; }
+  .topbar-greet p { color: rgba(255,255,255,.78); }
+  .icon-btn { background: rgba(255,255,255,.18); color: #fff; }
+  .icon-btn:hover { background: rgba(255,255,255,.28); }
+  .topbar-meta strong { color: #fff; }
+  .topbar-meta span { color: rgba(255,255,255,.72); }
+
+  /* My Lessons activity card: deep lilac, white text (it is the live one) */
+  .activity-card.card-lilac { background: #7c5cd6; }
+  .activity-card.card-lilac h3 { color: #fff; }
+  .activity-card.card-lilac p { color: rgba(255,255,255,.85); }
+
+  /* ==== MY LESSONS: PASTEL TREATMENT ==== */
+  /* Current lesson is the live action — deep lilac, white text, matching Home. */
+  .lesson-current { background: #7c5cd6; }
+  .lesson-current .card-label { color: #d9ccf7; }
+  .lesson-current h2 { color: #fff; }
+  .lesson-current p { color: rgba(255,255,255,.85); }
+
+  /* Scheduled sessions — deep teal, matching the Home upcoming panel. */
+  .lesson-upcoming { background: #2f7a68; }
+  .lesson-upcoming .card-label { color: #bff0e0; }
+  .lesson-upcoming, .lesson-upcoming div { color: #fff; }
+  .lesson-upcoming .card-label { color: #bff0e0; }
+
+  /* Preferences — light sky, keeps the page from going all-dark. */
+  .lesson-prefs { background: #dceafa; }
+  .lesson-prefs .card-label { color: #2c5f92; }
+  .lesson-prefs .field-label { color: #4a6785; }
+  .lesson-prefs .field-value { color: var(--ink); }
+
+  /* ==== SECTION TINTS: each panel matches its sidebar colour ==== */
+  /* Progress — sky */
+  #section-history .list-card {
+    background: #dceafa; border: none; border-radius: 20px; padding: 10px;
+  }
+  #section-history .history-item {
+    background: var(--white); border-radius: 14px; margin-bottom: 8px; border-bottom: none;
+  }
+  #section-history .history-item:last-child { margin-bottom: 0; }
+
+  /* Profile — pink */
+  .profile-card { background: #fbe3ef; border: none; }
+  .profile-card .field-label { color: #8d3f6a; }
+  .profile-card .field-value { color: var(--ink); }
+
+  /* Messages — green */
+  .msg-list-card {
+    background: #e6f6dc; border: none; border-radius: 20px;
+    padding: 10px; overflow: hidden;
+  }
+  .msg-list-card > div {
+    background: var(--white); border-radius: 14px; margin-bottom: 8px; border-bottom: none !important;
+  }
+  .msg-list-card > div:last-child { margin-bottom: 0; }
+
+  /* ================================================================
+     PENNY AI — LEARNER PORTAL COLOUR SYSTEM (consolidated)
+     Appended last and marked !important so nothing can override it.
+     Rule: every section takes the tint of its sidebar item.
+     ================================================================ */
+
+  /* --- SIDEBAR: one pastel per item --- */
+  body #nav-overview  { background: #dcd0fb !important; }
+  body #nav-lessons   { background: #c9efe4 !important; }
+  body #nav-selfstudy { background: #ffdcd6 !important; }
+  body #nav-practice  { background: #fdeeb5 !important; }
+  body #nav-history   { background: #cfe6fb !important; }
+  body #nav-profile   { background: #fbd6ea !important; }
+  body #nav-messages  { background: #d9f2c9 !important; }
+
+  body #nav-overview.active { background: #7c5cd6 !important; color: #fff !important; }
+  body #nav-lessons.active  { background: #2f9e83 !important; color: #fff !important; }
+  body #nav-history.active  { background: #3d86c6 !important; color: #fff !important; }
+  body #nav-profile.active  { background: #d1568f !important; color: #fff !important; }
+  body #nav-messages.active { background: #5aa03c !important; color: #fff !important; }
+  body .nav-item.active svg { color: #fff !important; }
+
+  /* --- TOP BAR: deep lilac --- */
+  body .topbar { background: #6b4fc4 !important; border-radius: 0 0 22px 22px; }
+  body .topbar-greet h1 { color: #ffffff !important; }
+  body .topbar-greet p  { color: rgba(255,255,255,.78) !important; }
+  body .icon-btn { background: rgba(255,255,255,.18) !important; color: #fff !important; }
+  body .topbar-meta strong { color: #ffffff !important; }
+  body .topbar-meta span   { color: rgba(255,255,255,.72) !important; }
+
+  /* --- HOME: activity cards --- */
+  body .activity-card.card-lilac { background: #7c5cd6 !important; }
+  body .activity-card.card-lilac h3 { color: #fff !important; }
+  body .activity-card.card-lilac p  { color: rgba(255,255,255,.85) !important; }
+  body .activity-card.card-mint  { background: #a2e2d4 !important; }
+  body .activity-card.card-peach { background: #ffb3aa !important; }
+
+  /* --- HOME: upcoming lesson panel (deep teal) --- */
+  body .home-bottom .panel:first-child { background: #2f7a68 !important; }
+  body .home-bottom .panel:first-child .panel-eyebrow { color: #bff0e0 !important; }
+  body .home-bottom .panel:first-child h3 { color: #ffffff !important; }
+  body .home-bottom .panel:first-child .panel-meta { color: rgba(255,255,255,.82) !important; }
+
+  /* --- MY LESSONS --- */
+  body .lesson-current { background: #7c5cd6 !important; }
+  body .lesson-current .card-label { color: #d9ccf7 !important; }
+  body .lesson-current h2 { color: #ffffff !important; }
+  body .lesson-upcoming { background: #2f7a68 !important; color: #fff !important; }
+  body .lesson-upcoming .card-label { color: #bff0e0 !important; }
+  body .lesson-upcoming div { color: #ffffff !important; }
+  body .lesson-prefs { background: #dceafa !important; }
+  body .lesson-prefs .card-label { color: #2c5f92 !important; }
+
+  /* --- PROGRESS (sky) --- */
+  body #section-history .list-card {
+    background: #dceafa !important; border: none !important;
+    border-radius: 20px; padding: 10px;
+  }
+  body #section-history .history-item {
+    background: #ffffff !important; border-radius: 14px;
+    margin-bottom: 8px; border-bottom: none !important;
+  }
+
+  /* --- PROFILE (pink) --- */
+  body .profile-card { background: #fbe3ef !important; border: none !important; }
+  body .profile-card .field-label { color: #8d3f6a !important; }
+
+  /* --- MESSAGES (green) --- */
+  body .msg-list-card {
+    background: #e6f6dc !important; border: none !important;
+    border-radius: 20px; padding: 10px;
+  }
+  body .msg-list-card > div {
+    background: #ffffff !important; border-radius: 14px;
+    margin-bottom: 8px; border-bottom: none !important;
+  }
+
+  /* --- AMBER ACTIONS --- */
+  body .btn-primary, body .btn-accent {
+    background: #ffbf00 !important; color: #181b30 !important;
+  }
+  body .goal-fill { background: #ffbf00 !important; }
 </style>
 </head>
 <body>
@@ -754,7 +928,7 @@
       <p>Your current path and upcoming sessions.</p>
     </div>
 
-    <div class="card" style="border-left: 4px solid var(--accent);">
+    <div class="card lesson-current">
       <div class="card-label">Current Lesson</div>
       <h2 id="lesson-title" style="font-size: 24px; margin-bottom: 8px;">—</h2>
       <p id="lesson-instruction" style="display:none;"></p>
@@ -767,7 +941,7 @@
       </div>
     </div>
 
-    <div class="card" style="margin-top: 24px;">
+    <div class="card lesson-upcoming" style="margin-top: 24px;">
       <div class="card-label">Upcoming Scheduled Sessions</div>
       <div id="upcoming-calls-list">
         <div class="empty-state" style="padding: 24px 0;">
@@ -776,7 +950,7 @@
       </div>
     </div>
 
-    <div class="card" style="margin-top: 24px;">
+    <div class="card lesson-prefs" style="margin-top: 24px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <div class="card-label" style="margin-bottom:0;">Preferences</div>
         <button class="btn-secondary" style="padding:6px 12px; font-size:12px;" onclick="openPreferencesModal()">Edit Preferences</button>
@@ -823,7 +997,7 @@
       <button class="btn-primary" onclick="openProfileModal()">Edit Profile</button>
     </div>
 
-    <div class="card">
+    <div class="card profile-card">
       <div class="profile-grid">
         <div style="border-right: 1px solid var(--border); padding-right: 40px;">
           <div class="profile-field">
@@ -861,7 +1035,7 @@
       <div class="section-header">
         <div><h1>Messages</h1><p>Your dedicated chats with your teacher and school.</p></div>
       </div>
-      <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;" id="msg-conv-list">
+      <div class="msg-list-card" id="msg-conv-list">
         <div style="text-align:center; color:var(--muted); padding:40px;">Loading…</div>
       </div>
     </div>
