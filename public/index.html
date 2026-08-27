@@ -570,27 +570,36 @@
     padding: 18px; box-shadow: 0 14px 40px rgba(24,27,48,.10);
   }
   .emma-video {
-    position:relative; aspect-ratio: 16/10; border-radius: 18px; overflow:hidden;
-    background: linear-gradient(145deg, var(--mint) 0%, var(--card-mint) 55%, var(--lilac) 100%);
+    position:relative; aspect-ratio: 16/9; border-radius: 18px; overflow:hidden;
+    background: #111827;
     display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px;
   }
+  .emma-video-player {
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    background:#111827;
+  }
   .emma-play {
+    position:relative; z-index:2;
     width:64px; height:64px; border-radius:50%; background: rgba(255,255,255,.92);
     display:flex; align-items:center; justify-content:center;
     box-shadow: 0 6px 18px rgba(24,27,48,.18); cursor:pointer; border:none;
-    transition: transform .15s;
+    transition: transform .15s, opacity .18s;
   }
   .emma-play:hover { transform: scale(1.06); }
   .emma-play svg { width:24px; height:24px; margin-left:3px; color: var(--accent); }
   .emma-ph-label {
+    position:relative; z-index:2; transition: opacity .18s;
     background: rgba(255,255,255,.85); border-radius:99px; padding:7px 15px;
     font-size:11.5px; font-weight:600; letter-spacing:.04em; color: var(--chip-ink);
   }
   .emma-cap {
-    position:absolute; left:14px; right:14px; bottom:14px;
+    position:absolute; z-index:2; left:14px; right:14px; bottom:14px;
     background: rgba(24,27,48,.82); color:#fff; border-radius:12px;
-    padding:10px 14px; font-size:12.5px; line-height:1.5;
+    padding:10px 14px; font-size:12.5px; line-height:1.5; transition: opacity .18s;
   }
+  .emma-video.is-playing .emma-play,
+  .emma-video.is-playing .emma-ph-label,
+  .emma-video.is-playing .emma-cap { opacity:0; pointer-events:none; }
   .emma-cta { margin-top:16px; }
   .emma-cta .btn-trial {
     display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
@@ -740,12 +749,16 @@
     <div class="hero-visual">
       <div class="emma-card">
         <div class="emma-video">
+          <video class="emma-video-player" id="emmaVideo" controls preload="metadata" playsinline poster="https://raw.githubusercontent.com/PennyAI-EU/PennyAI-Dashboard/master/public/media/penny-ai-boardroom-presentations-poster.jpg" aria-describedby="emmaCap">
+            <source src="https://raw.githubusercontent.com/PennyAI-EU/PennyAI-Dashboard/master/public/media/penny-ai-boardroom-presentations.mp4" type="video/mp4"/>
+            Your browser does not support embedded video.
+          </video>
           <button class="emma-play" id="emmaPlay" type="button" aria-label="Play Emma's welcome video">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
           </button>
           <div class="emma-ph-label">EMMA — WELCOME VIDEO</div>
           <div class="emma-cap" id="emmaCap">
-            Placeholder — Emma's recorded welcome will play here, muted with captions.
+            Click to watch Emma's welcome video.
           </div>
         </div>
         <div class="emma-cta">
@@ -1483,12 +1496,21 @@
     });
   });
 
-  /* Emma video placeholder */
+  /* Emma welcome video — playback starts only after a visitor clicks Play. */
   var play = document.getElementById('emmaPlay');
-  if (play) play.addEventListener('click', function () {
-    var cap = document.getElementById('emmaCap');
-    if (cap) cap.textContent = 'Video placeholder — Emma\'s recorded welcome will play here.';
-  });
+  var video = document.getElementById('emmaVideo');
+  var videoWrap = document.querySelector('.emma-video');
+  if (play && video && videoWrap) {
+    play.addEventListener('click', function () {
+      video.play().catch(function () {
+        var cap = document.getElementById('emmaCap');
+        if (cap) cap.textContent = 'The video could not start. Please try again.';
+      });
+    });
+    video.addEventListener('play', function () { videoWrap.classList.add('is-playing'); });
+    video.addEventListener('pause', function () { videoWrap.classList.remove('is-playing'); });
+    video.addEventListener('ended', function () { videoWrap.classList.remove('is-playing'); });
+  }
 })();
 </script>
 
