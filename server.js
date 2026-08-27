@@ -13,14 +13,30 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 const retell = new Retell({ apiKey: process.env.RETELL_API_KEY });
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, {
-  auth: {
-    persistSession: false,
-  },
-  realtime: {
-    transport: ws,
-  },
-});
+const hasSupabaseConfig = Boolean(
+  process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY,
+);
+const supabase = hasSupabaseConfig
+  ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, {
+      auth: {
+        persistSession: false,
+      },
+      realtime: {
+        transport: ws,
+      },
+    })
+  : null;
+
+// Preview deployments intentionally do not receive production database
+// credentials. Keep their public static pages available while clearly
+// preventing any API request from attempting to use an unconfigured client.
+if (!hasSupabaseConfig) {
+  app.use("/api", (_req, res) => {
+    res.status(503).json({
+      error: "This preview does not have database access.",
+    });
+  });
+}
 
 // Production safety gate for new Retell web calls. This intentionally fails
 // closed: a missing control row or database error keeps web calls paused.
