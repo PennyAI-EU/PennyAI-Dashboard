@@ -720,6 +720,22 @@
     background:var(--amber-light); border-radius:12px; padding:11px 14px;
     font-size:12px; color:var(--chip-ink); margin-top:18px; text-align:center;
   }
+  .pm-error {
+    display:none; background:#fde8e8; border:1px solid #f5b5b5; border-radius:10px;
+    padding:10px 14px; font-size:12.5px; color:#9b2c2c; margin-top:14px; line-height:1.5;
+  }
+  .pm-error.show { display:block; }
+  .pm-consent {
+    display:flex; align-items:flex-start; gap:9px; margin-top:16px; cursor:pointer;
+  }
+  .pm-consent input {
+    margin-top:3px; width:16px; height:16px; flex-shrink:0; accent-color:var(--amber);
+    cursor:pointer;
+  }
+  .pm-consent span {
+    font-size:12px; color:var(--muted); line-height:1.5;
+  }
+  .pm-btn:disabled { opacity:.6; cursor:not-allowed; transform:none !important; }
 
   @media (max-width: 900px) {
     .stats-inner { grid-template-columns: repeat(2, 1fr); }
@@ -1211,11 +1227,16 @@
         <input id="t-phone" type="tel" placeholder="Phone number" autocomplete="tel" data-i18n-placeholder="contact.phone.placeholder"/>
       </div>
     </div>
+    <label class="pm-consent" for="t-consent">
+      <input id="t-consent" type="checkbox"/>
+      <span data-i18n="details.consent">I'd like to receive occasional emails about Penny AI courses and offers. (Optional — you'll still get your free lesson either way.)</span>
+    </label>
     <div class="pm-actions">
       <button class="pm-btn pm-btn-ghost" type="button" data-close data-i18n="trial.back">Back</button>
       <button class="pm-btn pm-btn-primary" type="button" id="detailsNext" data-i18n="details.send">Send my code →</button>
     </div>
     <div class="pm-note" data-i18n="details.note">One free lesson per email address.</div>
+    <div class="pm-error" id="detailsError"></div>
   </div>
 </div>
 
@@ -1237,7 +1258,7 @@
       <button class="pm-btn pm-btn-primary" type="button" id="codeNext" data-i18n="code.start">Start my lesson →</button>
     </div>
     <div class="pm-note" data-i18n="code.resend">Didn't get it? <a href="#" id="resendCode">Send it again</a></div>
-    <div class="pm-soon" data-i18n="code.note">Placeholder — verification is not connected yet.</div>
+    <div class="pm-error" id="codeError"></div>
   </div>
 </div>
 
@@ -1376,6 +1397,63 @@
     }
   }
 
+  /* Starts a topic-based trial lesson for a visitor who has already verified their
+     email code via /api/trial/verify-code. The server looks up the topic script
+     server-side from the trial_leads row tied to this email — the client never
+     sends lesson instructions itself. Returns true on success so the trial-flow
+     script (below) knows whether to close its own modals. */
+  async function startTopicTrial(email) {
+    openModal(window.pennyT ? window.pennyT('call.connecting') : 'Connecting…');
+
+    try {
+      const res = await fetch('/api/trial/start-call', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Server error');
+
+      if (data.lesson_name) {
+        lessonMeta.textContent = '';
+        lessonTitle.textContent = data.lesson_name;
+        lessonInfo.style.display = '';
+      } else {
+        lessonInfo.style.display = 'none';
+      }
+
+      retellClient = new RetellWebClient();
+
+      retellClient.on('call_started', async () => {
+        setStatus(window.pennyT ? window.pennyT('call.live') : 'Live session', true);
+        await startMicVisualizer();
+      });
+
+      retellClient.on('update', (update) => {
+        const items = update?.transcript ?? [];
+        const last  = items[items.length - 1];
+        if (last?.role === 'agent' && last?.content) {
+          agentSpeakingUntil = Date.now() + 1800;
+        }
+      });
+
+      retellClient.on('call_ended', () => closeModal());
+
+      retellClient.on('error', () => {
+        setStatus(window.pennyT ? window.pennyT('call.error') : 'Something went wrong');
+        setTimeout(closeModal, 2000);
+      });
+
+      await retellClient.startCall({ accessToken: data.access_token });
+      return true;
+    } catch (err) {
+      setStatus(err.message || (window.pennyT ? window.pennyT('call.connectionFailed') : 'Connection failed'));
+      setTimeout(closeModal, 2500);
+      return false;
+    }
+  }
+  window.__startTopicTrial = startTopicTrial;
+
   function openModal(status) {
     modal.classList.add('open');
     setStatus(status, false);
@@ -1486,7 +1564,25 @@
   function closeAll() { [topic, details, codeM].forEach(close); }
 
   /* Exposed so the hero's "Try a Free Session" button can start the flow. */
-  window.__openTrialFlow = function () { closeAll(); open(topic); };
+  window.__openTrialFlow = function () {
+    closeAll();
+    chosenTopic = null;
+    currentEmail = '';
+    document.querySelectorAll('.pm-topic').forEach(function (x) { x.classList.remove('sel'); });
+    var codeBoxes = codeM ? codeM.querySelectorAll('.pm-code input') : [];
+    codeBoxes.forEach(function (inp) { inp.value = ''; });
+    var de = document.getElementById('detailsError');
+    var ce = document.getElementById('codeError');
+    [de, ce].forEach(function (el) {
+      if (!el) return;
+      el.classList.remove('show');
+      el.textContent = '';
+      el.style.background = '';
+      el.style.color = '';
+      el.style.borderColor = '';
+    });
+    open(topic);
+  };
 
   /* Topic selection */
   document.querySelectorAll('.pm-topic').forEach(function (t) {
@@ -1503,16 +1599,74 @@
     close(topic); open(details);
   });
 
+  var currentEmail = '';
+  var detailsError = document.getElementById('detailsError');
+  var codeError = document.getElementById('codeError');
+
+  function showError(el, msg) {
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+  function hideError(el) {
+    if (!el) return;
+    el.classList.remove('show');
+    el.textContent = '';
+    el.style.background = '';
+    el.style.color = '';
+    el.style.borderColor = '';
+  }
+  function setBtnBusy(btn, busy, busyText, idleText) {
+    if (!btn) return;
+    btn.disabled = busy;
+    btn.textContent = busy ? busyText : idleText;
+  }
+
   var detailsNext = document.getElementById('detailsNext');
+  var detailsIdleLabel = detailsNext ? detailsNext.textContent : 'Send my code →';
   if (detailsNext) detailsNext.addEventListener('click', function () {
+    hideError(detailsError);
+    if (!chosenTopic) { alert(t('alert.chooseTopic')); close(details); open(topic); return; }
+
     var em = document.getElementById('t-email');
-    if (!em || !em.value.trim()) { alert(t('alert.enterEmail')); return; }
-    var label = document.getElementById('codeEmail');
-    if (label) label.textContent = em.value.trim();
-    close(details); open(codeM);
+    var cc = document.getElementById('t-cc');
+    var ph = document.getElementById('t-phone');
+    var consent = document.getElementById('t-consent');
+    var email = em ? em.value.trim() : '';
+    var phoneDigits = ph ? ph.value.trim() : '';
+
+    if (!email) { showError(detailsError, t('alert.enterEmail')); return; }
+    if (!phoneDigits) { showError(detailsError, t('alert.enterPhone')); return; }
+
+    var phone = (cc ? cc.value : '') + phoneDigits;
+
+    setBtnBusy(detailsNext, true, t('details.sending'), detailsIdleLabel);
+    fetch('/api/trial/send-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: chosenTopic,
+        email: email,
+        phone: phone,
+        marketing_consent: !!(consent && consent.checked),
+      }),
+    }).then(function (res) {
+      return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+    }).then(function (result) {
+      setBtnBusy(detailsNext, false, t('details.sending'), detailsIdleLabel);
+      if (!result.ok) { showError(detailsError, result.data.error || t('alert.genericError')); return; }
+      currentEmail = email;
+      var label = document.getElementById('codeEmail');
+      if (label) label.textContent = email;
+      hideError(codeError);
+      close(details); open(codeM);
+    }).catch(function () {
+      setBtnBusy(detailsNext, false, t('details.sending'), detailsIdleLabel);
+      showError(detailsError, t('alert.genericError'));
+    });
   });
 
-  /* Code boxes: auto-advance and backspace, so it feels right even unwired. */
+  /* Code boxes: auto-advance and backspace */
   var boxes = codeM ? codeM.querySelectorAll('.pm-code input') : [];
   boxes.forEach(function (inp, i) {
     inp.addEventListener('input', function () {
@@ -1524,9 +1678,74 @@
     });
   });
 
+  function collectCode() {
+    var digits = '';
+    boxes.forEach(function (inp) { digits += (inp.value || '').trim(); });
+    return digits;
+  }
+
   var codeNext = document.getElementById('codeNext');
+  var codeIdleLabel = codeNext ? codeNext.textContent : 'Start my lesson →';
   if (codeNext) codeNext.addEventListener('click', function () {
-    alert(t('alert.verificationNotConnected'));
+    hideError(codeError);
+    var code = collectCode();
+    if (code.length !== 6) { showError(codeError, t('alert.enterFullCode')); return; }
+
+    setBtnBusy(codeNext, true, t('code.verifying'), codeIdleLabel);
+    fetch('/api/trial/verify-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: currentEmail, code: code }),
+    }).then(function (res) {
+      return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+    }).then(function (result) {
+      if (!result.ok) {
+        setBtnBusy(codeNext, false, t('code.verifying'), codeIdleLabel);
+        showError(codeError, result.data.error || t('alert.genericError'));
+        return;
+      }
+      // Verified — hand off to the live-call flow (module script) and close our modals.
+      closeAll();
+      if (window.__startTopicTrial) window.__startTopicTrial(currentEmail);
+      setBtnBusy(codeNext, false, t('code.verifying'), codeIdleLabel);
+    }).catch(function () {
+      setBtnBusy(codeNext, false, t('code.verifying'), codeIdleLabel);
+      showError(codeError, t('alert.genericError'));
+    });
+  });
+
+  /* Resend code — delegated, since applyLanguage() replaces this link's innerHTML
+     (via the code.resend i18n key) on every language switch. */
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest && e.target.closest('#resendCode');
+    if (!link) return;
+    e.preventDefault();
+    hideError(codeError);
+    if (!chosenTopic || !currentEmail) return;
+    var em = document.getElementById('t-email');
+    var cc = document.getElementById('t-cc');
+    var ph = document.getElementById('t-phone');
+    var consent = document.getElementById('t-consent');
+    fetch('/api/trial/send-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: chosenTopic,
+        email: currentEmail,
+        phone: (cc ? cc.value : '') + (ph ? ph.value.trim() : ''),
+        marketing_consent: !!(consent && consent.checked),
+      }),
+    }).then(function (res) {
+      return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+    }).then(function (result) {
+      if (!result.ok) { showError(codeError, result.data.error || t('alert.genericError')); return; }
+      showError(codeError, t('code.resending'));
+      codeError.style.background = '#e6f4ea';
+      codeError.style.color = '#1e6b3c';
+      codeError.style.borderColor = '#a8dcb8';
+    }).catch(function () {
+      showError(codeError, t('alert.genericError'));
+    });
   });
 
   /* Close buttons and backdrop clicks */
@@ -1688,7 +1907,6 @@
     "code.sub": { en: "We've sent a six-digit code to <b id=\"codeEmail\">your email</b>. It expires in 15 minutes.", it: "Ti abbiamo inviato un codice a sei cifre a <b id=\"codeEmail\">your email</b>. Scade tra 15 minuti." },
     "code.start": { en: "Start my lesson \u2192", it: "Inizia la mia lezione \u2192" },
     "code.resend": { en: "Didn't get it? <a href=\"#\" id=\"resendCode\">Send it again</a>", it: "Non l'hai ricevuto? <a href=\"#\" id=\"resendCode\">Inviamelo di nuovo</a>" },
-    "code.note": { en: "Placeholder \u2014 verification is not connected yet.", it: "Segnaposto \u2014 la verifica non \u00e8 ancora collegata." },
     "call.role": { en: "AI English Tutor \u00b7 Penny AI", it: "Tutor d'inglese AI \u00b7 Penny AI" },
     "call.endCall": { en: "End Call", it: "Termina chiamata" },
     "call.connecting": { en: "Connecting\u2026", it: "Connessione\u2026" },
@@ -1697,7 +1915,13 @@
     "call.connectionFailed": { en: "Connection failed", it: "Connessione non riuscita" },
     "alert.chooseTopic": { en: "Please choose a topic first.", it: "Scegli prima un argomento." },
     "alert.enterEmail": { en: "Please enter your email address.", it: "Inserisci il tuo indirizzo email." },
-    "alert.verificationNotConnected": { en: "Verification is not connected yet \u2014 this is the visual shell.", it: "La verifica non \u00e8 ancora collegata \u2014 questa \u00e8 solo l'anteprima visiva." },
+    "alert.enterPhone": { en: "Please enter your phone number.", it: "Inserisci il tuo numero di telefono." },
+    "alert.genericError": { en: "Something went wrong. Please try again.", it: "Qualcosa \u00e8 andato storto. Riprova." },
+    "alert.enterFullCode": { en: "Please enter the full six-digit code.", it: "Inserisci il codice completo di sei cifre." },
+    "details.consent": { en: "I'd like to receive occasional emails about Penny AI courses and offers. (Optional \u2014 you'll still get your free lesson either way.)", it: "Vorrei ricevere occasionalmente email sui corsi e le offerte di Penny AI. (Facoltativo \u2014 riceverai comunque la tua lezione gratuita.)" },
+    "details.sending": { en: "Sending\u2026", it: "Invio in corso\u2026" },
+    "code.verifying": { en: "Verifying\u2026", it: "Verifica in corso\u2026" },
+    "code.resending": { en: "Sent again \u2014 check your inbox.", it: "Inviato di nuovo \u2014 controlla la tua casella." },
     "emma.videoError": { en: "The video could not start. Please try again.", it: "Impossibile avviare il video. Riprova." },
   };
 

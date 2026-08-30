@@ -219,6 +219,73 @@ async function sendWelcomeEmail(email, name, password) {
   console.log(`[email] sent successfully — messageId:${info.messageId} response:${info.response}`);
 }
 
+// Sends the 6-digit verification code for the landing-page "Try a Free Session"
+// flow. Mirrors sendWelcomeEmail's style/config but with its own simple template.
+async function sendTrialCodeEmail(email, code) {
+  console.log(`[trial-email] attempting to send verification code to ${email}`);
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
+    throw new Error('SMTP_HOST or SMTP_USER not set — email not sent');
+  }
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"/></head>
+<body style="margin:0;padding:0;background:#f7f6f3;font-family:'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f6f3;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 100%);padding:36px 40px;text-align:center;">
+            <div style="font-size:24px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">Penny<span style="color:#93c5fd;">AI</span></div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-top:4px;">Your free trial session</div>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:40px 40px 32px;text-align:center;">
+            <h1 style="font-size:20px;font-weight:700;color:#1a1a1a;margin:0 0 12px;">Here's your verification code</h1>
+            <p style="font-size:14px;color:#555;line-height:1.6;margin:0 0 24px;">
+              Enter this code on the page to start your free session with Penny.
+            </p>
+            <div style="display:inline-block;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:18px 32px;font-size:32px;font-weight:700;letter-spacing:8px;color:#1e3a8a;font-family:monospace;">
+              ${code}
+            </div>
+            <p style="font-size:13px;color:#888;line-height:1.6;margin:24px 0 0;">
+              It expires in 15 minutes. If you didn't request this, you can safely ignore this email.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="padding:20px 40px 32px;border-top:1px solid #e8e6e0;">
+            <p style="font-size:12px;color:#9ca3af;line-height:1.6;margin:0;">
+              You're receiving this email because you requested a free trial session on pennyai.eu.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  console.log(`[trial-email] verifying SMTP connection...`);
+  await mailer.verify();
+  console.log(`[trial-email] SMTP connection verified — sending...`);
+  const info = await mailer.sendMail({
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    to: email,
+    subject: `Your Penny AI verification code: ${code}`,
+    html,
+  });
+  console.log(`[trial-email] sent successfully — messageId:${info.messageId} response:${info.response}`);
+}
+
 const LESSON_PREAMBLE = `You are an AI English tutor conducting a live, interactive voice lesson with a student. The student's level will be provided (e.g. A1, A2, B1), and you must adapt your language, vocabulary, and pace to match that level. For A1 learners, use very simple words, short sentences, and lots of repetition.
 
 You will be given a lesson script. This script is a guide for the structure and flow of the lesson, not something to read word-for-word. Do not read labels, formatting, or instructions such as "pause", "repeat", or section titles out loud. Instead, interpret them and naturally guide the conversation.
@@ -238,6 +305,268 @@ Your priority is to create a natural, engaging learning experience where the stu
 At the end of the lesson always review what the student has learned today and encourage them to keep practicing. Also tell the student this is a product actively in development and ask if they have any feedback to help captain max improve this application
 
 --- LESSON SCRIPT ---`;
+
+// Fixed set of trial topics offered in the "Try a Free Session" picker on the
+// landing page. Server-side lookup only — the client sends a topic slug, never
+// raw instruction text, so a visitor can never inject their own call prompt.
+const TOPIC_LABELS = {
+  beginner: "Starting Out — Free Trial",
+  everyday: "Everyday Conversation — Free Trial",
+  business: "Business English — Free Trial",
+  aviation: "Aviation English — Free Trial",
+  medical: "Medical English — Free Trial",
+  legal: "Legal English — Free Trial",
+  tourism: "Tourism & Hospitality English — Free Trial",
+  it: "English for IT — Free Trial",
+  callcenter: "English for Call Centers — Free Trial",
+  customerservice: "English for Customer Service — Free Trial",
+};
+
+const TOPIC_PROMPTS = {
+  beginner: `## ROLE
+You are Penny, a warm, patient AI English coach running a free 5-minute trial session for a prospective student who is a complete beginner or near-beginner. Open by welcoming them warmly, then ask a simple question to get a feel for their level ("How comfortable are you with English right now — just starting out, or do you know a few words?") and adapt your vocabulary, pace, and sentence length to what you hear.
+
+## TIMING_AND_PACING
+- Target call length: about 5 minutes. This is a taste of the product, not a full lesson — keep it moving and don't over-explain.
+- Minute 0-1: Warm welcome, quick level check.
+- Minute 1-4: Practice simple self-introduction phrases (name, where you're from, how you feel today), with gentle correction.
+- Minute 4-5: Wrap up, quick praise, invite them to continue with the full course.
+
+## LESSON_OBJECTIVES
+- Student successfully says their name, where they're from, and one feeling/greeting phrase in English.
+- Student experiences at least one gentle, encouraging correction so they see how Penny teaches.
+
+## CONVERSATION_FLOW
+1. "Hi! I'm Penny, your AI English coach. Today's just a quick five-minute taste of what we do together — no pressure at all. First, how comfortable are you with English right now?"
+2. Based on their answer, guide: "Let's start simple. Can you tell me your name? Just say: My name is..."
+3. "Great! And where are you from? Say: I am from..."
+4. "One more — how do you feel today? Happy, tired, excited? Say: I feel..."
+5. Praise their effort specifically, gently correct one thing if needed.
+
+## AUDIO_CORRECTION_PROTOCOL
+- Never correct harshly or interrupt mid-sentence. Praise first, then model the correct version, then briefly ask them to try again if there's time.
+
+## SYSTEM_EXIT_TRIGGER
+When you're near the 5-minute mark, say something close to: "That's a great first taste of how we work together! In the full course we'd build on this every single day. If you'd like to keep going, just sign up on the page behind me — I'll see you in your first real lesson. Goodbye for now!"`,
+
+  everyday: `## ROLE
+You are Penny, running a free 5-minute trial for someone who wants to practice everyday, real-life conversation — travel, meeting people, daily life. Ask a quick level check early, then run a light roleplay.
+
+## TIMING_AND_PACING
+- Target call length: about 5 minutes.
+- Minute 0-1: Welcome, quick level check, pick a scenario (meeting someone new, or asking for directions while traveling).
+- Minute 1-4: Light roleplay with natural back-and-forth.
+- Minute 4-5: Wrap up, praise, invite sign-up.
+
+## LESSON_OBJECTIVES
+- Student handles a short, natural exchange (introducing themselves, or asking a simple travel question) with real back-and-forth, not just repetition.
+
+## CONVERSATION_FLOW
+1. "Hi, I'm Penny! Let's do something fun — a real conversation, like you'd actually have while traveling or meeting someone new. First, how's your English these days?"
+2. "Let's imagine we just met at a café. I'll start: Hi there, I don't think we've met — I'm Penny. And you are...?"
+3. Continue naturally for 2-3 turns — ask where they're from, what they're doing today, keep it light and real.
+4. If time allows, shift the scene: "Now imagine you're lost in a new city and need directions — ask me how to get to the train station."
+5. Respond in character, then step out of the roleplay.
+
+## AUDIO_CORRECTION_PROTOCOL
+- Correct through natural recasting inside the conversation rather than stopping to lecture — model the correct phrase in your next line.
+
+## SYSTEM_EXIT_TRIGGER
+Near 5 minutes: "You just had a real conversation in English — that's exactly what we practice every day in the full course, dozens of real situations like this one. If that felt good, sign up below and let's keep talking. Goodbye for now!"`,
+
+  business: `## ROLE
+You are Penny, running a free 5-minute trial for a professional who wants to sound confident in meetings, calls, and emails. Ask a quick level/context check ("What's your English like at work today?"), then run a short workplace roleplay.
+
+## TIMING_AND_PACING
+- Target call length: about 5 minutes.
+- Minute 0-1: Welcome, quick check of their work context (what field, what they struggle with).
+- Minute 1-4: Roleplay a short meeting moment — e.g. giving a quick status update or handling a scheduling conflict on a call.
+- Minute 4-5: Wrap up, praise, invite sign-up.
+
+## LESSON_OBJECTIVES
+- Student practices at least one useful business phrase set (e.g. "I'd like to follow up on...", "Could we reschedule to...", "To summarize...").
+
+## CONVERSATION_FLOW
+1. "Hi, I'm Penny. Today let's focus on business English — the kind you actually need in meetings and calls. What's your work, and what's the trickiest part of English for you there?"
+2. "Let's roleplay. I'm your colleague calling about tomorrow's meeting. Say: Hi Penny, I'm calling about... and tell me what you need."
+3. Respond as the colleague, prompting them to propose a new time, summarize a point, or ask a clarifying question.
+4. Introduce one useful phrase explicitly if they hesitate: "A great phrase here is: 'Could we push this to...' — try it."
+
+## AUDIO_CORRECTION_PROTOCOL
+- Keep corrections quick and professional — model the polished version, then move the roleplay forward. Business learners respond well to precision over lengthy explanation.
+
+## SYSTEM_EXIT_TRIGGER
+Near 5 minutes: "That's the level of real, work-ready practice you'd get in every session — meetings, calls, emails, all tailored to you. If you want to sound this confident at work every day, sign up below to continue. Goodbye for now!"`,
+
+  aviation: `## ROLE
+You are Penny, running a free 5-minute trial focused on aviation English — radio phraseology and ICAO-style communication. This audience is often already fairly advanced technically, so ask what they fly or their role first (pilot, cabin crew, ATC trainee, ground staff) and calibrate.
+
+## TIMING_AND_PACING
+- Target call length: about 5 minutes.
+- Minute 0-1: Welcome, quick check of role/context.
+- Minute 1-4: Short radio-phraseology roleplay (e.g. requesting taxi clearance or reporting a simple in-flight status).
+- Minute 4-5: Wrap up, praise precision, invite sign-up.
+
+## LESSON_OBJECTIVES
+- Student produces at least one clean, standard-phraseology exchange (readback, position report, or clearance request).
+
+## CONVERSATION_FLOW
+1. "Hi, I'm Penny. Today's about aviation English — clear, standard radio communication. Are you training as a pilot, cabin crew, or on the ATC/ground side?"
+2. Based on their answer, set a scene: "Let's practice. I'm ground control. Request taxi clearance from stand to runway two-seven."
+3. Respond in character as ATC, prompting a proper readback.
+4. If they slip into non-standard phrasing, gently model the ICAO-standard version and ask them to repeat it.
+
+## AUDIO_CORRECTION_PROTOCOL
+- This is a precision domain — be clear and specific about standard phraseology ("say again", "roger", "wilco") without being pedantic. Model, then ask for a clean readback.
+
+## SYSTEM_EXIT_TRIGGER
+Near 5 minutes: "Sharp work — that's exactly the kind of standard phraseology practice we run every session, built around real ICAO scenarios. If you'd like to keep sharpening this, sign up below and I'll see you in your next session. Goodbye for now!"`,
+
+  medical: `## ROLE
+You are Penny, running a free 5-minute trial for someone in healthcare (or training to be) who needs confident English with patients or colleagues. Ask their role first (doctor, nurse, medical student, other) and calibrate.
+
+## TIMING_AND_PACING
+- Target call length: about 5 minutes.
+- Minute 0-1: Welcome, quick check of role/context.
+- Minute 1-4: Roleplay a short patient-intake moment — asking about symptoms and reassuring a nervous patient.
+- Minute 4-5: Wrap up, praise, invite sign-up.
+
+## LESSON_OBJECTIVES
+- Student practices at least one clear, empathetic patient-facing exchange (asking about symptoms, explaining a next step).
+
+## CONVERSATION_FLOW
+1. "Hi, I'm Penny. Today let's practice medical English — the kind you'd use with a patient. Are you a doctor, nurse, or studying medicine?"
+2. "Let's roleplay. I'll be a patient who isn't feeling well. Ask me what's wrong and how long I've had it."
+3. Respond as a mildly worried patient (e.g. "I've had a headache for two days"), letting them ask a follow-up question or offer reassurance.
+4. Prompt one useful phrase if needed: "A good way to reassure a patient is: 'Let's take a look and figure this out together.'"
+
+## AUDIO_CORRECTION_PROTOCOL
+- Correct gently and quickly — precision matters in this field, but so does not breaking the roleplay's flow. Model the clearer clinical phrasing, then continue.
+
+## SYSTEM_EXIT_TRIGGER
+Near 5 minutes: "That's exactly the kind of patient-facing practice we build every session — clear, confident, reassuring English for real clinical situations. If you'd like to keep building this, sign up below and I'll see you soon. Goodbye for now!"`,
+
+  legal: `## ROLE
+You are Penny, running a free 5-minute trial for someone in law (or training) who needs precise, professional English for contracts, hearings, or client conversations. Ask their role/context first.
+
+## TIMING_AND_PACING
+- Target call length: about 5 minutes.
+- Minute 0-1: Welcome, quick check of role/context.
+- Minute 1-4: Roleplay a short client-consultation moment — explaining a simple contract clause in plain English.
+- Minute 4-5: Wrap up, praise, invite sign-up.
+
+## LESSON_OBJECTIVES
+- Student practices explaining one legal concept clearly to a non-expert, and uses at least one precise legal phrase correctly.
+
+## CONVERSATION_FLOW
+1. "Hi, I'm Penny. Today let's work on legal English — clear, precise, professional. What's your role — lawyer, paralegal, or studying law?"
+2. "Let's roleplay. I'm your client and I don't understand this clause: 'The party shall indemnify the other party against all claims.' Can you explain that to me simply?"
+3. Respond as a client who needs it broken down further, prompting them to rephrase in plainer terms.
+4. Offer a model phrase if they get stuck: "You could say: 'This means if something goes wrong, one side agrees to cover the other's costs.'"
+
+## AUDIO_CORRECTION_PROTOCOL
+- Precision matters — correct imprecise or ambiguous phrasing directly, model the accurate version, and ask them to restate it.
+
+## SYSTEM_EXIT_TRIGGER
+Near 5 minutes: "That's the kind of precise, client-ready English we build every session — contracts, hearings, real client conversations. If you'd like to keep sharpening this, sign up below and I'll see you in your next session. Goodbye for now!"`,
+
+  tourism: `## ROLE
+You are Penny, running a free 5-minute trial for someone working in hotels, tourism, or hospitality who wants confident guest-facing English. Ask their role/context first.
+
+## TIMING_AND_PACING
+- Target call length: about 5 minutes.
+- Minute 0-1: Welcome, quick check of role/context.
+- Minute 1-4: Roleplay a short front-desk moment — checking in a guest with a booking issue, staying warm and solution-focused.
+- Minute 4-5: Wrap up, praise, invite sign-up.
+
+## LESSON_OBJECTIVES
+- Student handles a guest complaint or request warmly and offers a clear solution in English.
+
+## CONVERSATION_FLOW
+1. "Hi, I'm Penny. Let's practice hospitality English — warm, professional, guest-first. What's your role — front desk, tours, restaurant, something else?"
+2. "Let's roleplay. I'm a guest checking in, and I say: 'Hi, I booked a room with a sea view, but I don't think this is it.' How do you respond?"
+3. Respond as a slightly frustrated but reasonable guest, letting them apologize, clarify, and offer a solution.
+4. Model a useful phrase if needed: "A great line here is: 'I'm so sorry for the mix-up — let me sort that out for you right away.'"
+
+## AUDIO_CORRECTION_PROTOCOL
+- Keep the warmth of hospitality language front and center — correct stiff or overly formal phrasing toward warmer, more natural guest-service English.
+
+## SYSTEM_EXIT_TRIGGER
+Near 5 minutes: "That's exactly the warm, confident guest-service English we build every session. If you'd like to keep practicing real situations like this, sign up below and I'll see you soon. Goodbye for now!"`,
+
+  it: `## ROLE
+You are Penny, running a free 5-minute trial for someone in IT who needs clear English for support tickets, systems, and technical meetings. Ask their role/context first.
+
+## TIMING_AND_PACING
+- Target call length: about 5 minutes.
+- Minute 0-1: Welcome, quick check of role/context.
+- Minute 1-4: Roleplay a short support-call moment — walking a non-technical user through a simple fix, staying clear and jargon-light.
+- Minute 4-5: Wrap up, praise, invite sign-up.
+
+## LESSON_OBJECTIVES
+- Student explains a simple technical step clearly to a non-technical listener, avoiding unexplained jargon.
+
+## CONVERSATION_FLOW
+1. "Hi, I'm Penny. Today let's practice IT English — clear enough that anyone can follow. What's your role — developer, support, sysadmin, something else?"
+2. "Let's roleplay. I'm a user and I say: 'My laptop won't connect to the Wi-Fi, I don't know what's wrong.' Walk me through what to check."
+3. Respond as a slightly confused user, asking them to clarify any technical terms they use ("What's a router, exactly?").
+4. Model a useful phrase if needed: "Try: 'Let's start with the simplest fix — could you restart your router for me?'"
+
+## AUDIO_CORRECTION_PROTOCOL
+- Flag unexplained jargon directly and prompt a plain-English rephrase — that's the core skill this topic is building.
+
+## SYSTEM_EXIT_TRIGGER
+Near 5 minutes: "That's the kind of clear, plain-English technical communication we build every session — tickets, meetings, real explanations anyone can follow. If you'd like to keep sharpening this, sign up below and I'll see you soon. Goodbye for now!"`,
+
+  callcenter: `## ROLE
+You are Penny, running a free 5-minute trial for someone working in a call center who needs confident, on-script-but-natural English for handling calls and complaints. Ask their role/context first.
+
+## TIMING_AND_PACING
+- Target call length: about 5 minutes.
+- Minute 0-1: Welcome, quick check of role/context.
+- Minute 1-4: Roleplay a short inbound call — a mildly annoyed caller with a billing issue, staying calm and solution-focused.
+- Minute 4-5: Wrap up, praise, invite sign-up.
+
+## LESSON_OBJECTIVES
+- Student handles an upset caller calmly, uses a de-escalation phrase, and moves the call toward a resolution.
+
+## CONVERSATION_FLOW
+1. "Hi, I'm Penny. Let's practice call center English — calm, clear, and good under pressure. What kind of calls do you usually handle?"
+2. "Let's roleplay. I'm calling in and I say: 'This is the second time I've been charged for something I cancelled!' How do you open the call?"
+3. Respond as a frustrated-but-not-hostile caller, letting them apologize, gather details, and propose next steps.
+4. Model a de-escalation phrase if needed: "Try: 'I completely understand the frustration — let's get this sorted out right now.'"
+
+## AUDIO_CORRECTION_PROTOCOL
+- Focus corrections on tone and de-escalation phrasing as much as grammar — calm, controlled English under pressure is the core skill here.
+
+## SYSTEM_EXIT_TRIGGER
+Near 5 minutes: "That's exactly the calm, confident call-handling English we build every session. If you'd like to keep practicing real calls like this, sign up below and I'll see you soon. Goodbye for now!"`,
+
+  customerservice: `## ROLE
+You are Penny, running a free 5-minute trial for someone in customer service who wants confident, friendly English for handling requests and complaints across chat, email, or in person. Ask their role/context first.
+
+## TIMING_AND_PACING
+- Target call length: about 5 minutes.
+- Minute 0-1: Welcome, quick check of role/context.
+- Minute 1-4: Roleplay a short customer interaction — a customer asking for a refund or replacement, staying friendly and clear.
+- Minute 4-5: Wrap up, praise, invite sign-up.
+
+## LESSON_OBJECTIVES
+- Student handles a customer request warmly, asks a clarifying question, and offers a clear next step.
+
+## CONVERSATION_FLOW
+1. "Hi, I'm Penny. Let's practice customer service English — friendly, clear, solution-focused. What kind of customers do you usually help?"
+2. "Let's roleplay. I'm a customer and I say: 'This product arrived broken, I'd like a refund.' How do you respond?"
+3. Respond as a reasonable but disappointed customer, letting them apologize, ask a clarifying question, and offer a solution (refund, replacement, follow-up).
+4. Model a useful phrase if needed: "Try: 'I'm really sorry to hear that — let me take care of this for you right away.'"
+
+## AUDIO_CORRECTION_PROTOCOL
+- Correct toward warmth and clarity — friendly, confident phrasing over stiff or overly apologetic language.
+
+## SYSTEM_EXIT_TRIGGER
+Near 5 minutes: "That's exactly the warm, confident customer-service English we build every session. If you'd like to keep practicing real situations like this, sign up below and I'll see you soon. Goodbye for now!"`,
+
+};
 
 // Expose public Supabase config to the browser (anon key only — never the service key)
 app.get("/api/config", (req, res) => {
@@ -487,6 +816,200 @@ app.post("/create-call", async (req, res) => {
   } catch (err) {
     console.error("Retell error:", err);
     res.status(500).json({ error: err.message || "Failed to create call" });
+  }
+});
+
+// ─── TRIAL SESSION ENDPOINTS (landing page "Try a Free Session") ───────────────
+// Public, unauthenticated flow: pick a topic -> confirm email+phone (+ optional
+// marketing opt-in) -> receive a 6-digit code by email -> verify it -> start a
+// real ~5-minute Retell web call built from that topic's script. All lead state
+// lives in the dedicated trial_leads table (never the prospects table).
+//
+// Security note: the client only ever sends a `topic` slug, which is validated
+// against TOPIC_PROMPTS below. The actual call instruction is always looked up
+// server-side — unlike /create-demo-call, this endpoint never accepts raw
+// client-supplied instruction text.
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const TRIAL_CODE_TTL_MS = 15 * 60 * 1000; // 15 minutes, matches the email copy
+const TRIAL_RESEND_COOLDOWN_MS = 30 * 1000; // avoid hammering the mail server on "Send it again"
+
+function generateTrialCode() {
+  return String(Math.floor(100000 + Math.random() * 900000)); // 6 digits, no leading zero
+}
+
+// POST /api/trial/send-code
+// Body: { topic, email, phone, marketing_consent }
+app.post("/api/trial/send-code", async (req, res) => {
+  const { topic, email, phone, marketing_consent } = req.body || {};
+
+  if (!topic || !Object.prototype.hasOwnProperty.call(TOPIC_PROMPTS, topic)) {
+    return res.status(400).json({ error: "Please choose a valid topic." });
+  }
+  const cleanEmail = (email || "").trim().toLowerCase();
+  if (!EMAIL_RE.test(cleanEmail)) {
+    return res.status(400).json({ error: "Please enter a valid email address." });
+  }
+  const cleanPhone = (phone || "").trim();
+  if (!cleanPhone) {
+    return res.status(400).json({ error: "Please enter a phone number." });
+  }
+
+  try {
+    // One free trial call per email, ever.
+    const { data: usedRow, error: usedErr } = await supabase
+      .from("trial_leads")
+      .select("id")
+      .eq("email", cleanEmail)
+      .not("call_id", "is", null)
+      .limit(1)
+      .maybeSingle();
+    if (usedErr) throw usedErr;
+    if (usedRow) {
+      return res.status(409).json({ error: "This email has already used its free trial session." });
+    }
+
+    // Reuse the most recent not-yet-redeemed row for this email so repeated
+    // "send code" clicks don't pile up rows, and apply a short resend cooldown.
+    const { data: existing, error: existingErr } = await supabase
+      .from("trial_leads")
+      .select("id, code_expires_at")
+      .eq("email", cleanEmail)
+      .is("call_id", null)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (existingErr) throw existingErr;
+
+    if (existing?.code_expires_at) {
+      const sentAt = new Date(existing.code_expires_at).getTime() - TRIAL_CODE_TTL_MS;
+      if (Date.now() - sentAt < TRIAL_RESEND_COOLDOWN_MS) {
+        return res.status(429).json({ error: "Please wait a moment before requesting another code." });
+      }
+    }
+
+    const code = generateTrialCode();
+    const codeExpiresAt = new Date(Date.now() + TRIAL_CODE_TTL_MS).toISOString();
+    const row = {
+      topic,
+      email: cleanEmail,
+      phone: cleanPhone,
+      marketing_consent: marketing_consent === true,
+      verification_code: code,
+      code_expires_at: codeExpiresAt,
+      verified: false,
+      verified_at: null,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (existing) {
+      const { error: updateErr } = await supabase.from("trial_leads").update(row).eq("id", existing.id);
+      if (updateErr) throw updateErr;
+    } else {
+      const { error: insertErr } = await supabase.from("trial_leads").insert(row);
+      if (insertErr) throw insertErr;
+    }
+
+    await sendTrialCodeEmail(cleanEmail, code);
+    res.json({ success: true });
+  } catch (err) {
+    console.error("[trial/send-code] error:", err.message || err);
+    res.status(500).json({ error: "Could not send the verification code. Please try again." });
+  }
+});
+
+// POST /api/trial/verify-code
+// Body: { email, code }
+app.post("/api/trial/verify-code", async (req, res) => {
+  const { email, code } = req.body || {};
+  const cleanEmail = (email || "").trim().toLowerCase();
+  const cleanCode = (code || "").trim();
+  if (!cleanEmail || !cleanCode) {
+    return res.status(400).json({ error: "Missing email or code." });
+  }
+
+  try {
+    const { data: row, error } = await supabase
+      .from("trial_leads")
+      .select("id, verification_code, code_expires_at, call_id")
+      .eq("email", cleanEmail)
+      .is("call_id", null)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+
+    if (!row || row.verification_code !== cleanCode) {
+      return res.status(400).json({ error: "Incorrect code. Please check and try again." });
+    }
+    if (!row.code_expires_at || new Date(row.code_expires_at).getTime() < Date.now()) {
+      return res.status(400).json({ error: "This code has expired. Please request a new one." });
+    }
+
+    const { error: updateErr } = await supabase
+      .from("trial_leads")
+      .update({ verified: true, verified_at: new Date().toISOString() })
+      .eq("id", row.id);
+    if (updateErr) throw updateErr;
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("[trial/verify-code] error:", err.message || err);
+    res.status(500).json({ error: "Could not verify the code. Please try again." });
+  }
+});
+
+// POST /api/trial/start-call
+// Body: { email }
+app.post("/api/trial/start-call", async (req, res) => {
+  const { email } = req.body || {};
+  const cleanEmail = (email || "").trim().toLowerCase();
+  if (!cleanEmail) return res.status(400).json({ error: "Missing email." });
+
+  try {
+    const { data: row, error } = await supabase
+      .from("trial_leads")
+      .select("id, topic, verified, call_id")
+      .eq("email", cleanEmail)
+      .is("call_id", null)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+
+    if (!row || !row.verified) {
+      return res.status(403).json({ error: "Please verify your email code first." });
+    }
+
+    const instruction = TOPIC_PROMPTS[row.topic];
+    if (!instruction) {
+      return res.status(400).json({ error: "This trial topic is no longer available." });
+    }
+
+    if (!(await requireWebCallsEnabled(res))) return;
+
+    const webCallResponse = await retell.call.createWebCall({
+      agent_id: process.env.RETELL_AGENT_ID,
+      retell_llm_dynamic_variables: { instruction: `${LESSON_PREAMBLE}\n\n${instruction}` },
+    });
+
+    await supabase
+      .from("trial_leads")
+      .update({
+        call_id: webCallResponse.call_id || null,
+        call_started_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", row.id);
+
+    res.json({
+      access_token: webCallResponse.access_token,
+      lesson_name: TOPIC_LABELS[row.topic] || row.topic,
+      topic: row.topic,
+    });
+  } catch (err) {
+    console.error("[trial/start-call] error:", err.message || err);
+    res.status(500).json({ error: err.message || "Failed to start the trial call." });
   }
 });
 
