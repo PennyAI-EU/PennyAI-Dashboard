@@ -118,15 +118,15 @@
   }
   .hero-badge {
     display: inline-flex; align-items: center; gap: 6px;
-    background: var(--green-light); color: var(--green);
-    font-size: 12px; font-weight: 500;
-    padding: 5px 12px; border-radius: 20px;
+    background: var(--accent); color: #fff;
+    font-size: 12px; font-weight: 600;
+    padding: 6px 14px; border-radius: 20px;
     margin-bottom: 28px;
-    border: 1px solid #bbf7d0;
+    border: none;
   }
   .hero-badge .dot {
     width: 6px; height: 6px; border-radius: 50%;
-    background: var(--green); animation: pulse 2s infinite;
+    background: #fff; animation: pulse 2s infinite;
   }
   @keyframes pulse {
     0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
@@ -140,6 +140,16 @@
     margin-bottom: 20px;
   }
   h1 em { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; }
+  .headline-box {
+    display: inline-block;
+    background: var(--lilac);
+    color: var(--chip-ink);
+    padding: 22px 30px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 20px;
+  }
+  .headline-box h1 { margin-bottom: 0; color: var(--chip-ink); }
+  @media (max-width: 900px) { .headline-box { padding: 18px 22px; } }
   .hero-sub {
     font-size: 17px; color: var(--muted); line-height: 1.7;
     max-width: 520px; margin: 0 auto 36px;
@@ -570,27 +580,36 @@
     padding: 18px; box-shadow: 0 14px 40px rgba(24,27,48,.10);
   }
   .emma-video {
-    position:relative; aspect-ratio: 16/10; border-radius: 18px; overflow:hidden;
-    background: linear-gradient(145deg, var(--mint) 0%, var(--card-mint) 55%, var(--lilac) 100%);
+    position:relative; aspect-ratio: 16/9; border-radius: 18px; overflow:hidden;
+    background: #111827;
     display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px;
   }
+  .emma-video-player {
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    background:#111827;
+  }
   .emma-play {
+    position:relative; z-index:2;
     width:64px; height:64px; border-radius:50%; background: rgba(255,255,255,.92);
     display:flex; align-items:center; justify-content:center;
     box-shadow: 0 6px 18px rgba(24,27,48,.18); cursor:pointer; border:none;
-    transition: transform .15s;
+    transition: transform .15s, opacity .18s;
   }
   .emma-play:hover { transform: scale(1.06); }
   .emma-play svg { width:24px; height:24px; margin-left:3px; color: var(--accent); }
   .emma-ph-label {
+    position:relative; z-index:2; transition: opacity .18s;
     background: rgba(255,255,255,.85); border-radius:99px; padding:7px 15px;
     font-size:11.5px; font-weight:600; letter-spacing:.04em; color: var(--chip-ink);
   }
   .emma-cap {
-    position:absolute; left:14px; right:14px; bottom:14px;
+    position:absolute; z-index:2; left:14px; right:14px; bottom:14px;
     background: rgba(24,27,48,.82); color:#fff; border-radius:12px;
-    padding:10px 14px; font-size:12.5px; line-height:1.5;
+    padding:10px 14px; font-size:12.5px; line-height:1.5; transition: opacity .18s;
   }
+  .emma-video.is-playing .emma-play,
+  .emma-video.is-playing .emma-ph-label,
+  .emma-video.is-playing .emma-cap { opacity:0; pointer-events:none; }
   .emma-cta { margin-top:16px; }
   .emma-cta .btn-trial {
     display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
@@ -702,13 +721,6 @@
     border-color: var(--amber); box-shadow: 0 0 0 3px rgba(255,191,0,.22);
   }
   .emma-play svg { color: var(--amber-dark); }
-
-  /* selected topic: deeper amber fill so the choice reads clearly */
-  .pm-topic.sel {
-    background: #ffe9a8 !important;
-    border-color: var(--amber) !important;
-    box-shadow: 0 0 0 3px rgba(255,191,0,.22);
-  }
 </style>
 </head>
 <body>
@@ -721,8 +733,8 @@
       <button class="active" data-lang="en" type="button">EN</button>
       <button data-lang="it" type="button">IT</button>
     </div>
-    <a class="nav-link" href="/signin.html">Login</a>
-    <a class="btn-primary" href="/signup.html">Start Learning</a>
+    <a class="nav-link" href="/signin.html" data-i18n="nav.login">Login</a>
+    <a class="btn-primary" href="/signup.html" data-i18n="nav.startLearning">Start Learning</a>
   </div>
 </nav>
 
@@ -733,34 +745,40 @@
     <div class="hero-text">
       <div class="hero-badge">
         <div class="dot"></div>
-        AI-powered English tutor — available 24/7
+        <span data-i18n="hero.badge">AI-powered English tutor — available 24/7</span>
       </div>
-      <h1>Speak English <em>confidently</em><br>faster than you think</h1>
-      <p class="hero-sub">Practice real conversations with an AI tutor that adapts to your level, corrects you in real time, and shows you exactly how to improve after every session.</p>
+      <div class="headline-box">
+        <h1 data-i18n="hero.h1">Speak English <em>confidently</em><br>faster than you think</h1>
+      </div>
+      <p class="hero-sub" data-i18n="hero.sub">Practice real conversations with an AI tutor that adapts to your level, corrects you in real time, and shows you exactly how to improve after every session.</p>
       <div class="hero-ctas">
-        <a class="btn-primary-lg" href="/signup.html">Start Learning Now →</a>
+        <a class="btn-primary-lg" href="/signup.html" data-i18n="hero.cta">Start Learning Now →</a>
       </div>
-      <p class="trust-line">No classrooms. No pressure. Just real conversations that work.</p>
+      <p class="trust-line" data-i18n="hero.trust">No classrooms. No pressure. Just real conversations that work.</p>
     </div>
 
     <!-- RIGHT: Emma video + trial CTA -->
     <div class="hero-visual">
       <div class="emma-card">
         <div class="emma-video">
+          <video class="emma-video-player" id="emmaVideo" controls preload="metadata" playsinline poster="https://raw.githubusercontent.com/PennyAI-EU/PennyAI-Dashboard/master/public/media/penny-ai-boardroom-presentations-poster.jpg" aria-describedby="emmaCap">
+            <source src="https://raw.githubusercontent.com/PennyAI-EU/PennyAI-Dashboard/master/public/media/penny-ai-boardroom-presentations.mp4" type="video/mp4"/>
+            Your browser does not support embedded video.
+          </video>
           <button class="emma-play" id="emmaPlay" type="button" aria-label="Play Emma's welcome video">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
           </button>
-          <div class="emma-ph-label">EMMA — WELCOME VIDEO</div>
-          <div class="emma-cap" id="emmaCap">
-            Placeholder — Emma's recorded welcome will play here, muted with captions.
+          <div class="emma-ph-label" data-i18n="emma.label">EMMA — WELCOME VIDEO</div>
+          <div class="emma-cap" id="emmaCap" data-i18n="emma.cap">
+            Click to watch Emma's welcome video.
           </div>
         </div>
         <div class="emma-cta">
           <button class="btn-trial js-try-free" type="button">
-            Try a Free Session
+            <span data-i18n="tryFree">Try a Free Session</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </button>
-          <small>5 minutes with Penny. No card needed.</small>
+          <small data-i18n="emma.small">5 minutes with Penny. No card needed.</small>
         </div>
       </div>
     </div>
@@ -770,23 +788,23 @@
 <!-- STATS -->
 <section class="stats-bar">
   <div class="stats-inner">
-    <div class="stat-box"><b id="stat-lessons">—</b><span>Lessons taught</span></div>
-    <div class="stat-box"><b id="stat-hours">—</b><span>Hours of speaking practice</span></div>
-    <div class="stat-box"><b id="stat-levels">A1–C2</b><span>CEFR levels covered</span></div>
-    <div class="stat-box"><b id="stat-avail">24/7</b><span>Available any time</span></div>
+    <div class="stat-box"><b id="stat-lessons">—</b><span data-i18n="stats.lessons">Lessons taught</span></div>
+    <div class="stat-box"><b id="stat-hours">—</b><span data-i18n="stats.hours">Hours of speaking practice</span></div>
+    <div class="stat-box"><b id="stat-levels">A1–C2</b><span data-i18n="stats.levels">CEFR levels covered</span></div>
+    <div class="stat-box"><b id="stat-avail">24/7</b><span data-i18n="stats.avail">Available any time</span></div>
   </div>
 </section>
 
 <!-- PROBLEM -->
 <section class="problem">
   <div class="container" style="text-align:center;">
-    <h2>Most people never improve because they <em>don't actually speak</em></h2>
-    <p class="section-body">
+    <h2 data-i18n="problem.h2">Most people never improve because they <em>don't actually speak</em></h2>
+    <p class="section-body" data-i18n="problem.body">
       Watching videos and doing exercises isn't enough.<br/>
       You need <strong>real practice</strong>. You need <strong>feedback</strong>. You need <strong>consistency</strong>.<br/>
       That's exactly what Penny AI gives you.
     </p>
-    <a class="btn-primary-lg" href="#">Start Speaking Today →</a>
+    <a class="btn-primary-lg" href="#" data-i18n="problem.cta">Start Speaking Today →</a>
   </div>
 </section>
 
@@ -794,33 +812,33 @@
 <section>
   <div class="container">
     <div style="text-align:center; max-width:500px; margin:0 auto;">
-      <h2>How it <em>works</em></h2>
-      <p class="section-body">Four simple steps from sign-up to fluency.</p>
+      <h2 data-i18n="how.h2">How it <em>works</em></h2>
+      <p class="section-body" data-i18n="how.sub">Four simple steps from sign-up to fluency.</p>
     </div>
     <div class="steps-grid">
       <div class="step">
         <div class="step-num">01</div>
-        <h3>Get placed instantly</h3>
-        <p>We assess your level and match you to the right starting point automatically.</p>
+        <h3 data-i18n="how.step1.title">Get placed instantly</h3>
+        <p data-i18n="how.step1.desc">We assess your level and match you to the right starting point automatically.</p>
       </div>
       <div class="step">
         <div class="step-num">02</div>
-        <h3>Choose your path</h3>
-        <p>Structured lessons or real-life conversation practice — you pick what works for you.</p>
+        <h3 data-i18n="how.step2.title">Choose your path</h3>
+        <p data-i18n="how.step2.desc">Structured lessons or real-life conversation practice — you pick what works for you.</p>
       </div>
       <div class="step">
         <div class="step-num">03</div>
-        <h3>Start speaking immediately</h3>
-        <p>Talk via calls or web chat with an AI that responds naturally and guides you.</p>
+        <h3 data-i18n="how.step3.title">Start speaking immediately</h3>
+        <p data-i18n="how.step3.desc">Talk via calls or web chat with an AI that responds naturally and guides you.</p>
       </div>
       <div class="step">
         <div class="step-num">04</div>
-        <h3>Improve every session</h3>
-        <p>Get detailed feedback on what you did well and exactly what to fix next.</p>
+        <h3 data-i18n="how.step4.title">Improve every session</h3>
+        <p data-i18n="how.step4.desc">Get detailed feedback on what you did well and exactly what to fix next.</p>
       </div>
     </div>
     <div class="section-cta-center">
-      <a class="btn-primary-lg" href="#">Get Started in Minutes →</a>
+      <a class="btn-primary-lg" href="#" data-i18n="how.cta">Get Started in Minutes →</a>
     </div>
   </div>
 </section>
@@ -828,17 +846,17 @@
 <!-- POSITIONING -->
 <section class="position">
   <div class="container">
-    <h2>This isn't another <em>English course</em></h2>
-    <p class="section-body">
+    <h2 data-i18n="pos.h2">This isn't another <em>English course</em></h2>
+    <p class="section-body" data-i18n="pos.body">
       You're not memorizing rules.<br/>
       You're training your brain to <strong>think and respond in English.</strong>
     </p>
     <ul class="bullets">
-      <li>Speak more naturally in every conversation</li>
-      <li>Make fewer mistakes with real-time correction</li>
-      <li>Build real confidence that carries outside the app</li>
+      <li data-i18n="pos.b1">Speak more naturally in every conversation</li>
+      <li data-i18n="pos.b2">Make fewer mistakes with real-time correction</li>
+      <li data-i18n="pos.b3">Build real confidence that carries outside the app</li>
     </ul>
-    <a class="btn-primary-lg" href="#">Try Your First Session →</a>
+    <a class="btn-primary-lg" href="#" data-i18n="pos.cta">Try Your First Session →</a>
   </div>
 </section>
 
@@ -846,53 +864,53 @@
 <section>
   <div class="container">
     <div style="text-align:center; max-width:500px; margin:0 auto;">
-      <h2>Everything you need to <em>actually improve</em></h2>
+      <h2 data-i18n="features.h2">Everything you need to <em>actually improve</em></h2>
     </div>
     <div class="features-grid">
       <div class="feature-card">
         <div class="feature-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         </div>
-        <h3>Adaptive Learning</h3>
-        <p>Always learning at the right level. The AI adjusts in real time — no guesswork, no wasted sessions.</p>
+        <h3 data-i18n="features.f1.title">Adaptive Learning</h3>
+        <p data-i18n="features.f1.desc">Always learning at the right level. The AI adjusts in real time — no guesswork, no wasted sessions.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         </div>
-        <h3>Real Conversations</h3>
-        <p>Practice introductions, meetings, daily interactions, and more — situations that matter in real life.</p>
+        <h3 data-i18n="features.f2.title">Real Conversations</h3>
+        <p data-i18n="features.f2.desc">Practice introductions, meetings, daily interactions, and more — situations that matter in real life.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </div>
-        <h3>Instant Feedback</h3>
-        <p>Know exactly what to improve after every session — grammar, vocabulary, fluency all covered.</p>
+        <h3 data-i18n="features.f3.title">Instant Feedback</h3>
+        <p data-i18n="features.f3.desc">Know exactly what to improve after every session — grammar, vocabulary, fluency all covered.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
         </div>
-        <h3>Flexible Sessions</h3>
-        <p>Take lessons via web chat or scheduled phone calls — on your schedule, from anywhere.</p>
+        <h3 data-i18n="features.f4.title">Flexible Sessions</h3>
+        <p data-i18n="features.f4.desc">Take lessons via web chat or scheduled phone calls — on your schedule, from anywhere.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         </div>
-        <h3>Progress You Can See</h3>
-        <p>Track improvement across speaking, vocabulary, and fluency with clear session-by-session data.</p>
+        <h3 data-i18n="features.f5.title">Progress You Can See</h3>
+        <p data-i18n="features.f5.desc">Track improvement across speaking, vocabulary, and fluency with clear session-by-session data.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
         </div>
-        <h3>Voice & Web</h3>
-        <p>Talk through browser or get called on your phone. Both feel natural — both give you the same results.</p>
+        <h3 data-i18n="features.f6.title">Voice & Web</h3>
+        <p data-i18n="features.f6.desc">Talk through browser or get called on your phone. Both feel natural — both give you the same results.</p>
       </div>
     </div>
-    <div class="section-cta-center"><a class="btn-primary-lg" href="#">Start Improving Now →</a></div>
+    <div class="section-cta-center"><a class="btn-primary-lg" href="#" data-i18n="features.cta">Start Improving Now →</a></div>
   </div>
 </section>
 
@@ -900,33 +918,33 @@
 <section class="modes">
   <div class="container">
     <div style="text-align:center; max-width:500px; margin:0 auto;">
-      <h2>Two ways to <em>learn</em></h2>
-      <p class="section-body">Pick one or switch anytime — both are included.</p>
+      <h2 data-i18n="modes.h2">Two ways to <em>learn</em></h2>
+      <p class="section-body" data-i18n="modes.sub">Pick one or switch anytime — both are included.</p>
     </div>
     <div class="modes-grid">
       <div class="mode-card">
-        <div class="mode-tag">Structured Training</div>
-        <h3>Build strong foundations</h3>
-        <p class="mode-desc">For learners who want to understand the rules before applying them.</p>
+        <div class="mode-tag" data-i18n="modes.m1.tag">Structured Training</div>
+        <h3 data-i18n="modes.m1.title">Build strong foundations</h3>
+        <p class="mode-desc" data-i18n="modes.m1.desc">For learners who want to understand the rules before applying them.</p>
         <ul class="mode-list">
-          <li>Grammar fundamentals</li>
-          <li>Vocabulary building</li>
-          <li>Sentence structure</li>
+          <li data-i18n="modes.m1.li1">Grammar fundamentals</li>
+          <li data-i18n="modes.m1.li2">Vocabulary building</li>
+          <li data-i18n="modes.m1.li3">Sentence structure</li>
         </ul>
       </div>
       <div class="mode-card accent">
-        <div class="mode-tag">Conversation Practice</div>
-        <h3>Real-world confidence</h3>
-        <p class="mode-desc">For learners who want to speak naturally, right now.</p>
+        <div class="mode-tag" data-i18n="modes.m2.tag">Conversation Practice</div>
+        <h3 data-i18n="modes.m2.title">Real-world confidence</h3>
+        <p class="mode-desc" data-i18n="modes.m2.desc">For learners who want to speak naturally, right now.</p>
         <ul class="mode-list">
-          <li>Daily conversations</li>
-          <li>Scenario-based learning</li>
-          <li>Natural speaking flow</li>
+          <li data-i18n="modes.m2.li1">Daily conversations</li>
+          <li data-i18n="modes.m2.li2">Scenario-based learning</li>
+          <li data-i18n="modes.m2.li3">Natural speaking flow</li>
         </ul>
       </div>
     </div>
-    <div class="mode-footer">Pick one or switch anytime — both are included.</div>
-    <div class="section-cta-center" style="margin-top:24px;"><a class="btn-primary-lg" href="#">Choose Your Learning Style →</a></div>
+    <div class="mode-footer" data-i18n="modes.sub">Pick one or switch anytime — both are included.</div>
+    <div class="section-cta-center" style="margin-top:24px;"><a class="btn-primary-lg" href="#" data-i18n="modes.cta">Choose Your Learning Style →</a></div>
   </div>
 </section>
 
@@ -935,19 +953,19 @@
   <div class="container">
     <div class="schedule-body">
       <div class="schedule-text">
-        <h2>We make <em>consistency</em> easy</h2>
-        <p class="section-body">Set your preferred times and the system will call you for your lessons. No reminders needed. No missed sessions. <strong>Just show up and speak.</strong></p>
-        <a class="btn-primary-lg" href="#">Schedule Your First Lesson →</a>
+        <h2 data-i18n="schedule.h2">We make <em>consistency</em> easy</h2>
+        <p class="section-body" data-i18n="schedule.body">Set your preferred times and the system will call you for your lessons. No reminders needed. No missed sessions. <strong>Just show up and speak.</strong></p>
+        <a class="btn-primary-lg" href="#" data-i18n="schedule.cta">Schedule Your First Lesson →</a>
       </div>
       <div class="schedule-card">
         <div class="schedule-card-header">
-          <span>My weekly schedule</span>
-          <span style="font-size:12px; color:var(--muted);">This week</span>
+          <span data-i18n="schedule.card.title">My weekly schedule</span>
+          <span style="font-size:12px; color:var(--muted);" data-i18n="schedule.card.week">This week</span>
         </div>
         <div class="schedule-items">
           <div class="schedule-item">
             <div class="schedule-dot done"></div>
-            <div class="schedule-item-label">Monday — Conversation</div>
+            <div class="schedule-item-label" data-i18n="schedule.day1">Monday — Conversation</div>
             <div class="schedule-item-time">8:00 AM</div>
             <div class="schedule-check">
               <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg>
@@ -955,7 +973,7 @@
           </div>
           <div class="schedule-item">
             <div class="schedule-dot done"></div>
-            <div class="schedule-item-label">Wednesday — Grammar</div>
+            <div class="schedule-item-label" data-i18n="schedule.day2">Wednesday — Grammar</div>
             <div class="schedule-item-time">7:30 AM</div>
             <div class="schedule-check">
               <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg>
@@ -963,7 +981,7 @@
           </div>
           <div class="schedule-item">
             <div class="schedule-dot"></div>
-            <div class="schedule-item-label">Friday — Vocabulary</div>
+            <div class="schedule-item-label" data-i18n="schedule.day3">Friday — Vocabulary</div>
             <div class="schedule-item-time">8:00 AM</div>
             <div style="width:16px; height:16px; border-radius:50%; border:1px solid var(--border);"></div>
           </div>
@@ -977,38 +995,38 @@
 <section class="feedback-section">
   <div class="container">
     <div style="text-align:center; max-width:500px; margin:0 auto;">
-      <h2>Know exactly how you're <em>improving</em></h2>
-      <p class="section-body">After every session you get a personalized breakdown — clear explanations, actionable steps, and your next recommended lesson.</p>
+      <h2 data-i18n="feedback.h2">Know exactly how you're <em>improving</em></h2>
+      <p class="section-body" data-i18n="feedback.body">After every session you get a personalized breakdown — clear explanations, actionable steps, and your next recommended lesson.</p>
     </div>
     <div class="feedback-card">
       <div class="feedback-card-header">
-        <h4>Session Summary — Friday 9:00 AM</h4>
-        <div class="score-badge">Score: 78/100</div>
+        <h4 data-i18n="feedback.card.title">Session Summary — Friday 9:00 AM</h4>
+        <div class="score-badge" data-i18n="feedback.score">Score: 78/100</div>
       </div>
       <div class="feedback-rows">
         <div class="feedback-row">
-          <div class="feedback-row-label"><span>Fluency</span><span class="val">82%</span></div>
+          <div class="feedback-row-label"><span data-i18n="feedback.m1">Fluency</span><span class="val">82%</span></div>
           <div class="progress-bar"><div class="progress-fill" style="width:82%; background:var(--accent);"></div></div>
         </div>
         <div class="feedback-row">
-          <div class="feedback-row-label"><span>Grammar accuracy</span><span class="val">71%</span></div>
+          <div class="feedback-row-label"><span data-i18n="feedback.m2">Grammar accuracy</span><span class="val">71%</span></div>
           <div class="progress-bar"><div class="progress-fill" style="width:71%; background:var(--accent);"></div></div>
         </div>
         <div class="feedback-row">
-          <div class="feedback-row-label"><span>Vocabulary range</span><span class="val">69%</span></div>
+          <div class="feedback-row-label"><span data-i18n="feedback.m3">Vocabulary range</span><span class="val">69%</span></div>
           <div class="progress-bar"><div class="progress-fill" style="width:69%; background:var(--accent);"></div></div>
         </div>
         <div class="feedback-row">
-          <div class="feedback-row-label"><span>Pronunciation clarity</span><span class="val">88%</span></div>
+          <div class="feedback-row-label"><span data-i18n="feedback.m4">Pronunciation clarity</span><span class="val">88%</span></div>
           <div class="progress-bar"><div class="progress-fill" style="width:88%; background:#16a34a;"></div></div>
         </div>
       </div>
       <div class="feedback-note">
-        <strong>Next recommended focus</strong>
-        Work on irregular past tense verbs — you missed "bought", "went", and "came" in today's session. Your next lesson will target these specifically.
+        <strong data-i18n="feedback.note.title">Next recommended focus</strong>
+        <span data-i18n="feedback.note.body">Work on irregular past tense verbs — you missed "bought", "went", and "came" in today's session. Your next lesson will target these specifically.</span>
       </div>
     </div>
-    <div class="section-cta-center" style="margin-top:32px;"><a class="btn-primary-lg" href="#">See How It Works →</a></div>
+    <div class="section-cta-center" style="margin-top:32px;"><a class="btn-primary-lg" href="#" data-i18n="feedback.cta">See How It Works →</a></div>
   </div>
 </section>
 
@@ -1017,20 +1035,20 @@
 <section class="contact-sec" id="contact">
   <div class="contact-wrap">
     <div>
-      <h2>Talk to us about your team</h2>
-      <p>Schools, universities and companies: tell us how many learners you have and what you need them to be able to do. We'll come back with a plan and pricing that fits.</p>
+      <h2 data-i18n="contact.h2">Talk to us about your team</h2>
+      <p data-i18n="contact.body">Schools, universities and companies: tell us how many learners you have and what you need them to be able to do. We'll come back with a plan and pricing that fits.</p>
     </div>
     <div class="contact-form">
       <div class="field">
-        <label for="c-name">Name</label>
-        <input id="c-name" type="text" placeholder="Your name"/>
+        <label for="c-name" data-i18n="contact.name.label">Name</label>
+        <input id="c-name" type="text" placeholder="Your name" data-i18n-placeholder="contact.name.placeholder"/>
       </div>
       <div class="field">
-        <label for="c-email">Email</label>
-        <input id="c-email" type="email" placeholder="you@organisation.com"/>
+        <label for="c-email" data-i18n="contact.email.label">Email</label>
+        <input id="c-email" type="email" placeholder="you@organisation.com" data-i18n-placeholder="contact.email.placeholder"/>
       </div>
       <div class="field">
-        <label for="c-phone">Phone</label>
+        <label for="c-phone" data-i18n="contact.phone.label">Phone</label>
         <div class="phone-row">
           <select id="c-cc" aria-label="Country code">
             <option value="+39">🇮🇹 +39</option>
@@ -1042,26 +1060,26 @@
             <option value="+351">🇵🇹 +351</option>
             <option value="+55">🇧🇷 +55</option>
           </select>
-          <input id="c-phone" type="tel" placeholder="Phone number"/>
+          <input id="c-phone" type="tel" placeholder="Phone number" data-i18n-placeholder="contact.phone.placeholder"/>
         </div>
       </div>
       <div class="field">
-        <label for="c-msg">How can we help?</label>
-        <textarea id="c-msg" rows="3" placeholder="Number of learners, goals, timeline…"></textarea>
+        <label for="c-msg" data-i18n="contact.msg.label">How can we help?</label>
+        <textarea id="c-msg" rows="3" placeholder="Number of learners, goals, timeline…" data-i18n-placeholder="contact.msg.placeholder"></textarea>
       </div>
-      <button class="pm-btn pm-btn-primary" style="width:100%" type="button" id="contactSend">Send enquiry →</button>
-      <div class="pm-soon">Placeholder — not connected yet.</div>
+      <button class="pm-btn pm-btn-primary" style="width:100%" type="button" id="contactSend" data-i18n="contact.send">Send enquiry →</button>
+      <div class="pm-soon" data-i18n="contact.note">Placeholder — not connected yet.</div>
     </div>
   </div>
 </section>
 
 <section class="final-cta">
   <div class="container-sm">
-    <h2>If you can speak,<br/><em>you can improve</em></h2>
-    <p class="hero-sub">Start where you are. Improve with every conversation.</p>
+    <h2 data-i18n="final.h2">If you can speak,<br/><em>you can improve</em></h2>
+    <p class="hero-sub" data-i18n="final.sub">Start where you are. Improve with every conversation.</p>
     <div class="hero-ctas">
-      <a class="btn-white" href="#">Start Learning Now →</a>
-      <a class="btn-outline-white js-try-free" href="#">Try a Free Session</a>
+      <a class="btn-white" href="#" data-i18n="hero.cta">Start Learning Now →</a>
+      <a class="btn-outline-white js-try-free" href="#" data-i18n="tryFree">Try a Free Session</a>
     </div>
   </div>
 </section>
@@ -1070,31 +1088,31 @@
 <footer>
   <a class="footer-logo" href="#">Penny<span>AI</span></a>
   <div class="footer-links">
-    <a href="#">Login</a>
-    <a href="#">Dashboard</a>
-    <a href="#">Contact</a>
-    <a href="#">Terms</a>
-    <a href="#">Privacy</a>
+    <a href="#" data-i18n="nav.login">Login</a>
+    <a href="#" data-i18n="footer.dashboard">Dashboard</a>
+    <a href="#" data-i18n="footer.contact">Contact</a>
+    <a href="#" data-i18n="footer.terms">Terms</a>
+    <a href="#" data-i18n="footer.privacy">Privacy</a>
   </div>
-  <div class="footer-copy">© 2025 Penny AI. All rights reserved.</div>
+  <div class="footer-copy" data-i18n="footer.copy">© 2025 Penny AI. All rights reserved.</div>
 </footer>
 
 <!-- LEVEL SELECT MODAL -->
 <div id="levelSelectModal" class="call-modal" role="dialog" aria-modal="true" aria-label="Select your English level">
   <div class="call-modal-card" style="background: white; color: var(--text); padding: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
-    <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 16px; text-align: center;">Select your English Level</h3>
-    <p style="font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 24px;">Choose a level for your free practice session.</p>
+    <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 16px; text-align: center;" data-i18n="level.title">Select your English Level</h3>
+    <p style="font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 24px;" data-i18n="level.sub">Choose a level for your free practice session.</p>
     <select id="levelSelect" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 15px; margin-bottom: 24px; outline: none; background: var(--off); cursor: pointer;">
-      <option value="A1">Beginner (A1)</option>
-      <option value="A2">Elementary (A2)</option>
-      <option value="B1">Intermediate (B1)</option>
-      <option value="B2">Upper Intermediate (B2)</option>
-      <option value="C1">Advanced (C1)</option>
-      <option value="C2">Proficient (C2)</option>
+      <option value="A1" data-i18n="level.opt.a1">Beginner (A1)</option>
+      <option value="A2" data-i18n="level.opt.a2">Elementary (A2)</option>
+      <option value="B1" data-i18n="level.opt.b1">Intermediate (B1)</option>
+      <option value="B2" data-i18n="level.opt.b2">Upper Intermediate (B2)</option>
+      <option value="C1" data-i18n="level.opt.c1">Advanced (C1)</option>
+      <option value="C2" data-i18n="level.opt.c2">Proficient (C2)</option>
     </select>
     <div style="display: flex; gap: 12px; justify-content: center;">
-      <button class="btn-secondary" id="cancelLevelBtn" style="flex: 1; justify-content: center;">Cancel</button>
-      <button class="btn-primary" id="confirmLevelBtn" style="flex: 1; justify-content: center;">Start Session</button>
+      <button class="btn-secondary" id="cancelLevelBtn" style="flex: 1; justify-content: center;" data-i18n="level.cancel">Cancel</button>
+      <button class="btn-primary" id="confirmLevelBtn" style="flex: 1; justify-content: center;" data-i18n="level.start">Start Session</button>
     </div>
   </div>
 </div>
@@ -1104,25 +1122,25 @@
 <!-- STEP 1: choose a topic -->
 <div class="pm-overlay" id="trialTopic" role="dialog" aria-modal="true" aria-label="Choose your lesson">
   <div class="pm-card">
-    <h3>What would you like to practise?</h3>
-    <p>Pick a topic and Penny will run a five-minute speaking lesson with you.</p>
+    <h3 data-i18n="topic.title">What would you like to practise?</h3>
+    <p data-i18n="topic.sub">Pick a topic and Penny will run a five-minute speaking lesson with you.</p>
     <div class="pm-topics">
       <button class="pm-topic" type="button" data-topic="beginner">
-        <b>Starting out</b><span>Simple everyday English</span>
+        <b data-i18n="topic.t1.title">Starting out</b><span data-i18n="topic.t1.desc">Simple everyday English</span>
       </button>
       <button class="pm-topic" type="button" data-topic="everyday">
-        <b>Everyday conversation</b><span>Travel, people, daily life</span>
+        <b data-i18n="topic.t2.title">Everyday conversation</b><span data-i18n="topic.t2.desc">Travel, people, daily life</span>
       </button>
       <button class="pm-topic" type="button" data-topic="business">
-        <b>Business English</b><span>Meetings, calls, email</span>
+        <b data-i18n="topic.t3.title">Business English</b><span data-i18n="topic.t3.desc">Meetings, calls, email</span>
       </button>
       <button class="pm-topic" type="button" data-topic="aviation">
-        <b>Aviation English</b><span>Radio phrasing, ICAO</span>
+        <b data-i18n="topic.t4.title">Aviation English</b><span data-i18n="topic.t4.desc">Radio phrasing, ICAO</span>
       </button>
     </div>
     <div class="pm-actions">
-      <button class="pm-btn pm-btn-ghost" type="button" data-close>Cancel</button>
-      <button class="pm-btn pm-btn-primary" type="button" id="topicNext">Continue →</button>
+      <button class="pm-btn pm-btn-ghost" type="button" data-close data-i18n="level.cancel">Cancel</button>
+      <button class="pm-btn pm-btn-primary" type="button" id="topicNext" data-i18n="topic.continue">Continue →</button>
     </div>
   </div>
 </div>
@@ -1130,14 +1148,14 @@
 <!-- STEP 2: email + phone -->
 <div class="pm-overlay" id="trialDetails" role="dialog" aria-modal="true" aria-label="Your details">
   <div class="pm-card">
-    <h3>Where should we send your code?</h3>
-    <p>We'll email you a six-digit code to start your free lesson.</p>
+    <h3 data-i18n="details.title">Where should we send your code?</h3>
+    <p data-i18n="details.sub">We'll email you a six-digit code to start your free lesson.</p>
     <div class="field">
-      <label for="t-email">Email address</label>
-      <input id="t-email" type="email" placeholder="you@example.com" autocomplete="email"/>
+      <label for="t-email" data-i18n="details.email.label">Email address</label>
+      <input id="t-email" type="email" placeholder="you@example.com" autocomplete="email" data-i18n-placeholder="details.email.placeholder"/>
     </div>
     <div class="field">
-      <label for="t-phone">Phone number</label>
+      <label for="t-phone" data-i18n="details.phone.label">Phone number</label>
       <div class="phone-row">
         <select id="t-cc" aria-label="Country code">
           <option value="+39">🇮🇹 +39</option>
@@ -1151,22 +1169,22 @@
           <option value="+91">🇮🇳 +91</option>
           <option value="+971">🇦🇪 +971</option>
         </select>
-        <input id="t-phone" type="tel" placeholder="Phone number" autocomplete="tel"/>
+        <input id="t-phone" type="tel" placeholder="Phone number" autocomplete="tel" data-i18n-placeholder="contact.phone.placeholder"/>
       </div>
     </div>
     <div class="pm-actions">
-      <button class="pm-btn pm-btn-ghost" type="button" data-close>Back</button>
-      <button class="pm-btn pm-btn-primary" type="button" id="detailsNext">Send my code →</button>
+      <button class="pm-btn pm-btn-ghost" type="button" data-close data-i18n="trial.back">Back</button>
+      <button class="pm-btn pm-btn-primary" type="button" id="detailsNext" data-i18n="details.send">Send my code →</button>
     </div>
-    <div class="pm-note">One free lesson per email address.</div>
+    <div class="pm-note" data-i18n="details.note">One free lesson per email address.</div>
   </div>
 </div>
 
 <!-- STEP 3: six-digit code -->
 <div class="pm-overlay" id="trialCode" role="dialog" aria-modal="true" aria-label="Enter your code">
   <div class="pm-card">
-    <h3>Enter your code</h3>
-    <p>We've sent a six-digit code to <b id="codeEmail">your email</b>. It expires in 15 minutes.</p>
+    <h3 data-i18n="code.title">Enter your code</h3>
+    <p data-i18n="code.sub">We've sent a six-digit code to <b id="codeEmail">your email</b>. It expires in 15 minutes.</p>
     <div class="pm-code">
       <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 1"/>
       <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2"/>
@@ -1176,11 +1194,11 @@
       <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6"/>
     </div>
     <div class="pm-actions">
-      <button class="pm-btn pm-btn-ghost" type="button" data-close>Back</button>
-      <button class="pm-btn pm-btn-primary" type="button" id="codeNext">Start my lesson →</button>
+      <button class="pm-btn pm-btn-ghost" type="button" data-close data-i18n="trial.back">Back</button>
+      <button class="pm-btn pm-btn-primary" type="button" id="codeNext" data-i18n="code.start">Start my lesson →</button>
     </div>
-    <div class="pm-note">Didn't get it? <a href="#" id="resendCode">Send it again</a></div>
-    <div class="pm-soon">Placeholder — verification is not connected yet.</div>
+    <div class="pm-note" data-i18n="code.resend">Didn't get it? <a href="#" id="resendCode">Send it again</a></div>
+    <div class="pm-soon" data-i18n="code.note">Placeholder — verification is not connected yet.</div>
   </div>
 </div>
 
@@ -1197,16 +1215,16 @@
       </div>
       <div class="call-identity">
         <div class="call-name">Penny</div>
-        <div class="call-role">AI English Tutor · Penny AI</div>
+        <div class="call-role" data-i18n="call.role">AI English Tutor · Penny AI</div>
       </div>
       <div class="call-lesson-info" id="callLessonInfo" style="display:none;">
         <div class="call-lesson-title" id="callLessonTitle"></div>
         <div class="call-lesson-meta" id="callLessonMeta"></div>
       </div>
-      <div class="call-status-text" id="callStatusText">Connecting…</div>
+      <div class="call-status-text" id="callStatusText" data-i18n="call.connecting">Connecting…</div>
       <button class="call-end-btn" id="endCallBtn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        End Call
+        <span data-i18n="call.endCall">End Call</span>
       </button>
     </div>
   </div>
@@ -1238,10 +1256,16 @@
   let micStream         = null;
   let agentSpeakingUntil = 0; // timestamp until which agent is considered speaking
 
-  /* The trial-flow buttons are bound in the standalone script at the end of the page,
-     so they keep working even if the Retell SDK import in this module fails or is slow.
-     The old level picker below is opened by the trial flow after code verification. */
-  window.__openLevelPicker = function () { levelModal.classList.add('open'); };
+  /* "Try a Free Session" now opens the gated trial flow (topic -> details -> code).
+     The old anonymous level picker is retained below and is opened by the trial flow
+     once the visitor's email has been verified. */
+  document.querySelectorAll('.js-try-free').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      if (window.__openTrialFlow) window.__openTrialFlow();
+      else levelModal.classList.add('open');
+    });
+  });
 
   cancelLevelBtn.addEventListener('click', () => {
     levelModal.classList.remove('open');
@@ -1262,7 +1286,7 @@
     const level         = selectedLevel || LEVELS[Math.floor(Math.random() * LEVELS.length)];
     const lesson_number = Math.floor(Math.random() * 5) + 1;
 
-    openModal('Connecting…');
+    openModal(window.pennyT ? window.pennyT('call.connecting') : 'Connecting…');
 
     try {
       const res = await fetch('/create-demo-call', {
@@ -1285,7 +1309,7 @@
       retellClient = new RetellWebClient();
 
       retellClient.on('call_started', async () => {
-        setStatus('Live session', true);
+        setStatus(window.pennyT ? window.pennyT('call.live') : 'Live session', true);
         await startMicVisualizer();
       });
 
@@ -1302,13 +1326,13 @@
       retellClient.on('call_ended', () => closeModal());
 
       retellClient.on('error', () => {
-        setStatus('Something went wrong');
+        setStatus(window.pennyT ? window.pennyT('call.error') : 'Something went wrong');
         setTimeout(closeModal, 2000);
       });
 
       await retellClient.startCall({ accessToken: data.access_token });
     } catch (err) {
-      setStatus(err.message || 'Connection failed');
+      setStatus(err.message || (window.pennyT ? window.pennyT('call.connectionFailed') : 'Connection failed'));
       setTimeout(closeModal, 2500);
     }
   }
@@ -1422,11 +1446,8 @@
   function close(el) { if (el) el.classList.remove('open'); }
   function closeAll() { [topic, details, codeM].forEach(close); }
 
-  /* Bound here, not in the module script, so the flow works regardless of SDK load state. */
+  /* Exposed so the hero's "Try a Free Session" button can start the flow. */
   window.__openTrialFlow = function () { closeAll(); open(topic); };
-  document.querySelectorAll('.js-try-free').forEach(function (b) {
-    b.addEventListener('click', function (e) { e.preventDefault(); window.__openTrialFlow(); });
-  });
 
   /* Topic selection */
   document.querySelectorAll('.pm-topic').forEach(function (t) {
@@ -1439,14 +1460,14 @@
 
   var topicNext = document.getElementById('topicNext');
   if (topicNext) topicNext.addEventListener('click', function () {
-    if (!chosenTopic) { alert('Please choose a topic first.'); return; }
+    if (!chosenTopic) { alert(t('alert.chooseTopic')); return; }
     close(topic); open(details);
   });
 
   var detailsNext = document.getElementById('detailsNext');
   if (detailsNext) detailsNext.addEventListener('click', function () {
     var em = document.getElementById('t-email');
-    if (!em || !em.value.trim()) { alert('Please enter your email address.'); return; }
+    if (!em || !em.value.trim()) { alert(t('alert.enterEmail')); return; }
     var label = document.getElementById('codeEmail');
     if (label) label.textContent = em.value.trim();
     close(details); open(codeM);
@@ -1466,7 +1487,7 @@
 
   var codeNext = document.getElementById('codeNext');
   if (codeNext) codeNext.addEventListener('click', function () {
-    alert('Verification is not connected yet — this is the visual shell.');
+    alert(t('alert.verificationNotConnected'));
   });
 
   /* Close buttons and backdrop clicks */
@@ -1479,20 +1500,215 @@
   });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeAll(); });
 
-  /* Language toggle — visual only for now. */
+  /* ===== i18n: EN / IT (data-driven, full page) ===== */
+  var I18N = {
+    "nav.login": { en: "Login", it: "Accedi" },
+    "nav.startLearning": { en: "Start Learning", it: "Inizia a imparare" },
+    "hero.badge": { en: "AI-powered English tutor \u2014 available 24/7", it: "Tutor d'inglese basato su AI \u2014 disponibile 24/7" },
+    "hero.h1": { en: "Speak English <em>confidently</em><br>faster than you think", it: "Parla inglese <em>con sicurezza</em><br>pi\u00f9 in fretta di quanto pensi" },
+    "hero.sub": { en: "Practice real conversations with an AI tutor that adapts to your level, corrects you in real time, and shows you exactly how to improve after every session.", it: "Fai pratica con conversazioni reali insieme a un tutor AI che si adatta al tuo livello, ti corregge in tempo reale e ti mostra esattamente come migliorare dopo ogni sessione." },
+    "hero.cta": { en: "Start Learning Now \u2192", it: "Inizia a imparare ora \u2192" },
+    "hero.trust": { en: "No classrooms. No pressure. Just real conversations that work.", it: "Niente aule. Niente pressione. Solo conversazioni reali che funzionano." },
+    "emma.label": { en: "EMMA \u2014 WELCOME VIDEO", it: "EMMA \u2014 VIDEO DI BENVENUTO" },
+    "emma.cap": { en: "Click to watch Emma's welcome video.", it: "Clicca per guardare il video di benvenuto di Emma." },
+    "tryFree": { en: "Try a Free Session", it: "Prova una sessione gratuita" },
+    "emma.small": { en: "5 minutes with Penny. No card needed.", it: "5 minuti con Penny. Nessuna carta richiesta." },
+    "stats.lessons": { en: "Lessons taught", it: "Lezioni svolte" },
+    "stats.hours": { en: "Hours of speaking practice", it: "Ore di pratica orale" },
+    "stats.levels": { en: "CEFR levels covered", it: "Livelli QCER coperti" },
+    "stats.avail": { en: "Available any time", it: "Disponibile in ogni momento" },
+    "problem.h2": { en: "Most people never improve because they <em>don't actually speak</em>", it: "La maggior parte delle persone non migliora mai perch\u00e9 <em>non parla davvero</em>" },
+    "problem.body": { en: "Watching videos and doing exercises isn't enough.<br/>You need <strong>real practice</strong>. You need <strong>feedback</strong>. You need <strong>consistency</strong>.<br/>That's exactly what Penny AI gives you.", it: "Guardare video e fare esercizi non basta.<br/>Hai bisogno di <strong>pratica reale</strong>. Hai bisogno di <strong>feedback</strong>. Hai bisogno di <strong>costanza</strong>.<br/>Questo \u00e8 esattamente ci\u00f2 che Penny AI ti offre." },
+    "problem.cta": { en: "Start Speaking Today \u2192", it: "Inizia a parlare oggi \u2192" },
+    "how.h2": { en: "How it <em>works</em>", it: "Come <em>funziona</em>" },
+    "how.sub": { en: "Four simple steps from sign-up to fluency.", it: "Quattro semplici passaggi dall'iscrizione alla scioltezza." },
+    "how.step1.title": { en: "Get placed instantly", it: "Ricevi subito il tuo livello" },
+    "how.step1.desc": { en: "We assess your level and match you to the right starting point automatically.", it: "Valutiamo il tuo livello e ti assegniamo automaticamente il punto di partenza giusto." },
+    "how.step2.title": { en: "Choose your path", it: "Scegli il tuo percorso" },
+    "how.step2.desc": { en: "Structured lessons or real-life conversation practice \u2014 you pick what works for you.", it: "Lezioni strutturate o pratica di conversazione reale \u2014 scegli tu cosa funziona meglio per te." },
+    "how.step3.title": { en: "Start speaking immediately", it: "Inizia a parlare subito" },
+    "how.step3.desc": { en: "Talk via calls or web chat with an AI that responds naturally and guides you.", it: "Parla tramite chiamate o chat web con un'AI che risponde in modo naturale e ti guida." },
+    "how.step4.title": { en: "Improve every session", it: "Migliora a ogni sessione" },
+    "how.step4.desc": { en: "Get detailed feedback on what you did well and exactly what to fix next.", it: "Ricevi un feedback dettagliato su cosa hai fatto bene ed esattamente cosa correggere." },
+    "how.cta": { en: "Get Started in Minutes \u2192", it: "Inizia in pochi minuti \u2192" },
+    "pos.h2": { en: "This isn't another <em>English course</em>", it: "Questo non \u00e8 l'ennesimo <em>corso d'inglese</em>" },
+    "pos.body": { en: "You're not memorizing rules.<br/>You're training your brain to <strong>think and respond in English.</strong>", it: "Non stai memorizzando regole.<br/>Stai allenando la tua mente a <strong>pensare e rispondere in inglese.</strong>" },
+    "pos.b1": { en: "Speak more naturally in every conversation", it: "Parla in modo pi\u00f9 naturale in ogni conversazione" },
+    "pos.b2": { en: "Make fewer mistakes with real-time correction", it: "Fai meno errori grazie alla correzione in tempo reale" },
+    "pos.b3": { en: "Build real confidence that carries outside the app", it: "Costruisci una sicurezza reale che ti segue anche fuori dall'app" },
+    "pos.cta": { en: "Try Your First Session \u2192", it: "Prova la tua prima sessione \u2192" },
+    "features.h2": { en: "Everything you need to <em>actually improve</em>", it: "Tutto ci\u00f2 che ti serve per <em>migliorare davvero</em>" },
+    "features.f1.title": { en: "Adaptive Learning", it: "Apprendimento adattivo" },
+    "features.f1.desc": { en: "Always learning at the right level. The AI adjusts in real time \u2014 no guesswork, no wasted sessions.", it: "Impari sempre al livello giusto. L'AI si adatta in tempo reale \u2014 niente supposizioni, niente sessioni sprecate." },
+    "features.f2.title": { en: "Real Conversations", it: "Conversazioni reali" },
+    "features.f2.desc": { en: "Practice introductions, meetings, daily interactions, and more \u2014 situations that matter in real life.", it: "Fai pratica con presentazioni, riunioni, interazioni quotidiane e altro \u2014 situazioni che contano nella vita reale." },
+    "features.f3.title": { en: "Instant Feedback", it: "Feedback immediato" },
+    "features.f3.desc": { en: "Know exactly what to improve after every session \u2014 grammar, vocabulary, fluency all covered.", it: "Sai esattamente cosa migliorare dopo ogni sessione \u2014 grammatica, vocabolario e scioltezza, tutto incluso." },
+    "features.f4.title": { en: "Flexible Sessions", it: "Sessioni flessibili" },
+    "features.f4.desc": { en: "Take lessons via web chat or scheduled phone calls \u2014 on your schedule, from anywhere.", it: "Segui le lezioni via chat web o chiamate programmate \u2014 quando vuoi tu, da qualsiasi luogo." },
+    "features.f5.title": { en: "Progress You Can See", it: "Progressi che puoi vedere" },
+    "features.f5.desc": { en: "Track improvement across speaking, vocabulary, and fluency with clear session-by-session data.", it: "Monitora i tuoi miglioramenti in conversazione, vocabolario e scioltezza con dati chiari sessione per sessione." },
+    "features.f6.title": { en: "Voice & Web", it: "Voce e web" },
+    "features.f6.desc": { en: "Talk through browser or get called on your phone. Both feel natural \u2014 both give you the same results.", it: "Parla dal browser oppure ricevi una chiamata sul telefono. Entrambe le modalit\u00e0 sono naturali \u2014 e danno gli stessi risultati." },
+    "features.cta": { en: "Start Improving Now \u2192", it: "Inizia a migliorare ora \u2192" },
+    "modes.h2": { en: "Two ways to <em>learn</em>", it: "Due modi per <em>imparare</em>" },
+    "modes.sub": { en: "Pick one or switch anytime \u2014 both are included.", it: "Scegline uno o passa dall'uno all'altro quando vuoi \u2014 sono entrambi inclusi." },
+    "modes.m1.tag": { en: "Structured Training", it: "Formazione strutturata" },
+    "modes.m1.title": { en: "Build strong foundations", it: "Costruisci basi solide" },
+    "modes.m1.desc": { en: "For learners who want to understand the rules before applying them.", it: "Per chi vuole capire le regole prima di applicarle." },
+    "modes.m1.li1": { en: "Grammar fundamentals", it: "Fondamenti di grammatica" },
+    "modes.m1.li2": { en: "Vocabulary building", it: "Ampliamento del vocabolario" },
+    "modes.m1.li3": { en: "Sentence structure", it: "Struttura della frase" },
+    "modes.m2.tag": { en: "Conversation Practice", it: "Pratica di conversazione" },
+    "modes.m2.title": { en: "Real-world confidence", it: "Sicurezza nel mondo reale" },
+    "modes.m2.desc": { en: "For learners who want to speak naturally, right now.", it: "Per chi vuole parlare in modo naturale, fin da subito." },
+    "modes.m2.li1": { en: "Daily conversations", it: "Conversazioni quotidiane" },
+    "modes.m2.li2": { en: "Scenario-based learning", it: "Apprendimento basato su scenari" },
+    "modes.m2.li3": { en: "Natural speaking flow", it: "Fluidit\u00e0 nel parlato naturale" },
+    "modes.cta": { en: "Choose Your Learning Style \u2192", it: "Scegli il tuo stile di apprendimento \u2192" },
+    "schedule.h2": { en: "We make <em>consistency</em> easy", it: "Rendiamo facile la <em>costanza</em>" },
+    "schedule.body": { en: "Set your preferred times and the system will call you for your lessons. No reminders needed. No missed sessions. <strong>Just show up and speak.</strong>", it: "Imposta gli orari che preferisci e il sistema ti chiamer\u00e0 per le tue lezioni. Nessun promemoria necessario. Nessuna sessione persa. <strong>Basta presentarsi e parlare.</strong>" },
+    "schedule.cta": { en: "Schedule Your First Lesson \u2192", it: "Programma la tua prima lezione \u2192" },
+    "schedule.card.title": { en: "My weekly schedule", it: "Il mio programma settimanale" },
+    "schedule.card.week": { en: "This week", it: "Questa settimana" },
+    "schedule.day1": { en: "Monday \u2014 Conversation", it: "Luned\u00ec \u2014 Conversazione" },
+    "schedule.day2": { en: "Wednesday \u2014 Grammar", it: "Mercoled\u00ec \u2014 Grammatica" },
+    "schedule.day3": { en: "Friday \u2014 Vocabulary", it: "Venerd\u00ec \u2014 Vocabolario" },
+    "feedback.h2": { en: "Know exactly how you're <em>improving</em>", it: "Sappi esattamente come stai <em>migliorando</em>" },
+    "feedback.body": { en: "After every session you get a personalized breakdown \u2014 clear explanations, actionable steps, and your next recommended lesson.", it: "Dopo ogni sessione ricevi un'analisi personalizzata \u2014 spiegazioni chiare, passi concreti e la tua prossima lezione consigliata." },
+    "feedback.card.title": { en: "Session Summary \u2014 Friday 9:00 AM", it: "Riepilogo sessione \u2014 Venerd\u00ec ore 9:00" },
+    "feedback.score": { en: "Score: 78/100", it: "Punteggio: 78/100" },
+    "feedback.m1": { en: "Fluency", it: "Scioltezza" },
+    "feedback.m2": { en: "Grammar accuracy", it: "Precisione grammaticale" },
+    "feedback.m3": { en: "Vocabulary range", it: "Ampiezza del vocabolario" },
+    "feedback.m4": { en: "Pronunciation clarity", it: "Chiarezza della pronuncia" },
+    "feedback.note.title": { en: "Next recommended focus", it: "Prossimo obiettivo consigliato" },
+    "feedback.note.body": { en: "Work on irregular past tense verbs \u2014 you missed \"bought\", \"went\", and \"came\" in today's session. Your next lesson will target these specifically.", it: "Lavora sui verbi irregolari al passato \u2014 nella sessione di oggi ti sono sfuggiti \"bought\", \"went\" e \"came\". La tua prossima lezione si concentrer\u00e0 proprio su questi." },
+    "feedback.cta": { en: "See How It Works \u2192", it: "Scopri come funziona \u2192" },
+    "contact.h2": { en: "Talk to us about your team", it: "Parlaci del tuo team" },
+    "contact.body": { en: "Schools, universities and companies: tell us how many learners you have and what you need them to be able to do. We'll come back with a plan and pricing that fits.", it: "Scuole, universit\u00e0 e aziende: raccontaci quanti studenti avete e cosa volete che sappiano fare. Ti risponderemo con un piano e un prezzo su misura." },
+    "contact.name.label": { en: "Name", it: "Nome" },
+    "contact.name.placeholder": { en: "Your name", it: "Il tuo nome" },
+    "contact.email.label": { en: "Email", it: "Email" },
+    "contact.email.placeholder": { en: "you@organisation.com", it: "tu@organizzazione.com" },
+    "contact.phone.label": { en: "Phone", it: "Telefono" },
+    "contact.phone.placeholder": { en: "Phone number", it: "Numero di telefono" },
+    "contact.msg.label": { en: "How can we help?", it: "Come possiamo aiutarti?" },
+    "contact.msg.placeholder": { en: "Number of learners, goals, timeline\u2026", it: "Numero di studenti, obiettivi, tempistiche\u2026" },
+    "contact.send": { en: "Send enquiry \u2192", it: "Invia richiesta \u2192" },
+    "contact.note": { en: "Placeholder \u2014 not connected yet.", it: "Segnaposto \u2014 non ancora collegato." },
+    "final.h2": { en: "If you can speak,<br/><em>you can improve</em>", it: "Se sai parlare,<br/><em>puoi migliorare</em>" },
+    "final.sub": { en: "Start where you are. Improve with every conversation.", it: "Parti da dove sei. Migliora a ogni conversazione." },
+    "footer.dashboard": { en: "Dashboard", it: "Dashboard" },
+    "footer.contact": { en: "Contact", it: "Contatti" },
+    "footer.terms": { en: "Terms", it: "Termini" },
+    "footer.privacy": { en: "Privacy", it: "Privacy" },
+    "footer.copy": { en: "\u00a9 2025 Penny AI. All rights reserved.", it: "\u00a9 2025 Penny AI. Tutti i diritti riservati." },
+    "level.title": { en: "Select your English Level", it: "Seleziona il tuo livello d'inglese" },
+    "level.sub": { en: "Choose a level for your free practice session.", it: "Scegli un livello per la tua sessione di pratica gratuita." },
+    "level.opt.a1": { en: "Beginner (A1)", it: "Principiante (A1)" },
+    "level.opt.a2": { en: "Elementary (A2)", it: "Elementare (A2)" },
+    "level.opt.b1": { en: "Intermediate (B1)", it: "Intermedio (B1)" },
+    "level.opt.b2": { en: "Upper Intermediate (B2)", it: "Intermedio superiore (B2)" },
+    "level.opt.c1": { en: "Advanced (C1)", it: "Avanzato (C1)" },
+    "level.opt.c2": { en: "Proficient (C2)", it: "Padronanza (C2)" },
+    "level.cancel": { en: "Cancel", it: "Annulla" },
+    "level.start": { en: "Start Session", it: "Inizia la sessione" },
+    "topic.title": { en: "What would you like to practise?", it: "Cosa vorresti praticare?" },
+    "topic.sub": { en: "Pick a topic and Penny will run a five-minute speaking lesson with you.", it: "Scegli un argomento e Penny far\u00e0 con te una lezione di conversazione di cinque minuti." },
+    "topic.t1.title": { en: "Starting out", it: "Per iniziare" },
+    "topic.t1.desc": { en: "Simple everyday English", it: "Inglese quotidiano semplice" },
+    "topic.t2.title": { en: "Everyday conversation", it: "Conversazione quotidiana" },
+    "topic.t2.desc": { en: "Travel, people, daily life", it: "Viaggi, persone, vita di tutti i giorni" },
+    "topic.t3.title": { en: "Business English", it: "Inglese commerciale" },
+    "topic.t3.desc": { en: "Meetings, calls, email", it: "Riunioni, chiamate, email" },
+    "topic.t4.title": { en: "Aviation English", it: "Inglese aeronautico" },
+    "topic.t4.desc": { en: "Radio phrasing, ICAO", it: "Fraseologia radio, ICAO" },
+    "topic.continue": { en: "Continue \u2192", it: "Continua \u2192" },
+    "details.title": { en: "Where should we send your code?", it: "Dove vuoi ricevere il codice?" },
+    "details.sub": { en: "We'll email you a six-digit code to start your free lesson.", it: "Ti invieremo via email un codice a sei cifre per iniziare la tua lezione gratuita." },
+    "details.email.label": { en: "Email address", it: "Indirizzo email" },
+    "details.email.placeholder": { en: "you@example.com", it: "tu@esempio.com" },
+    "details.phone.label": { en: "Phone number", it: "Numero di telefono" },
+    "trial.back": { en: "Back", it: "Indietro" },
+    "details.send": { en: "Send my code \u2192", it: "Invia il mio codice \u2192" },
+    "details.note": { en: "One free lesson per email address.", it: "Una lezione gratuita per ogni indirizzo email." },
+    "code.title": { en: "Enter your code", it: "Inserisci il tuo codice" },
+    "code.sub": { en: "We've sent a six-digit code to <b id=\"codeEmail\">your email</b>. It expires in 15 minutes.", it: "Ti abbiamo inviato un codice a sei cifre a <b id=\"codeEmail\">your email</b>. Scade tra 15 minuti." },
+    "code.start": { en: "Start my lesson \u2192", it: "Inizia la mia lezione \u2192" },
+    "code.resend": { en: "Didn't get it? <a href=\"#\" id=\"resendCode\">Send it again</a>", it: "Non l'hai ricevuto? <a href=\"#\" id=\"resendCode\">Inviamelo di nuovo</a>" },
+    "code.note": { en: "Placeholder \u2014 verification is not connected yet.", it: "Segnaposto \u2014 la verifica non \u00e8 ancora collegata." },
+    "call.role": { en: "AI English Tutor \u00b7 Penny AI", it: "Tutor d'inglese AI \u00b7 Penny AI" },
+    "call.endCall": { en: "End Call", it: "Termina chiamata" },
+    "call.connecting": { en: "Connecting\u2026", it: "Connessione\u2026" },
+    "call.live": { en: "Live session", it: "Sessione in corso" },
+    "call.error": { en: "Something went wrong", it: "Qualcosa \u00e8 andato storto" },
+    "call.connectionFailed": { en: "Connection failed", it: "Connessione non riuscita" },
+    "alert.chooseTopic": { en: "Please choose a topic first.", it: "Scegli prima un argomento." },
+    "alert.enterEmail": { en: "Please enter your email address.", it: "Inserisci il tuo indirizzo email." },
+    "alert.verificationNotConnected": { en: "Verification is not connected yet \u2014 this is the visual shell.", it: "La verifica non \u00e8 ancora collegata \u2014 questa \u00e8 solo l'anteprima visiva." },
+    "emma.videoError": { en: "The video could not start. Please try again.", it: "Impossibile avviare il video. Riprova." },
+  };
+
+  var currentLang = (function () {
+    try {
+      var saved = localStorage.getItem('pennyLang');
+      if (saved === 'en' || saved === 'it') return saved;
+    } catch (_) {}
+    return 'en';
+  })();
+
+  function t(key) {
+    var entry = I18N[key];
+    if (!entry) return key;
+    return entry[currentLang] || entry.en || key;
+  }
+  window.pennyT = t;
+
+  function applyLanguage(lang) {
+    currentLang = (lang === 'it') ? 'it' : 'en';
+    document.documentElement.lang = currentLang;
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var key = el.getAttribute('data-i18n');
+      var entry = I18N[key];
+      if (entry) el.innerHTML = entry[currentLang] || entry.en;
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+      var key = el.getAttribute('data-i18n-placeholder');
+      var entry = I18N[key];
+      if (entry) el.setAttribute('placeholder', entry[currentLang] || entry.en);
+    });
+    document.querySelectorAll('.lang-toggle button').forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === currentLang);
+    });
+    try { localStorage.setItem('pennyLang', currentLang); } catch (_) {}
+  }
+  window.PennyLang = { get: function () { return currentLang; }, set: applyLanguage };
+
+  /* Language toggle — now fully wired, swaps every tagged string on the page. */
   document.querySelectorAll('.lang-toggle button').forEach(function (b) {
     b.addEventListener('click', function () {
-      document.querySelectorAll('.lang-toggle button').forEach(function (x) { x.classList.remove('active'); });
-      b.classList.add('active');
+      applyLanguage(b.getAttribute('data-lang'));
     });
   });
 
-  /* Emma video placeholder */
+  applyLanguage(currentLang);
+
+  /* Emma welcome video — playback starts only after a visitor clicks Play. */
   var play = document.getElementById('emmaPlay');
-  if (play) play.addEventListener('click', function () {
-    var cap = document.getElementById('emmaCap');
-    if (cap) cap.textContent = 'Video placeholder — Emma\'s recorded welcome will play here.';
-  });
+  var video = document.getElementById('emmaVideo');
+  var videoWrap = document.querySelector('.emma-video');
+  if (play && video && videoWrap) {
+    play.addEventListener('click', function () {
+      video.play().catch(function () {
+        var cap = document.getElementById('emmaCap');
+        if (cap) cap.textContent = t('emma.videoError');
+      });
+    });
+    video.addEventListener('play', function () { videoWrap.classList.add('is-playing'); });
+    video.addEventListener('pause', function () { videoWrap.classList.remove('is-playing'); });
+    video.addEventListener('ended', function () { videoWrap.classList.remove('is-playing'); });
+  }
 })();
 </script>
 
