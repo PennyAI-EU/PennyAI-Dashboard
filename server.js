@@ -210,11 +210,25 @@ async function sendWelcomeEmail(email, name, password) {
   console.log(`[email] verifying SMTP connection...`);
   await mailer.verify();
   console.log(`[email] SMTP connection verified — sending...`);
+  const text = `Welcome to Penny AI, ${firstName}!
+
+Your account is ready. Here are your login details:
+
+Email: ${email}
+Password: ${password}
+
+Sign in: ${loginUrl}/signin.html
+
+We recommend changing your password after your first login. Your teacher will be in touch soon to guide your learning path.
+
+— Penny AI`;
+
   const info = await mailer.sendMail({
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to: email,
     subject: `Welcome to Penny AI — your account is ready, ${firstName}!`,
     html,
+    text,
   });
   console.log(`[email] sent successfully — messageId:${info.messageId} response:${info.response}`);
 }
@@ -277,11 +291,19 @@ async function sendTrialCodeEmail(email, code) {
   console.log(`[trial-email] verifying SMTP connection...`);
   await mailer.verify();
   console.log(`[trial-email] SMTP connection verified — sending...`);
+  const text = `Your Penny AI verification code is: ${code}
+
+Enter this code on the page to start your free trial session with Penny.
+It expires in 15 minutes. If you didn't request this, you can safely ignore this email.
+
+— Penny AI`;
+
   const info = await mailer.sendMail({
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to: email,
     subject: `Your Penny AI verification code: ${code}`,
     html,
+    text,
   });
   console.log(`[trial-email] sent successfully — messageId:${info.messageId} response:${info.response}`);
 }
