@@ -306,6 +306,20 @@ At the end of the lesson always review what the student has learned today and en
 
 --- LESSON SCRIPT ---`;
 
+// Universal opening behavior for every trial call, regardless of which topic was
+// picked. Layered in between LESSON_PREAMBLE and the topic-specific script for
+// /api/trial/start-call only — the regular curriculum lessons (/create-call,
+// /create-demo-call) are untouched by this.
+const TRIAL_LESSON_INTRO = `This call is a free trial session, not a full curriculum lesson, so before getting into the topic script below, always run this opening with every trial visitor — it applies no matter which topic they picked:
+
+1. Greet them warmly and ask for their name. Use their name naturally for the rest of the call, especially whenever you praise or encourage them.
+2. Ask whether they'd feel more comfortable if you explain things in English or Italian. Whichever they choose, keep running the actual practice and questions in English — that's the point of the session — but reassure them that if they ever don't understand something, they can just ask you to repeat it in Italian, and you'll happily switch to Italian briefly to clarify before returning to English right away.
+3. Ask what they do for work, and briefly why they want to improve their English (for work, travel, family, exams, etc.). Keep this light and quick, not an interview.
+4. Ask them how they'd rate their own English level — beginner, intermediate, advanced, or a CEFR level (A1-C2) if they know it. Use their answer to set your pace and support for the rest of the call: for beginner and lower-intermediate levels (roughly A1-B1), speak more slowly and clearly, use simpler vocabulary and shorter sentences, and give extra encouragement and support. For stronger levels, speak more naturally and challenge them a bit more.
+5. Once you know their profession, weave it into the practice below wherever it fits naturally. The topic they picked is still the main frame for the session, but ground examples in their real job when you can — if they work in a restaurant, use restaurant situations; if they're a doctor, pilot, or anything else, pull in scenarios and vocabulary close to that world, even inside a differently-themed topic. This is what makes the practice feel personally relevant to them.
+
+Only after this opening — name, language comfort, quick profession/goal check, and level — move into the topic-specific script below. Treat its own opening line as already covered by what you just did; don't re-introduce yourself or ask the same questions twice.`;
+
 // Fixed set of trial topics offered in the "Try a Free Session" picker on the
 // landing page. Server-side lookup only — the client sends a topic slug, never
 // raw instruction text, so a visitor can never inject their own call prompt.
@@ -990,7 +1004,7 @@ app.post("/api/trial/start-call", async (req, res) => {
 
     const webCallResponse = await retell.call.createWebCall({
       agent_id: process.env.RETELL_AGENT_ID,
-      retell_llm_dynamic_variables: { instruction: `${LESSON_PREAMBLE}\n\n${instruction}` },
+      retell_llm_dynamic_variables: { instruction: `${LESSON_PREAMBLE}\n\n${TRIAL_LESSON_INTRO}\n\n${instruction}` },
     });
 
     await supabase
