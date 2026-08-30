@@ -21,6 +21,7 @@
     --amber: #ffbf00;
     --amber-dark: #e8ae00;
     --amber-light: #fff6dd;
+    --amber-select: #ffdb77;
     --ink: #181b30;
     --green: #16a34a;
     --green-light: #f0fdf4;
@@ -683,6 +684,7 @@
   .pm-card {
     background:var(--white); border-radius:var(--radius-xl); padding:32px;
     width:100%; max-width:440px; box-shadow:0 24px 60px rgba(24,27,48,.28);
+    max-height:90vh; overflow-y:auto;
   }
   .pm-card h3 { font-size:22px; font-weight:700; letter-spacing:-.4px; margin-bottom:8px; }
   .pm-card > p { font-size:13.5px; color:var(--muted); line-height:1.6; margin-bottom:22px; }
@@ -734,7 +736,7 @@
 
   /* amber applied to remaining accents */
   .lang-toggle button.active { color: var(--ink); }
-  .pm-topic.sel { border-color: var(--amber); background: var(--amber-light); }
+  .pm-topic.sel { border-color: var(--amber); background: var(--amber-select); }
   .field input:focus, .field select:focus, .field textarea:focus,
   .pm-code input:focus {
     border-color: var(--amber); box-shadow: 0 0 0 3px rgba(255,191,0,.22);
@@ -1155,6 +1157,24 @@
       </button>
       <button class="pm-topic" type="button" data-topic="aviation">
         <b data-i18n="topic.t4.title">Aviation English</b><span data-i18n="topic.t4.desc">Radio phrasing, ICAO</span>
+      </button>
+      <button class="pm-topic" type="button" data-topic="medical">
+        <b data-i18n="topic.t5.title">Medical English</b><span data-i18n="topic.t5.desc">Doctors, patients, appointments</span>
+      </button>
+      <button class="pm-topic" type="button" data-topic="legal">
+        <b data-i18n="topic.t6.title">Legal English</b><span data-i18n="topic.t6.desc">Contracts, hearings, compliance</span>
+      </button>
+      <button class="pm-topic" type="button" data-topic="tourism">
+        <b data-i18n="topic.t7.title">English for Tourism and Hospitality</b><span data-i18n="topic.t7.desc">Hotels, guests, bookings</span>
+      </button>
+      <button class="pm-topic" type="button" data-topic="it">
+        <b data-i18n="topic.t8.title">English for IT</b><span data-i18n="topic.t8.desc">Support tickets, systems, meetings</span>
+      </button>
+      <button class="pm-topic" type="button" data-topic="callcenter">
+        <b data-i18n="topic.t9.title">English for Call Centers</b><span data-i18n="topic.t9.desc">Scripts, complaints, resolutions</span>
+      </button>
+      <button class="pm-topic" type="button" data-topic="customerservice">
+        <b data-i18n="topic.t10.title">English for Customer Service</b><span data-i18n="topic.t10.desc">Requests, complaints, follow-ups</span>
       </button>
     </div>
     <div class="pm-actions">
@@ -1643,6 +1663,18 @@
     "topic.t3.desc": { en: "Meetings, calls, email", it: "Riunioni, chiamate, email" },
     "topic.t4.title": { en: "Aviation English", it: "Inglese aeronautico" },
     "topic.t4.desc": { en: "Radio phrasing, ICAO", it: "Fraseologia radio, ICAO" },
+    "topic.t5.title": { en: "Medical English", it: "Inglese medico" },
+    "topic.t5.desc": { en: "Doctors, patients, appointments", it: "Medici, pazienti, appuntamenti" },
+    "topic.t6.title": { en: "Legal English", it: "Inglese legale" },
+    "topic.t6.desc": { en: "Contracts, hearings, compliance", it: "Contratti, udienze, conformit\u00e0" },
+    "topic.t7.title": { en: "English for Tourism and Hospitality", it: "Inglese per il turismo e l'ospitalit\u00e0" },
+    "topic.t7.desc": { en: "Hotels, guests, bookings", it: "Hotel, ospiti, prenotazioni" },
+    "topic.t8.title": { en: "English for IT", it: "Inglese per l'informatica" },
+    "topic.t8.desc": { en: "Support tickets, systems, meetings", it: "Ticket di assistenza, sistemi, riunioni" },
+    "topic.t9.title": { en: "English for Call Centers", it: "Inglese per i call center" },
+    "topic.t9.desc": { en: "Scripts, complaints, resolutions", it: "Script, reclami, risoluzioni" },
+    "topic.t10.title": { en: "English for Customer Service", it: "Inglese per il servizio clienti" },
+    "topic.t10.desc": { en: "Requests, complaints, follow-ups", it: "Richieste, reclami, follow-up" },
     "topic.continue": { en: "Continue \u2192", it: "Continua \u2192" },
     "details.title": { en: "Where should we send your code?", it: "Dove vuoi ricevere il codice?" },
     "details.sub": { en: "We'll email you a six-digit code to start your free lesson.", it: "Ti invieremo via email un codice a sei cifre per iniziare la tua lezione gratuita." },
