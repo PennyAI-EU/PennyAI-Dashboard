@@ -134,9 +134,23 @@ const mailer = nodemailer.createTransport({
 // pasted into it when the Resend SMTP relay was set up) unless a
 // dedicated RESEND_API_KEY env var is present.
 async function sendViaResendApi({ to, subject, html, text }) {
-  const apiKey = process.env.RESEND_API_KEY || process.env.SMTP_PASS;
+  const rawApiKey = process.env.RESEND_API_KEY || process.env.SMTP_PASS || '';
+  // Defensive cleanup: env vars pasted through a browser/UI sometimes pick up
+  // invisible characters (zero-width spaces, curly quotes, stray newlines,
+  // BOM) that are outside plain ASCII. A header value like `Authorization`
+  // must be ISO-8859-1/ASCII-safe, or fetch/undici throws:
+  //   "Cannot convert argument to a ByteString because the character at
+  //   index N has a value of M which is greater than 255."
+  // Strip anything outside printable ASCII and trim whitespace so a bad
+  // paste can't silently break sending — and if it strips down to nothing
+  // or still contains something odd, fail loudly with a clear message
+  // instead of a cryptic ByteString crash.
+  const apiKey = rawApiKey.replace(/[^\x20-\x7E]/g, '').trim();
   if (!apiKey) {
     throw new Error('RESEND_API_KEY (or SMTP_PASS) not set — email not sent');
+  }
+  if (apiKey !== rawApiKey.trim()) {
+    console.warn('[email] WARNING: apiKey contained non-ASCII characters that were stripped — re-check SMTP_PASS in Vercel for a bad paste (invisible/curly characters).');
   }
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
