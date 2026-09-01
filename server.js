@@ -123,6 +123,41 @@ const mailer = nodemailer.createTransport({
   },
   tls: { rejectUnauthorized: false, minVersion: 'TLSv1.2' },
 });
+// Kept above for reference / potential fallback, but unused below — SMTP
+// from Vercel's serverless functions to smtp.resend.com was hitting
+// intermittent "getaddrinfo EBUSY" DNS errors. Sending via Resend's HTTPS
+// API instead (a single POST, no SMTP handshake) is simpler and is
+// Resend's own recommended integration method for exactly this kind of
+// environment.
+//
+// Reuses SMTP_PASS as the Resend API key (that's literally what was
+// pasted into it when the Resend SMTP relay was set up) unless a
+// dedicated RESEND_API_KEY env var is present.
+async function sendViaResendApi({ to, subject, html, text }) {
+  const apiKey = process.env.RESEND_API_KEY || process.env.SMTP_PASS;
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY (or SMTP_PASS) not set — email not sent');
+  }
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: process.env.SMTP_FROM || 'learn@pennyai.eu',
+      to,
+      subject,
+      html,
+      text,
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    throw new Error(`Resend API error ${res.status}: ${body}`);
+  }
+  return res.json();
+}
 
 async function sendWelcomeEmail(email, name, password) {
   console.log(`[email] attempting to send welcome email to ${email}`);
@@ -207,9 +242,6 @@ async function sendWelcomeEmail(email, name, password) {
 </body>
 </html>`;
 
-  console.log(`[email] verifying SMTP connection...`);
-  await mailer.verify();
-  console.log(`[email] SMTP connection verified — sending...`);
   const text = `Welcome to Penny AI, ${firstName}!
 
 Your account is ready. Here are your login details:
@@ -223,14 +255,14 @@ We recommend changing your password after your first login. Your teacher will be
 
 — Penny AI`;
 
-  const info = await mailer.sendMail({
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+  console.log(`[email] sending via Resend API...`);
+  const info = await sendViaResendApi({
     to: email,
     subject: `Welcome to Penny AI — your account is ready, ${firstName}!`,
     html,
     text,
   });
-  console.log(`[email] sent successfully — messageId:${info.messageId} response:${info.response}`);
+  console.log(`[email] sent successfully — id:${info.id}`);
 }
 
 // Sends the 6-digit verification code for the landing-page "Try a Free Session"
@@ -288,9 +320,6 @@ async function sendTrialCodeEmail(email, code) {
 </body>
 </html>`;
 
-  console.log(`[trial-email] verifying SMTP connection...`);
-  await mailer.verify();
-  console.log(`[trial-email] SMTP connection verified — sending...`);
   const text = `Your Penny AI verification code is: ${code}
 
 Enter this code on the page to start your free trial session with Penny.
@@ -298,14 +327,14 @@ It expires in 15 minutes. If you didn't request this, you can safely ignore this
 
 — Penny AI`;
 
-  const info = await mailer.sendMail({
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+  console.log(`[trial-email] sending via Resend API...`);
+  const info = await sendViaResendApi({
     to: email,
     subject: `Your Penny AI verification code: ${code}`,
     html,
     text,
   });
-  console.log(`[trial-email] sent successfully — messageId:${info.messageId} response:${info.response}`);
+  console.log(`[trial-email] sent successfully — id:${info.id}`);
 }
 
 const LESSON_PREAMBLE = `You are an AI English tutor conducting a live, interactive voice lesson with a student. The student's level will be provided (e.g. A1, A2, B1), and you must adapt your language, vocabulary, and pace to match that level. For A1 learners, use very simple words, short sentences, and lots of repetition.
