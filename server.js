@@ -152,6 +152,22 @@ async function sendViaResendApi({ to, subject, html, text }) {
   if (apiKey !== rawApiKey.trim()) {
     console.warn('[email] WARNING: apiKey contained non-ASCII characters that were stripped — re-check SMTP_PASS in Vercel for a bad paste (invisible/curly characters).');
   }
+  // Same defensive cleanup for the sender address. Resend rejects a malformed
+  // `from` with a 400 validation_error, and a value pasted into Vercel can
+  // easily arrive wrapped in quotes, padded with whitespace, or carrying a
+  // curly quote / non-breaking space that is invisible in the dashboard.
+  // Accepted formats are `email@example.com` or `Name <email@example.com>`.
+  const rawFrom = process.env.SMTP_FROM || 'learn@pennyai.eu';
+  const from = rawFrom
+    .replace(/[^\x20-\x7E]/g, '')
+    .trim()
+    .replace(/^["']+|["']+$/g, '')
+    .trim();
+  console.log(`[email] resend from:${JSON.stringify(from)} to:${JSON.stringify(to)} keyLen:${apiKey.length}`);
+  if (from !== rawFrom) {
+    console.warn(`[email] WARNING: SMTP_FROM was cleaned before sending. raw:${JSON.stringify(rawFrom)} used:${JSON.stringify(from)}`);
+  }
+
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -159,7 +175,7 @@ async function sendViaResendApi({ to, subject, html, text }) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: process.env.SMTP_FROM || 'learn@pennyai.eu',
+      from,
       to,
       subject,
       html,
@@ -992,8 +1008,13 @@ app.post("/api/trial/send-code", async (req, res) => {
     await sendTrialCodeEmail(cleanEmail, code);
     res.json({ success: true });
   } catch (err) {
-    console.error("[trial/send-code] error:", err.message || err);
-    res.status(500).json({ error: "Could not send the verification code. Please try again." });
+    const detail = err.message || String(err);
+    console.error("[trial/send-code] error:", detail);
+    // `detail` surfaces the upstream provider's own rejection message (e.g.
+    // Resend's validation_error text) so a failure can be diagnosed from the
+    // browser without digging through platform logs. It never contains the API
+    // key or any other secret.
+    res.status(500).json({ error: "Could not send the verification code. Please try again.", detail });
   }
 });
 
