@@ -638,6 +638,104 @@
   .emma-cta .btn-trial:hover { background: var(--accent-dark); transform: translateY(-1px); }
   .emma-cta small { display:block; text-align:center; font-size:12px; color:var(--muted); margin-top:11px; }
 
+  /* --- HERO HELLO DEMO ---------------------------------------------------
+     The hero visual is one slot with two states. While live demo calls remain
+     under the daily cap it shows the microphone panel; once the cap is reached
+     it falls back to the pre-recorded video below. JS picks the state on load
+     from /api/hello/availability, and defaults to the video if anything fails. */
+  .hello-panel[hidden], .emma-sound[hidden], .emma-endcard[hidden],
+  .call-countdown[hidden], .hello-upsell[hidden] { display:none !important; }
+
+  .hello-panel {
+    position:relative; aspect-ratio: 16/9; border-radius:18px; overflow:hidden;
+    background: linear-gradient(150deg, var(--accent) 0%, #7c6df0 55%, var(--lilac) 100%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:10px; padding:20px; text-align:center;
+  }
+  .hello-orb-wrap { position:relative; width:78px; height:78px; display:flex; align-items:center; justify-content:center; margin-bottom:4px; }
+  .hello-ring {
+    position:absolute; inset:0; border-radius:50%; border:2px solid rgba(255,255,255,.55);
+    animation: helloPulse 2.4s ease-out infinite;
+  }
+  .hello-ring:nth-child(2) { animation-delay: 1.2s; }
+  @keyframes helloPulse {
+    0%   { transform: scale(.72); opacity:.85; }
+    100% { transform: scale(1.5);  opacity:0; }
+  }
+  .hello-mic {
+    position:relative; z-index:2; width:64px; height:64px; border-radius:50%;
+    background: var(--white); border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 8px 22px rgba(24,27,48,.28);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .hello-mic:hover { transform: scale(1.07); box-shadow: 0 10px 26px rgba(24,27,48,.34); }
+  .hello-mic:disabled { opacity:.6; cursor:default; transform:none; }
+  .hello-mic svg { width:27px; height:27px; color: var(--accent); }
+  .hello-title { color:#fff; font-size:19px; font-weight:700; letter-spacing:-.3px; line-height:1.25; }
+  .hello-sub   { color:rgba(255,255,255,.88); font-size:13px; line-height:1.5; max-width:290px; }
+  .hello-note  {
+    margin-top:2px; background:rgba(255,255,255,.18); color:#fff;
+    border-radius:99px; padding:5px 13px; font-size:11px; font-weight:600; letter-spacing:.03em;
+  }
+  .hello-note.is-error { background:rgba(248,113,113,.28); }
+  @media (max-width: 900px) { .hello-title { font-size:17px; } .hello-sub { font-size:12.5px; } }
+
+  /* Muted autoplay needs a visible, moving invitation to turn sound on —
+     browsers block audible autoplay, so without this the fallback is silent. */
+  .emma-sound {
+    position:absolute; z-index:3; left:50%; bottom:14px; transform:translateX(-50%);
+    display:flex; align-items:center; gap:7px; border:none; cursor:pointer;
+    background: rgba(255,255,255,.94); color: var(--chip-ink);
+    border-radius:99px; padding:9px 16px; font-family:inherit; font-size:12.5px; font-weight:700;
+    box-shadow:0 6px 18px rgba(24,27,48,.22); animation: soundNudge 1.9s ease-in-out infinite;
+  }
+  @keyframes soundNudge { 0%,100% { transform:translateX(-50%) scale(1); } 50% { transform:translateX(-50%) scale(1.06); } }
+  .emma-sound svg { width:15px; height:15px; }
+
+  .emma-endcard {
+    position:absolute; inset:0; z-index:4; background: rgba(24,27,48,.93);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:12px; padding:22px; text-align:center;
+  }
+  .emma-endcard p { color:#fff; font-size:15px; font-weight:600; margin:0; line-height:1.4; max-width:280px; }
+  .emma-endcard button {
+    border:none; cursor:pointer; background: var(--amber); color: var(--chip-ink);
+    border-radius:12px; padding:12px 22px; font-family:inherit; font-size:14px; font-weight:700;
+    transition: transform .12s;
+  }
+  .emma-endcard button:hover { transform: translateY(-1px); }
+
+  /* Countdown for the 60-second demo, shown inside the existing call modal. */
+  .call-countdown {
+    margin-top:8px; font-size:12.5px; font-weight:700; letter-spacing:.06em;
+    color: rgba(255,255,255,.85); font-variant-numeric: tabular-nums;
+  }
+  .call-countdown.is-low { color:#fca5a5; }
+
+  /* Shown after the 60-second hello ends — the handoff into the full free lesson. */
+  .hello-upsell {
+    position:fixed; inset:0; z-index:1200; background: rgba(24,27,48,.72);
+    display:flex; align-items:center; justify-content:center; padding:22px;
+  }
+  .hello-upsell-card {
+    background: var(--white); border-radius: var(--radius-xl); padding:32px 28px;
+    max-width:400px; width:100%; text-align:center; box-shadow:0 24px 60px rgba(24,27,48,.3);
+  }
+  .hello-upsell-card h3 { margin:0 0 10px; font-size:21px; color:var(--chip-ink); letter-spacing:-.3px; }
+  .hello-upsell-card p  { margin:0 0 22px; font-size:14px; line-height:1.6; color:var(--muted); }
+  .hello-upsell-card .btn-trial {
+    display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+    background: var(--accent); color:#fff; border:none; border-radius:14px;
+    padding:15px 20px; font-family:inherit; font-size:15px; font-weight:600; cursor:pointer;
+    transition: background .15s, transform .12s;
+  }
+  .hello-upsell-card .btn-trial:hover { background: var(--accent-dark); transform: translateY(-1px); }
+  .hello-upsell-card .hello-upsell-dismiss {
+    margin-top:14px; background:none; border:none; cursor:pointer;
+    font-family:inherit; font-size:13px; color:var(--muted); text-decoration:underline;
+  }
+
   /* --- STATS BAR --- */
   .stats-bar { background: var(--off); padding: 34px 24px; }
   .stats-inner {
@@ -797,6 +895,21 @@
     <!-- RIGHT: Penny video + trial CTA -->
     <div class="hero-visual">
       <div class="emma-card">
+        <!-- Live state: shown when demo calls remain under today's cap. -->
+        <div class="hello-panel" id="helloPanel" hidden>
+          <div class="hello-orb-wrap">
+            <span class="hello-ring"></span>
+            <span class="hello-ring"></span>
+            <button class="hello-mic" id="helloMicBtn" type="button" aria-label="Talk to Penny now">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+            </button>
+          </div>
+          <div class="hello-title" data-i18n="hello.title">Talk to Penny right now</div>
+          <div class="hello-sub" data-i18n="hello.sub">One minute, out loud, in your browser. No signup, no email — just say hello.</div>
+          <div class="hello-note" id="helloNote" data-i18n="hello.note">Tap the microphone to start</div>
+        </div>
+
+        <!-- Fallback state: shown once the daily cap is reached, or if anything fails. -->
         <div class="emma-video">
           <video class="emma-video-player" id="emmaVideo" controls preload="metadata" playsinline poster="https://raw.githubusercontent.com/PennyAI-EU/PennyAI-Dashboard/master/public/media/penny-ai-boardroom-presentations-poster.jpg" aria-describedby="emmaCap">
             <source src="https://raw.githubusercontent.com/PennyAI-EU/PennyAI-Dashboard/master/public/media/penny-ai-boardroom-presentations.mp4" type="video/mp4"/>
@@ -808,6 +921,14 @@
           <div class="emma-ph-label" data-i18n="emma.label">PENNY — WELCOME VIDEO</div>
           <div class="emma-cap" id="emmaCap" data-i18n="emma.cap">
             Click to watch Penny's welcome video.
+          </div>
+          <button class="emma-sound" id="emmaSound" type="button" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
+            <span data-i18n="hello.tapSound">Tap for sound</span>
+          </button>
+          <div class="emma-endcard" id="emmaEndCard" hidden>
+            <p data-i18n="hello.endcardTitle">Ready to actually speak?</p>
+            <button type="button" class="js-try-free" data-i18n="tryFree">Try a Free Session</button>
           </div>
         </div>
         <div class="emma-cta">
@@ -1263,6 +1384,18 @@
 </div>
 
 <!-- CALL MODAL -->
+<div id="helloUpsell" class="hello-upsell" role="dialog" aria-modal="true" aria-labelledby="helloUpsellTitle" hidden>
+  <div class="hello-upsell-card">
+    <h3 id="helloUpsellTitle" data-i18n="hello.upsellTitle">That was just the hello.</h3>
+    <p data-i18n="hello.upsellBody">Get a full five-minute lesson with Penny — free, on any topic you like, from everyday conversation to business, medical or aviation English.</p>
+    <button type="button" class="btn-trial js-try-free">
+      <span data-i18n="tryFree">Try a Free Session</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>
+    <button type="button" class="hello-upsell-dismiss" id="helloUpsellDismiss" data-i18n="hello.upsellDismiss">Maybe later</button>
+  </div>
+</div>
+
 <div id="callModal" class="call-modal" role="dialog" aria-modal="true" aria-label="Live lesson call">
   <div class="call-modal-card">
     <div class="call-modal-inner">
@@ -1282,6 +1415,7 @@
         <div class="call-lesson-meta" id="callLessonMeta"></div>
       </div>
       <div class="call-status-text" id="callStatusText" data-i18n="call.connecting">Connecting…</div>
+      <div class="call-countdown" id="callCountdown" hidden>1:00</div>
       <button class="call-end-btn" id="endCallBtn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         <span data-i18n="call.endCall">End Call</span>
@@ -1454,6 +1588,225 @@
   }
   window.__startTopicTrial = startTopicTrial;
 
+  /* ---------------------------------------------------------------------
+     HERO HELLO DEMO — an ungated 60-second call, no email and no topic.
+
+     Spend is bounded server-side by a rolling-24h cap (production_controls
+     .hello_calls_enabled.numeric_value). When the cap is reached the server
+     answers 429 {capped:true} and this slot degrades to the pre-recorded
+     video instead of showing an error. The video is also the default for
+     any unexpected failure, so the hero always renders something useful.
+     --------------------------------------------------------------------- */
+  const HELLO_DURATION_MS = 60 * 1000;
+
+  const helloPanel   = document.getElementById('helloPanel');
+  const helloMicBtn  = document.getElementById('helloMicBtn');
+  const helloNote    = document.getElementById('helloNote');
+  const emmaVideoEl  = document.querySelector('.emma-video');
+  const emmaSoundBtn = document.getElementById('emmaSound');
+  const emmaEndCard  = document.getElementById('emmaEndCard');
+  const heroVideo    = document.getElementById('emmaVideo');
+  const countdownEl  = document.getElementById('callCountdown');
+  const upsellEl     = document.getElementById('helloUpsell');
+  const upsellDismiss = document.getElementById('helloUpsellDismiss');
+
+  let helloTimerId    = null;
+  let helloDeadline   = 0;
+  let isHelloCall     = false;
+
+  function tHello(key, fallback) {
+    return window.pennyT ? window.pennyT(key) : fallback;
+  }
+
+  /* --- state selection ------------------------------------------------- */
+
+  function showLiveState() {
+    if (helloPanel) helloPanel.hidden = false;
+    if (emmaVideoEl) emmaVideoEl.style.display = 'none';
+  }
+
+  function showVideoState() {
+    if (helloPanel) helloPanel.hidden = true;
+    if (emmaVideoEl) emmaVideoEl.style.display = '';
+    startFallbackVideo();
+  }
+
+  async function initHelloSlot() {
+    if (!helloPanel || !emmaVideoEl) return;
+    try {
+      const res  = await fetch('/api/hello/availability');
+      const data = await res.json();
+      if (data?.live) showLiveState();
+      else showVideoState();
+    } catch {
+      // Network or server trouble: the video always works, so prefer it.
+      showVideoState();
+    }
+  }
+
+  /* --- fallback video -------------------------------------------------- */
+
+  /* Browsers refuse to autoplay audible media, so the fallback starts muted
+     and offers an obvious one-tap unmute. If even muted autoplay is blocked
+     the card simply stays as the existing click-to-play video. */
+  function startFallbackVideo() {
+    if (!heroVideo) return;
+    heroVideo.muted = true;
+    heroVideo.setAttribute('playsinline', '');
+    const attempt = heroVideo.play();
+    if (attempt && typeof attempt.then === 'function') {
+      attempt
+        .then(() => {
+          emmaVideoEl.classList.add('is-playing');
+          if (emmaSoundBtn) emmaSoundBtn.hidden = false;
+        })
+        .catch(() => { /* autoplay blocked entirely — leave the play button */ });
+    }
+  }
+
+  if (emmaSoundBtn) {
+    emmaSoundBtn.addEventListener('click', () => {
+      if (!heroVideo) return;
+      heroVideo.muted = false;
+      heroVideo.volume = 1;
+      heroVideo.play().catch(() => {});
+      emmaSoundBtn.hidden = true;
+    });
+  }
+
+  if (heroVideo && emmaEndCard) {
+    heroVideo.addEventListener('ended', () => {
+      emmaEndCard.hidden = false;
+      if (emmaSoundBtn) emmaSoundBtn.hidden = true;
+    });
+  }
+
+  /* --- countdown ------------------------------------------------------- */
+
+  function renderCountdown() {
+    if (!countdownEl) return;
+    const left = Math.max(0, helloDeadline - Date.now());
+    const secs = Math.ceil(left / 1000);
+    countdownEl.textContent = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+    countdownEl.classList.toggle('is-low', secs <= 15);
+    if (left <= 0) {
+      stopHelloCountdown();
+      retellClient?.stopCall();
+      closeModal();
+      showUpsell();
+    }
+  }
+
+  function startHelloCountdown() {
+    if (!countdownEl) return;
+    helloDeadline = Date.now() + HELLO_DURATION_MS;
+    countdownEl.hidden = false;
+    renderCountdown();
+    helloTimerId = setInterval(renderCountdown, 250);
+  }
+
+  function stopHelloCountdown() {
+    if (helloTimerId) { clearInterval(helloTimerId); helloTimerId = null; }
+    if (countdownEl) { countdownEl.hidden = true; countdownEl.classList.remove('is-low'); }
+  }
+
+  /* --- upsell ---------------------------------------------------------- */
+
+  function showUpsell() {
+    if (!isHelloCall || !upsellEl) return;
+    isHelloCall = false;
+    upsellEl.hidden = false;
+  }
+
+  function hideUpsell() { if (upsellEl) upsellEl.hidden = true; }
+
+  if (upsellDismiss) upsellDismiss.addEventListener('click', hideUpsell);
+  if (upsellEl) upsellEl.addEventListener('click', e => { if (e.target === upsellEl) hideUpsell(); });
+  // Any "Try a Free Session" button also closes the overlays it may be sitting in.
+  document.querySelectorAll('.js-try-free').forEach(btn => {
+    btn.addEventListener('click', () => {
+      hideUpsell();
+      if (emmaEndCard) emmaEndCard.hidden = true;
+    });
+  });
+
+  /* --- the call -------------------------------------------------------- */
+
+  function helloError(msgKey, fallback) {
+    if (helloNote) {
+      helloNote.textContent = tHello(msgKey, fallback);
+      helloNote.classList.add('is-error');
+    }
+    if (helloMicBtn) helloMicBtn.disabled = false;
+  }
+
+  async function startHelloDemo() {
+    if (helloMicBtn) helloMicBtn.disabled = true;
+    if (helloNote) {
+      helloNote.classList.remove('is-error');
+      helloNote.textContent = tHello('hello.connecting', 'Connecting…');
+    }
+
+    /* Ask for the microphone up front. Doing this before spending a Retell
+       call means a blocked mic costs nothing and produces a clear message,
+       rather than a live call the visitor cannot speak into. */
+    try {
+      const probe = await navigator.mediaDevices.getUserMedia({ audio: true });
+      probe.getTracks().forEach(t => t.stop());
+    } catch {
+      helloError('hello.micBlocked', 'Microphone blocked — allow it in your browser and try again');
+      return;
+    }
+
+    try {
+      const res  = await fetch('/api/hello/start-call', { method: 'POST' });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 429 || data?.capped) {
+        // Today's live demos are used up — switch the slot to the video.
+        showVideoState();
+        return;
+      }
+      if (!res.ok) throw new Error(data.error || 'Server error');
+
+      isHelloCall = true;
+      lessonInfo.style.display = 'none';
+      openModal(tHello('call.connecting', 'Connecting…'));
+
+      retellClient = new RetellWebClient();
+
+      retellClient.on('call_started', async () => {
+        setStatus(tHello('call.live', 'Live session'), true);
+        startHelloCountdown();
+        await startMicVisualizer();
+      });
+
+      retellClient.on('update', (update) => {
+        const items = update?.transcript ?? [];
+        const last  = items[items.length - 1];
+        if (last?.role === 'agent' && last?.content) agentSpeakingUntil = Date.now() + 1800;
+      });
+
+      retellClient.on('call_ended', () => { closeModal(); showUpsell(); });
+
+      retellClient.on('error', () => {
+        setStatus(tHello('call.error', 'Something went wrong'));
+        setTimeout(closeModal, 2000);
+      });
+
+      await retellClient.startCall({ accessToken: data.access_token });
+      if (helloNote) helloNote.textContent = tHello('hello.note', 'Tap the microphone to start');
+      if (helloMicBtn) helloMicBtn.disabled = false;
+    } catch (err) {
+      closeModal();
+      helloError('hello.failed', 'Could not start the demo — please try again');
+    }
+  }
+
+  if (helloMicBtn) helloMicBtn.addEventListener('click', startHelloDemo);
+  initHelloSlot();
+
+
   function openModal(status) {
     modal.classList.add('open');
     setStatus(status, false);
@@ -1462,6 +1815,7 @@
 
   function closeModal() {
     modal.classList.remove('open');
+    stopHelloCountdown();
     cancelAnimationFrame(animId);
     micStream?.getTracks().forEach(t => t.stop());
     analyser          = null;
@@ -1912,6 +2266,18 @@
     "call.connecting": { en: "Connecting\u2026", it: "Connessione\u2026" },
     "call.live": { en: "Live session", it: "Sessione in corso" },
     "call.error": { en: "Something went wrong", it: "Qualcosa \u00e8 andato storto" },
+    /* Hero hello demo (live mic state, video fallback, and the upsell handoff). */
+    "hello.title": { en: "Talk to Penny right now", it: "Parla con Penny adesso" },
+    "hello.sub": { en: "One minute, out loud, in your browser. No signup, no email — just say hello.", it: "Un minuto, a voce, dal tuo browser. Niente registrazione, niente email — dille solo ciao." },
+    "hello.note": { en: "Tap the microphone to start", it: "Tocca il microfono per iniziare" },
+    "hello.connecting": { en: "Connecting…", it: "Connessione…" },
+    "hello.micBlocked": { en: "Microphone blocked — allow it in your browser and try again", it: "Microfono bloccato — consentilo nel browser e riprova" },
+    "hello.failed": { en: "Could not start the demo — please try again", it: "Impossibile avviare la demo — riprova" },
+    "hello.tapSound": { en: "Tap for sound", it: "Tocca per l’audio" },
+    "hello.endcardTitle": { en: "Ready to actually speak?", it: "Pronto a parlare davvero?" },
+    "hello.upsellTitle": { en: "That was just the hello.", it: "Quello era solo il saluto." },
+    "hello.upsellBody": { en: "Get a full five-minute lesson with Penny — free, on any topic you like, from everyday conversation to business, medical or aviation English.", it: "Fai una lezione completa di cinque minuti con Penny — gratis, sull’argomento che preferisci: dalla conversazione quotidiana all’inglese business, medico o aeronautico." },
+    "hello.upsellDismiss": { en: "Maybe later", it: "Forse più tardi" },
     "call.connectionFailed": { en: "Connection failed", it: "Connessione non riuscita" },
     "alert.chooseTopic": { en: "Please choose a topic first.", it: "Scegli prima un argomento." },
     "alert.enterEmail": { en: "Please enter your email address.", it: "Inserisci il tuo indirizzo email." },
