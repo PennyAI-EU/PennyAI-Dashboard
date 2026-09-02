@@ -648,38 +648,73 @@
 
   .hello-panel {
     position:relative; aspect-ratio: 16/9; border-radius:18px; overflow:hidden;
-    background: linear-gradient(150deg, var(--accent) 0%, #7c6df0 55%, var(--lilac) 100%);
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:10px; padding:20px; text-align:center;
+    background:#111827; display:flex; align-items:flex-end; justify-content:center;
   }
-  .hello-orb-wrap { position:relative; width:78px; height:78px; display:flex; align-items:center; justify-content:center; margin-bottom:4px; }
+  /* Bias the crop upward so her face sits clear of the overlay bar. */
+  .hello-photo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 18%; }
+  /* Scrim keeps the overlaid text legible whatever the photo behind it does. */
+  .hello-scrim {
+    position:absolute; inset:0;
+    background: linear-gradient(to top, rgba(17,24,39,.90) 0%, rgba(17,24,39,.62) 26%, rgba(17,24,39,.06) 55%, rgba(17,24,39,0) 100%);
+  }
+  .hello-overlay {
+    position:relative; z-index:2; width:100%;
+    display:flex; flex-direction:row; align-items:center; gap:13px;
+    padding:14px 16px 15px; text-align:left;
+  }
+  .hello-copy { min-width:0; display:flex; flex-direction:column; gap:5px; align-items:flex-start; }
+  .hello-orb-wrap { position:relative; width:62px; height:62px; display:flex; align-items:center; justify-content:center; }
   .hello-ring {
-    position:absolute; inset:0; border-radius:50%; border:2px solid rgba(255,255,255,.55);
+    position:absolute; inset:0; border-radius:50%; border:2px solid rgba(255,255,255,.6);
     animation: helloPulse 2.4s ease-out infinite;
   }
   .hello-ring:nth-child(2) { animation-delay: 1.2s; }
   @keyframes helloPulse {
-    0%   { transform: scale(.72); opacity:.85; }
-    100% { transform: scale(1.5);  opacity:0; }
+    0%   { transform: scale(.75); opacity:.85; }
+    100% { transform: scale(1.55); opacity:0; }
   }
   .hello-mic {
-    position:relative; z-index:2; width:64px; height:64px; border-radius:50%;
+    position:relative; z-index:2; width:54px; height:54px; border-radius:50%;
     background: var(--white); border:none; cursor:pointer;
     display:flex; align-items:center; justify-content:center;
-    box-shadow: 0 8px 22px rgba(24,27,48,.28);
+    box-shadow: 0 8px 22px rgba(0,0,0,.4);
     transition: transform .15s, box-shadow .15s;
   }
-  .hello-mic:hover { transform: scale(1.07); box-shadow: 0 10px 26px rgba(24,27,48,.34); }
+  .hello-mic:hover { transform: scale(1.08); box-shadow: 0 10px 26px rgba(0,0,0,.5); }
   .hello-mic:disabled { opacity:.6; cursor:default; transform:none; }
-  .hello-mic svg { width:27px; height:27px; color: var(--accent); }
-  .hello-title { color:#fff; font-size:19px; font-weight:700; letter-spacing:-.3px; line-height:1.25; }
-  .hello-sub   { color:rgba(255,255,255,.88); font-size:13px; line-height:1.5; max-width:290px; }
+  .hello-mic svg { width:24px; height:24px; color: var(--accent); }
+  .hello-title { color:#fff; font-size:16px; font-weight:700; letter-spacing:-.2px; line-height:1.3; text-shadow:0 1px 6px rgba(0,0,0,.45); }
   .hello-note  {
-    margin-top:2px; background:rgba(255,255,255,.18); color:#fff;
-    border-radius:99px; padding:5px 13px; font-size:11px; font-weight:600; letter-spacing:.03em;
+    background:rgba(255,255,255,.2); color:#fff; border-radius:99px;
+    padding:5px 13px; font-size:11.5px; font-weight:600; letter-spacing:.02em;
   }
-  .hello-note.is-error { background:rgba(248,113,113,.28); }
-  @media (max-width: 900px) { .hello-title { font-size:17px; } .hello-sub { font-size:12.5px; } }
+  .hello-note.is-error { background:rgba(248,113,113,.35); }
+
+  /* Penny's spoken invitation. Audio can never autoplay, so this is an explicit,
+     gently animated control — and it doubles as a free preview of her voice for
+     every visitor, including the ones who arrive after the daily demo cap. */
+  .hello-hear {
+    position:absolute; z-index:3; top:12px; right:12px;
+    display:flex; align-items:center; gap:7px; border:none; cursor:pointer;
+    background: rgba(255,255,255,.94); color: var(--chip-ink);
+    border-radius:99px; padding:8px 14px; font-family:inherit; font-size:12px; font-weight:700;
+    box-shadow:0 4px 14px rgba(0,0,0,.3); animation: soundNudge 2.1s ease-in-out infinite;
+  }
+  .hello-hear svg { width:14px; height:14px; }
+  .hello-hear.is-playing { animation:none; background: var(--amber); }
+  .hello-hear[hidden] { display:none !important; }
+
+  /* Narrow screens: a taller frame plus tighter copy keeps her face visible
+     once the title wraps to two lines. */
+  @media (max-width: 900px) {
+    .hello-panel { aspect-ratio: 4/3; }
+    .hello-title { font-size:14.5px; line-height:1.25; }
+    .hello-note  { font-size:11px; padding:4px 11px; }
+    .hello-overlay { gap:11px; padding:12px 13px 13px; }
+    .hello-mic { width:48px; height:48px; }
+    .hello-mic svg { width:21px; height:21px; }
+    .hello-orb-wrap { width:56px; height:56px; }
+  }
 
   /* Muted autoplay needs a visible, moving invitation to turn sound on —
      browsers block audible autoplay, so without this the fallback is silent. */
@@ -897,16 +932,29 @@
       <div class="emma-card">
         <!-- Live state: shown when demo calls remain under today's cap. -->
         <div class="hello-panel" id="helloPanel" hidden>
-          <div class="hello-orb-wrap">
-            <span class="hello-ring"></span>
-            <span class="hello-ring"></span>
-            <button class="hello-mic" id="helloMicBtn" type="button" aria-label="Talk to Penny now">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
-            </button>
+          <img class="hello-photo" id="helloPhoto"
+               src="https://raw.githubusercontent.com/PennyAI-EU/PennyAI-Dashboard/master/public/media/penny-hello-portrait.jpg"
+               alt="Penny, your AI English coach">
+          <div class="hello-scrim"></div>
+
+          <button class="hello-hear" id="helloHearBtn" type="button" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
+            <span id="helloHearLabel" data-i18n="hello.hearMe">Hear me</span>
+          </button>
+
+          <div class="hello-overlay">
+            <div class="hello-orb-wrap">
+              <span class="hello-ring"></span>
+              <span class="hello-ring"></span>
+              <button class="hello-mic" id="helloMicBtn" type="button" aria-label="Talk to Penny now">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+              </button>
+            </div>
+            <div class="hello-copy">
+              <div class="hello-title" data-i18n="hello.title">Want to speak to me right now?</div>
+              <div class="hello-note" id="helloNote" data-i18n="hello.note">Just click the microphone</div>
+            </div>
           </div>
-          <div class="hello-title" data-i18n="hello.title">Talk to Penny right now</div>
-          <div class="hello-sub" data-i18n="hello.sub">One minute, out loud, in your browser. No signup, no email — just say hello.</div>
-          <div class="hello-note" id="helloNote" data-i18n="hello.note">Tap the microphone to start</div>
         </div>
 
         <!-- Fallback state: shown once the daily cap is reached, or if anything fails. -->
@@ -1599,9 +1647,18 @@
      --------------------------------------------------------------------- */
   const HELLO_DURATION_MS = 60 * 1000;
 
+  /* Penny's spoken invitation. Hosted alongside the welcome video, following the
+     same raw.githubusercontent convention already used for media on this page.
+     If a file is absent the "Hear me" button simply never appears, so the panel
+     ships and works with or without the recordings. */
+  const HELLO_AUDIO_BASE = 'https://raw.githubusercontent.com/PennyAI-EU/PennyAI-Dashboard/master/public/media/';
+  const HELLO_AUDIO = { en: HELLO_AUDIO_BASE + 'penny-hello-en.mp3', it: HELLO_AUDIO_BASE + 'penny-hello-it.mp3' };
+
   const helloPanel   = document.getElementById('helloPanel');
   const helloMicBtn  = document.getElementById('helloMicBtn');
   const helloNote    = document.getElementById('helloNote');
+  const helloHearBtn = document.getElementById('helloHearBtn');
+  const helloHearLbl = document.getElementById('helloHearLabel');
   const emmaVideoEl  = document.querySelector('.emma-video');
   const emmaSoundBtn = document.getElementById('emmaSound');
   const emmaEndCard  = document.getElementById('emmaEndCard');
@@ -1618,11 +1675,69 @@
     return window.pennyT ? window.pennyT(key) : fallback;
   }
 
+  /* --- Penny's spoken invitation ---------------------------------------- */
+
+  let helloAudio = null;
+  let helloAudioReady = false;
+
+  function currentLang() {
+    try { return (window.PennyLang && window.PennyLang.get()) || 'en'; } catch { return 'en'; }
+  }
+
+  /* Probe the clip for the current language, falling back to English if the
+     localised one is missing. The button only appears once a file has actually
+     loaded, so a missing recording degrades to silence rather than a dead control. */
+  function prepareHelloAudio(lang) {
+    const src = HELLO_AUDIO[lang] || HELLO_AUDIO.en;
+    const a = new Audio();
+    a.preload = 'metadata';
+    a.src = src;
+
+    a.addEventListener('loadedmetadata', () => {
+      helloAudio = a;
+      helloAudioReady = true;
+      if (helloHearBtn) helloHearBtn.hidden = false;
+    }, { once: true });
+
+    a.addEventListener('error', () => {
+      // Localised clip missing — try English once before giving up quietly.
+      if (lang !== 'en') prepareHelloAudio('en');
+      else if (helloHearBtn) helloHearBtn.hidden = true;
+    }, { once: true });
+
+    a.addEventListener('ended', () => setHearState(false), { once: false });
+  }
+
+  function setHearState(playing) {
+    if (!helloHearBtn) return;
+    helloHearBtn.classList.toggle('is-playing', playing);
+    if (helloHearLbl) {
+      helloHearLbl.textContent = playing
+        ? tHello('hello.playing', 'Playing…')
+        : tHello('hello.hearMe', 'Hear me');
+    }
+  }
+
+  function stopHelloAudio() {
+    if (helloAudio && !helloAudio.paused) { helloAudio.pause(); helloAudio.currentTime = 0; }
+    setHearState(false);
+  }
+
+  if (helloHearBtn) {
+    helloHearBtn.addEventListener('click', () => {
+      if (!helloAudioReady || !helloAudio) return;
+      if (!helloAudio.paused) { stopHelloAudio(); return; }
+      setHearState(true);
+      helloAudio.play().catch(() => setHearState(false));
+    });
+  }
+
   /* --- state selection ------------------------------------------------- */
 
   function showLiveState() {
     if (helloPanel) helloPanel.hidden = false;
     if (emmaVideoEl) emmaVideoEl.style.display = 'none';
+    prepareHelloAudio(currentLang());
   }
 
   function showVideoState() {
@@ -1741,6 +1856,7 @@
   }
 
   async function startHelloDemo() {
+    stopHelloAudio();
     if (helloMicBtn) helloMicBtn.disabled = true;
     if (helloNote) {
       helloNote.classList.remove('is-error');
@@ -2267,9 +2383,10 @@
     "call.live": { en: "Live session", it: "Sessione in corso" },
     "call.error": { en: "Something went wrong", it: "Qualcosa \u00e8 andato storto" },
     /* Hero hello demo (live mic state, video fallback, and the upsell handoff). */
-    "hello.title": { en: "Talk to Penny right now", it: "Parla con Penny adesso" },
-    "hello.sub": { en: "One minute, out loud, in your browser. No signup, no email — just say hello.", it: "Un minuto, a voce, dal tuo browser. Niente registrazione, niente email — dille solo ciao." },
-    "hello.note": { en: "Tap the microphone to start", it: "Tocca il microfono per iniziare" },
+    "hello.title": { en: "Want to speak to me right now?", it: "Vuoi parlare con me adesso?" },
+    "hello.note": { en: "Just click the microphone", it: "Clicca semplicemente sul microfono" },
+    "hello.hearMe": { en: "Hear me", it: "Ascoltami" },
+    "hello.playing": { en: "Playing…", it: "In riproduzione…" },
     "hello.connecting": { en: "Connecting…", it: "Connessione…" },
     "hello.micBlocked": { en: "Microphone blocked — allow it in your browser and try again", it: "Microfono bloccato — consentilo nel browser e riprova" },
     "hello.failed": { en: "Could not start the demo — please try again", it: "Impossibile avviare la demo — riprova" },
