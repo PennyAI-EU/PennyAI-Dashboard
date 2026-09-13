@@ -83,10 +83,18 @@ async function getUserFromToken(token) {
 const DEFAULT_PASSWORD = 'Penny2026!';
 
 // Normalize phone to E164 (+digits). If already has +, keep it; otherwise prepend +.
-function toE164(phone) {
+// The users.phone column is guarded by the users_phone_canonical_check
+// constraint: ^[1-9][0-9]{7,14}$ — digits only, no leading '+', no zero first.
+// Supabase Auth also stores its phone column stripped of '+', and requireAuth
+// matches users.phone against user_metadata.phone, so ALL THREE must hold the
+// same canonical digits-only string or the account cannot use the app.
+function toCanonicalPhone(phone) {
   if (!phone) return phone;
-  const digits = phone.replace(/\D/g, '');
-  return '+' + digits;
+  return String(phone).replace(/\D/g, '');
+}
+
+function isValidCanonicalPhone(phone) {
+  return /^[1-9][0-9]{7,14}$/.test(String(phone || ''));
 }
 
 // Admin-created students skip the phone onboarding call that normally collects
@@ -1604,20 +1612,23 @@ app.post("/api/admin/students", requireAdmin, async (req, res) => {
   const derivedRating = deriveSelfRatingFromLevel(row.english_level);
   if (derivedRating) Object.assign(row, derivedRating);
 
-  const e164Phone = toE164(row.phone);
+  const canonicalPhone = toCanonicalPhone(row.phone);
+  if (!isValidCanonicalPhone(canonicalPhone)) {
+    return res.status(400).json({ error: "Phone number must be 8 to 15 digits including the country code, and cannot start with 0. Example: 393401234567" });
+  }
 
   // Create auth user first so we can use the auth UUID as the users table id
   const { data: authData, error: authError } = await supabase.auth.admin.createUser({
     email: row.email,
-    phone: e164Phone,
+    phone: "+" + canonicalPhone,
     password: DEFAULT_PASSWORD,
     email_confirm: true,
     phone_confirm: true,
-    user_metadata: { phone: e164Phone, name: row.name || '', must_change_password: true },
+    user_metadata: { phone: canonicalPhone, name: row.name || '', must_change_password: true },
   });
   if (authError) return res.status(500).json({ error: "Auth account creation failed: " + authError.message });
 
-  const { data, error } = await supabase.from("users").insert({ ...row, id: authData.user.id, phone: e164Phone }).select().single();
+  const { data, error } = await supabase.from("users").insert({ ...row, id: authData.user.id, phone: canonicalPhone }).select().single();
   if (error) {
     await supabase.auth.admin.deleteUser(authData.user.id);
     return res.status(500).json({ error: error.message });
@@ -1698,20 +1709,23 @@ app.post("/api/admin/teachers", requireAdmin, async (req, res) => {
   if (!phone) return res.status(400).json({ error: "Phone number is required." });
   if (!email) return res.status(400).json({ error: "Email is required." });
 
-  const e164Phone = toE164(phone);
+  const canonicalPhone = toCanonicalPhone(phone);
+  if (!isValidCanonicalPhone(canonicalPhone)) {
+    return res.status(400).json({ error: "Phone number must be 8 to 15 digits including the country code, and cannot start with 0. Example: 393401234567" });
+  }
 
   // Create auth user first so we can use the auth UUID as the users table id
   const { data: authData, error: authError } = await supabase.auth.admin.createUser({
     email,
-    phone: e164Phone,
+    phone: "+" + canonicalPhone,
     password: DEFAULT_PASSWORD,
     email_confirm: true,
     phone_confirm: true,
-    user_metadata: { phone: e164Phone, name: name || '', must_change_password: true },
+    user_metadata: { phone: canonicalPhone, name: name || '', must_change_password: true },
   });
   if (authError) return res.status(500).json({ error: "Auth account creation failed: " + authError.message });
 
-  const row = { name, email, phone: e164Phone, role: "teacher" };
+  const row = { name, email, phone: canonicalPhone, role: "teacher" };
   if (req.adminSchoolId) row.school_id = req.adminSchoolId;
   const { data, error } = await supabase.from("users").insert({ ...row, id: authData.user.id }).select().single();
   if (error) {
