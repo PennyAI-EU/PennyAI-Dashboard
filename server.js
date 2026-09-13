@@ -1899,17 +1899,24 @@ app.get("/api/admin/students/:id/attempts", requireAdmin, async (req, res) => {
 });
 
 app.post("/api/admin/schedule-call", requireAdmin, async (req, res) => {
-  const { phone_number, name, email, scheduled_time } = req.body;
+  const { phone_number, name, email, scheduled_time, call_purpose } = req.body;
   if (!phone_number || !scheduled_time) {
     return res.status(400).json({ error: "phone_number and scheduled_time are required" });
   }
+
+  // call_purpose MUST be set, or the n8n dispatchers cannot see the row at all.
+  // The onboarding dispatcher filters on call_purpose != 'lesson' (a NULL never
+  // matches), and then claims only rows where call_purpose = 'onboarding'.
+  // Default to onboarding; accept "lesson" explicitly when the caller asks for it.
+  const purpose = call_purpose === "lesson" ? "lesson" : "onboarding";
 
   const { error } = await supabase.from("call_triggers").insert({
     phone_number,
     name,
     email,
     scheduled_time,
-    call_status: "pending"
+    call_status: "pending",
+    call_purpose: purpose
   });
 
   if (error) return res.status(500).json({ error: error.message });
