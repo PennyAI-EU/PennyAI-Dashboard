@@ -2158,6 +2158,218 @@ app.get("/api/messages/unread", requireAuth, async (req, res) => {
   res.json({ unread: total });
 });
 
+// ============================================================================
+// SUPER ADMIN — student management console (/superadmin.html)
+// Every route here is restricted to role = system_admin.
+// ============================================================================
+
+async function requireSuperAdmin(req, res, next) {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+
+  const { data: { user }, error: userError } = await getUserFromToken(token);
+  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+
+  const phone = user.user_metadata?.phone || user.phone;
+  if (!phone) return res.status(401).json({ error: "No phone on user" });
+
+  const { data, error } = await supabase
+    .from("users").select("id, role, school_id, name").eq("phone", phone).maybeSingle();
+
+  if (error || !data || data.role !== "system_admin") {
+    return res.status(403).json({ error: "Forbidden: super admin access required" });
+  }
+  req.superAdmin = data;
+  next();
+}
+
+// Fields the console is allowed to write. Anything else in the body is ignored.
+const SA_EDITABLE = [
+  "name", "email", "english_level", "current_lesson_id", "goal",
+  "preferred_days", "preferred_times", "lesson_frequency", "lesson_duration",
+  "conversation_lesson", "approved_for_outbound", "consent_given",
+  "teacher_id", "school_id",
+];
+
+// ---- list every student with their next pending call ------------------------
+app.get("/api/superadmin/students", requireSuperAdmin, async (req, res) => {
+  const { data: users, error } = await supabase
+    .from("users")
+    .select("id, name, email, phone, role, english_level, current_lesson_id, goal, preferred_days, preferred_times, lesson_frequency, lesson_duration, conversation_lesson, approved_for_outbound, consent_given, avg_self_rating, teacher_id, school_id, allocated_time_this_month, used_time_this_month, total_time_used, created_at")
+    .eq("role", "student")
+    .order("created_at", { ascending: false });
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  const phones = (users || []).map(u => u.phone).filter(Boolean);
+  let triggers = [];
+  if (phones.length) {
+    const { data: t } = await supabase
+      .from("call_triggers")
+      .select("id, phone_number, call_status, call_purpose, scheduled_time, attempt_count, max_attempts")
+      .in("phone_number", phones)
+      .eq("call_status", "pending");
+    triggers = t || [];
+  }
+
+  const nextByPhone = {};
+  triggers.forEach(t => {
+    const cur = nextByPhone[t.phone_number];
+    if (!cur || new Date(t.scheduled_time) < new Date(cur.scheduled_time)) nextByPhone[t.phone_number] = t;
+  });
+
+  res.json((users || []).map(u => ({ ...u, next_call: nextByPhone[u.phone] || null })));
+});
+
+// ---- update a student's profile --------------------------------------------
+app.put("/api/superadmin/students/:id", requireSuperAdmin, async (req, res) => {
+  const patch = {};
+  SA_EDITABLE.forEach(k => { if (k in req.body) patch[k] = req.body[k] === "" ? null : req.body[k]; });
+
+  // Phone is special: it must stay canonical and stay in step with Supabase Auth.
+  if ("phone" in req.body) {
+    const canonical = toCanonicalPhone(req.body.phone);
+    if (!isValidCanonicalPhone(canonical)) {
+      return res.status(400).json({ error: "Phone must be 8 to 15 digits including the country code, and cannot start with 0." });
+    }
+    const { data: clash } = await supabase.from("users").select("id").eq("phone", canonical).neq("id", req.params.id).maybeSingle();
+    if (clash) return res.status(409).json({ error: "Another account already uses that phone number." });
+
+    const { error: authErr } = await supabase.auth.admin.updateUserById(req.params.id, {
+      phone: "+" + canonical,
+      user_metadata: { phone: canonical },
+    });
+    if (authErr) return res.status(400).json({ error: "Could not update the login record: " + authErr.message });
+    patch.phone = canonical;
+  }
+
+  if (patch.lesson_duration != null && !["10", "15"].includes(String(patch.lesson_duration))) {
+    return res.status(400).json({ error: "Lesson duration must be 10 or 15." });
+  }
+
+  patch.updated_at = new Date().toISOString();
+  const { data, error } = await supabase.from("users").update(patch).eq("id", req.params.id).select().single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+// ---- minutes ----------------------------------------------------------------
+app.put("/api/superadmin/students/:id/minutes", requireSuperAdmin, async (req, res) => {
+  const patch = { updated_at: new Date().toISOString() };
+  if (req.body.allocated_time_this_month != null) patch.allocated_time_this_month = Math.max(0, parseInt(req.body.allocated_time_this_month, 10) || 0);
+  if (req.body.used_time_this_month != null) patch.used_time_this_month = Math.max(0, parseInt(req.body.used_time_this_month, 10) || 0);
+
+  const { data, error } = await supabase.from("users").update(patch).eq("id", req.params.id).select().single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+// ---- a student's calls ------------------------------------------------------
+app.get("/api/superadmin/students/:id/calls", requireSuperAdmin, async (req, res) => {
+  const { data: u, error: uErr } = await supabase.from("users").select("phone").eq("id", req.params.id).maybeSingle();
+  if (uErr || !u) return res.status(404).json({ error: "Student not found" });
+
+  const { data, error } = await supabase
+    .from("call_triggers")
+    .select("id, name, phone_number, call_status, call_purpose, scheduled_time, attempt_count, max_attempts, last_attempt_at, last_disconnection_reason, created_at")
+    .eq("phone_number", u.phone)
+    .order("scheduled_time", { ascending: false });
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || []);
+});
+
+// ---- book a call ------------------------------------------------------------
+// call_purpose is mandatory: a trigger without one is invisible to both dispatchers.
+app.post("/api/superadmin/students/:id/calls", requireSuperAdmin, async (req, res) => {
+  const { call_purpose, scheduled_time, max_attempts } = req.body;
+  if (!["lesson", "onboarding"].includes(call_purpose)) {
+    return res.status(400).json({ error: "call_purpose must be 'lesson' or 'onboarding'." });
+  }
+  if (!scheduled_time) return res.status(400).json({ error: "scheduled_time is required." });
+
+  const { data: u, error: uErr } = await supabase
+    .from("users").select("id, name, email, phone, school_id").eq("id", req.params.id).maybeSingle();
+  if (uErr || !u) return res.status(404).json({ error: "Student not found" });
+
+  const { data, error } = await supabase.from("call_triggers").insert({
+    phone_number: u.phone,
+    name: u.name,
+    email: u.email,
+    user_id: u.id,
+    school_id: u.school_id,
+    call_status: "pending",
+    call_purpose,
+    scheduled_time: new Date(scheduled_time).toISOString(),
+    attempt_count: 0,
+    max_attempts: Math.min(5, Math.max(1, parseInt(max_attempts, 10) || 3)),
+  }).select().single();
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+// ---- reschedule, cancel, or call now ----------------------------------------
+app.put("/api/superadmin/calls/:callId", requireSuperAdmin, async (req, res) => {
+  const { action, scheduled_time, call_purpose, max_attempts } = req.body;
+
+  const { data: existing, error: exErr } = await supabase
+    .from("call_triggers").select("id, call_status").eq("id", req.params.callId).maybeSingle();
+  if (exErr || !existing) return res.status(404).json({ error: "Call not found" });
+  if (existing.call_status === "in_progress") {
+    return res.status(409).json({ error: "That call is in progress and cannot be changed." });
+  }
+
+  if (action === "cancel") {
+    const { data, error } = await supabase.from("call_triggers")
+      .update({ call_status: "cancelled", updated_at: new Date().toISOString() })
+      .eq("id", req.params.callId).select().single();
+    if (error) return res.status(500).json({ error: error.message });
+    return res.json(data);
+  }
+
+  // Reschedule (or "call now", which is just a reschedule to this moment).
+  // Counters are cleared so the student gets a clean set of attempts.
+  const when = action === "now" ? new Date() : new Date(scheduled_time);
+  if (isNaN(when.getTime())) return res.status(400).json({ error: "A valid scheduled_time is required." });
+
+  const patch = {
+    scheduled_time: when.toISOString(),
+    call_status: "pending",
+    attempt_count: 0,
+    last_attempt_at: null,
+    last_call_id: null,
+    last_disconnection_reason: null,
+    missed_email_sent_at: null,
+    updated_at: new Date().toISOString(),
+  };
+  if (["lesson", "onboarding"].includes(call_purpose)) patch.call_purpose = call_purpose;
+  if (max_attempts != null) patch.max_attempts = Math.min(5, Math.max(1, parseInt(max_attempts, 10) || 3));
+
+  const { data, error } = await supabase.from("call_triggers").update(patch).eq("id", req.params.callId).select().single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+// ---- delete a student, login account included -------------------------------
+app.delete("/api/superadmin/students/:id", requireSuperAdmin, async (req, res) => {
+  const { data: u } = await supabase.from("users").select("phone").eq("id", req.params.id).maybeSingle();
+
+  if (u?.phone) {
+    await supabase.from("call_triggers")
+      .update({ call_status: "cancelled", updated_at: new Date().toISOString() })
+      .eq("phone_number", u.phone).in("call_status", ["pending", "in_progress"]);
+  }
+
+  const { error } = await supabase.from("users").delete().eq("id", req.params.id);
+  if (error) return res.status(500).json({ error: error.message });
+
+  const { error: authErr } = await supabase.auth.admin.deleteUser(req.params.id);
+  if (authErr) console.error("[superadmin] users row deleted but auth account remains:", authErr.message);
+
+  res.json({ success: true, authDeleted: !authErr });
+});
+
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

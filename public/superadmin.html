@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Penny AI — Student Management</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --white:#ffffff; --off:#f7f8fc; --sidebar-bg:#eef0fb; --border:#e3e5f0;
+    --text:#181b30; --ink:#181b30; --muted:#636b82;
+    --accent:#5b5ce2; --accent-dark:#4a4bd0; --accent-light:#f0f2fc;
+    --pink:#f45aa0; --amber:#ffbf00; --amber-dark:#e8ae00;
+    --green:#16a34a; --green-light:#f0fdf4;
+    --yellow:#d97706; --yellow-light:#fffbeb;
+    --red:#dc2626; --red-light:#fee2e2;
+    --radius:12px; --radius-lg:20px; --sidebar-width:232px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'DM Sans',system-ui,-apple-system,Segoe UI,sans-serif;
+    color:var(--text); background:var(--off); min-height:100vh; display:flex;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{width:var(--sidebar-width);background:var(--white);border-right:1px solid var(--border);
+    height:100vh;position:fixed;left:0;top:0;display:flex;flex-direction:column;padding:22px 14px;gap:4px;z-index:5}
+  .logo{display:flex;align-items:center;gap:9px;padding:0 10px 18px;font-weight:700;font-size:17px}
+  .logo .dot{width:26px;height:26px;border-radius:8px;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:13px}
+  .role-chip{margin:0 10px 16px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--accent-dark);background:var(--accent-light);padding:5px 9px;border-radius:7px;display:inline-block;width:fit-content}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;font-size:14px;
+    font-weight:500;color:var(--muted);cursor:pointer;transition:.15s}
+  .nav-item:hover{background:var(--off);color:var(--text)}
+  .nav-item.active{background:var(--accent);color:#fff}
+  .sidebar-foot{margin-top:auto;font-size:11px;color:var(--muted);padding:12px 10px;line-height:1.5}
+
+  /* ---------- MAIN ---------- */
+  main{margin-left:var(--sidebar-width);flex:1;padding:26px 30px 70px;max-width:1500px}
+  .page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;margin-bottom:6px}
+  h1{font-size:23px;margin:0 0 4px;font-weight:600}
+  .sub{color:var(--muted);font-size:13.5px;margin:0}
+
+  .proto-note{background:var(--yellow-light);border:1px solid #fde68a;color:#78350f;
+    padding:10px 14px;border-radius:10px;font-size:13px;margin:16px 0 20px;display:flex;gap:9px;align-items:flex-start}
+
+  /* ---------- STAT CARDS ---------- */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:14px;margin-bottom:20px}
+  .card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:16px 17px}
+  .card-label{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:6px}
+  .card-value{font-size:26px;font-weight:600;line-height:1.1}
+  .card-value.warn{color:var(--yellow)}
+  .card-value.bad{color:var(--red)}
+  .card-foot{font-size:11.5px;color:var(--muted);margin-top:5px}
+
+  /* ---------- TOOLBAR ---------- */
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .search{flex:1;min-width:220px;position:relative}
+  .search input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:9px;
+    font-family:inherit;font-size:14px;outline:none;background:var(--white)}
+  .search input:focus{border-color:var(--accent)}
+  .filters{display:flex;gap:6px;background:var(--white);border:1px solid var(--border);border-radius:9px;padding:4px}
+  .filter{padding:6px 12px;border-radius:7px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:none;font-family:inherit}
+  .filter.active{background:var(--accent-light);color:var(--accent-dark)}
+
+  .btn{border:none;border-radius:8px;padding:10px 17px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:.15s;white-space:nowrap}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:var(--accent-dark)}
+  .btn-secondary{background:var(--white);color:var(--text);border:1px solid var(--border)}
+  .btn-secondary:hover{background:var(--off)}
+  .btn-danger{background:var(--red-light);color:var(--red)}
+  .btn-danger:hover{background:#fecaca}
+  .btn-sm{padding:6px 12px;font-size:12.5px;border-radius:7px}
+
+  /* ---------- TABLE ---------- */
+  .table-wrap{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .scroll-x{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:860px}
+  th{text-align:left;padding:12px 15px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--muted);font-weight:600;background:var(--off);border-bottom:1px solid var(--border);white-space:nowrap}
+  td{padding:13px 15px;border-bottom:1px solid var(--border);vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr.row:hover{background:var(--accent-light)}
+  .name-cell{font-weight:600}
+  .sub-cell{font-size:11.5px;color:var(--muted);margin-top:2px}
+
+  .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+  .badge.ok{background:var(--green-light);color:var(--green)}
+  .badge.warn{background:var(--yellow-light);color:var(--yellow)}
+  .badge.bad{background:var(--red-light);color:var(--red)}
+  .badge.neutral{background:var(--off);color:var(--muted)}
+  .badge.info{background:var(--accent-light);color:var(--accent-dark)}
+
+  .meter{width:96px;height:6px;border-radius:4px;background:var(--border);overflow:hidden;margin-top:5px}
+  .meter i{display:block;height:100%;background:var(--accent)}
+  .meter i.over{background:var(--red)}
+  .meter i.high{background:var(--yellow)}
+
+  /* ---------- DRAWER ---------- */
+  .overlay{position:fixed;inset:0;background:rgba(24,27,48,.45);display:none;z-index:40}
+  .overlay.open{display:block}
+  .drawer{position:fixed;top:0;right:0;height:100vh;width:min(620px,100%);background:var(--white);
+    z-index:50;transform:translateX(100%);transition:transform .22s ease;display:flex;flex-direction:column;box-shadow:-10px 0 34px rgba(24,27,48,.16)}
+  .drawer.open{transform:translateX(0)}
+  .drawer-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .drawer-title{font-size:19px;font-weight:600;margin:0}
+  .close-x{background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;padding:2px 6px}
+  .tabs{display:flex;gap:2px;padding:0 16px;border-bottom:1px solid var(--border);overflow-x:auto}
+  .tab{padding:12px 14px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;border:none;
+    background:none;font-family:inherit;border-bottom:2px solid transparent;white-space:nowrap}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .drawer-body{padding:22px 24px 40px;overflow-y:auto;flex:1}
+  .pane{display:none}
+  .pane.active{display:block}
+
+  .field{margin-bottom:15px}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px}
+  .field input,.field select,.field textarea{width:100%;padding:9px 12px;border:1px solid var(--border);
+    border-radius:8px;font-family:inherit;font-size:14px;outline:none;background:var(--white);color:var(--text)}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .day-row{display:flex;flex-wrap:wrap;gap:6px}
+  .day{padding:6px 11px;border:1px solid var(--border);border-radius:20px;font-size:12.5px;cursor:pointer;background:var(--white);font-family:inherit;color:var(--muted)}
+  .day.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  .switch-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border)}
+  .switch-row:last-of-type{border-bottom:none}
+  .switch-label{font-size:13.5px;font-weight:500}
+  .switch-hint{font-size:11.5px;color:var(--muted);margin-top:2px;max-width:330px}
+  .toggle{width:42px;height:24px;border-radius:20px;background:var(--border);position:relative;cursor:pointer;flex:none;transition:.16s;border:none}
+  .toggle.on{background:var(--accent)}
+  .toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.16s}
+  .toggle.on::after{left:21px}
+
+  .section-title{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
+    font-weight:600;margin:24px 0 11px;padding-top:18px;border-top:1px solid var(--border)}
+  .section-title:first-child{margin-top:0;padding-top:0;border-top:none}
+
+  .call-item{border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:9px}
+  .call-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .call-when{font-weight:600;font-size:14px}
+  .call-meta{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .call-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+
+  .minutes-box{background:var(--off);border-radius:10px;padding:16px;margin-bottom:16px}
+  .minutes-big{font-size:30px;font-weight:600}
+  .minutes-big small{font-size:14px;color:var(--muted);font-weight:500}
+  .quick{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+
+  .flag-list{list-style:none;padding:0;margin:0}
+  .flag-list li{display:flex;gap:9px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px}
+  .flag-list li:last-child{border-bottom:none}
+  .flag-ico{flex:none;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;margin-top:1px}
+  .flag-ico.bad{background:var(--red)} .flag-ico.warn{background:var(--yellow)} .flag-ico.ok{background:var(--green)}
+
+  .danger-zone{border:1px solid #fecaca;background:#fff5f5;border-radius:10px;padding:16px;margin-top:8px}
+
+  .drawer-foot{padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:9px;justify-content:flex-end;background:var(--white)}
+
+  /* ---------- MODAL ---------- */
+  .modal{position:fixed;inset:0;background:rgba(24,27,48,.45);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+  .modal.open{display:flex}
+  .modal-card{background:var(--white);border-radius:var(--radius-lg);padding:26px;width:min(470px,100%);max-height:88vh;overflow-y:auto}
+  .modal-title{font-size:19px;font-weight:600;margin:0 0 6px}
+  .modal-sub{font-size:13px;color:var(--muted);margin:0 0 18px}
+  .modal-foot{display:flex;gap:9px;justify-content:flex-end;margin-top:20px}
+
+  /* ---------- TOAST ---------- */
+  #toasts{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:90;display:flex;flex-direction:column;gap:8px;align-items:center}
+  .toast{background:var(--ink);color:#fff;padding:11px 18px;border-radius:9px;font-size:13.5px;font-weight:500;
+    box-shadow:0 8px 22px rgba(24,27,48,.25);animation:rise .22s ease}
+  .toast.ok{background:#14532d}.toast.bad{background:#7f1d1d}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+  .empty{padding:34px;text-align:center;color:var(--muted);font-size:13.5px}
+
+  @media(max-width:820px){
+    .sidebar{display:none}
+    main{margin-left:0;padding:18px 16px 60px}
+    .grid2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo"><span class="dot">P</span> Penny AI</div>
+  <span class="role-chip">Super admin</span>
+  <div class="nav-item" onclick="location.href='/admin.html'">Admin panel</div>
+  <div class="nav-item active">Students</div>
+  
+  
+  
+  <div class="sidebar-foot"><span id="who">—</span><br/><a href="/admin.html" style="color:var(--accent);text-decoration:none">← Back to admin panel</a></div>
+</aside>
+
+<main>
+  <div class="page-head">
+    <div>
+      <h1>Students</h1>
+      <p class="sub">Manage profiles, scheduled calls and lesson minutes.</p>
+    </div>
+    <button class="btn btn-primary" onclick="openAdd()">+ Add student</button>
+  </div>
+
+  <div class="proto-note" id="live-note" style="display:none"></div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="toolbar">
+    <div class="search"><input id="q" placeholder="Search by name, phone or email…" oninput="render()"/></div>
+    <div class="filters">
+      <button class="filter active" data-f="all" onclick="setFilter('all')">All</button>
+      <button class="filter" data-f="attention" onclick="setFilter('attention')">Needs attention</button>
+      <button class="filter" data-f="ready" onclick="setFilter('ready')">Ready</button>
+      <button class="filter" data-f="nocall" onclick="setFilter('nocall')">No call booked</button>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="scroll-x">
+      <table>
+        <thead><tr>
+          <th>Student</th><th>Level</th><th>Lesson</th><th>Minutes</th><th>Next call</th><th>Status</th><th></th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- DRAWER -->
+<div class="overlay" id="ov" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div>
+      <h2 class="drawer-title" id="d-name">—</h2>
+      <div class="sub" id="d-sub">—</div>
+    </div>
+    <button class="close-x" onclick="closeDrawer()">&times;</button>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-p="profile" onclick="setPane('profile')">Profile</button>
+    <button class="tab" data-p="calls" onclick="setPane('calls')">Scheduled calls</button>
+    <button class="tab" data-p="minutes" onclick="setPane('minutes')">Minutes</button>
+    <button class="tab" data-p="health" onclick="setPane('health')">Readiness</button>
+    <button class="tab" data-p="account" onclick="setPane('account')">Account</button>
+  </div>
+  <div class="drawer-body">
+
+    <!-- PROFILE -->
+    <div class="pane active" id="pane-profile">
+      <div class="section-title">Identity</div>
+      <div class="grid2">
+        <div class="field"><label>Full name</label><input id="f-name"/></div>
+        <div class="field"><label>Phone (digits only)</label><input id="f-phone"/></div>
+      </div>
+      <div class="field"><label>Email</label><input id="f-email"/></div>
+      <div class="grid2">
+        <div class="field"><label>Teacher</label>
+          <select id="f-teacher"></select></div>
+        <div class="field"><label>School</label>
+          <select id="f-school"></select></div>
+      </div>
+
+      <div class="section-title">Learning</div>
+      <div class="grid2">
+        <div class="field"><label>English level</label>
+          <select id="f-level">
+            <option value="">— not set —</option>
+            <optgroup label="Guided"><option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option></optgroup>
+            <optgroup label="Conversational"><option>AC1</option><option>AC2</option><option>BC1</option><option>BC2</option><option>CC1</option><option>CC2</option></optgroup>
+          </select></div>
+        <div class="field"><label>Current lesson number</label><input id="f-lesson" type="number" min="1"/></div>
+      </div>
+      <div class="field"><label>Learning goal</label><textarea id="f-goal" rows="2"></textarea></div>
+
+      <div class="section-title">Schedule</div>
+      <div class="field"><label>Preferred days</label><div class="day-row" id="f-days"></div></div>
+      <div class="grid2">
+        <div class="field"><label>Preferred time (Rome)</label><input id="f-time" type="time"/></div>
+        <div class="field"><label>Lessons per week</label>
+          <select id="f-freq"><option>1</option><option>2</option><option>3</option></select></div>
+      </div>
+      <div class="field"><label>Lesson duration</label>
+        <select id="f-dur"><option value="10">10 minutes</option><option value="15">15 minutes</option></select></div>
+
+      <div class="section-title">Flags</div>
+      <div class="switch-row">
+        <div><div class="switch-label">Conversation lessons</div>
+          <div class="switch-hint">Off means the guided curriculum. Must be set either way — left empty, the dispatcher skips this student.</div></div>
+        <button class="toggle" id="f-conv" onclick="tog('f-conv')"></button>
+      </div>
+      <div class="switch-row">
+        <div><div class="switch-label">Approved for outbound calls</div>
+          <div class="switch-hint">Off means Penny will never ring this student for a lesson.</div></div>
+        <button class="toggle" id="f-outb" onclick="tog('f-outb')"></button>
+      </div>
+      <div class="switch-row">
+        <div><div class="switch-label">Recording consent given</div>
+          <div class="switch-hint">Captured on the onboarding call.</div></div>
+        <button class="toggle" id="f-cons" onclick="tog('f-cons')"></button>
+      </div>
+    </div>
+
+    <!-- CALLS -->
+    <div class="pane" id="pane-calls">
+      <div class="section-title">Upcoming</div>
+      <div id="upcoming"></div>
+      <button class="btn btn-primary btn-sm" style="margin-top:6px" onclick="openSchedule()">+ Schedule a call</button>
+      <div class="section-title">History</div>
+      <div id="history"></div>
+    </div>
+
+    <!-- MINUTES -->
+    <div class="pane" id="pane-minutes">
+      <div class="minutes-box">
+        <div class="card-label">Remaining this month</div>
+        <div class="minutes-big" id="m-remaining">—</div>
+        <div class="meter" style="width:100%;margin-top:10px"><i id="m-bar"></i></div>
+        <div class="card-foot" id="m-detail">—</div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Monthly allowance (minutes)</label><input id="m-alloc" type="number" min="0"/></div>
+        <div class="field"><label>Used this month (minutes)</label><input id="m-used" type="number" min="0"/></div>
+      </div>
+      <div class="card-label">Quick adjustments</div>
+      <div class="quick">
+        <button class="btn btn-secondary btn-sm" onclick="adjust(15)">+15 min</button>
+        <button class="btn btn-secondary btn-sm" onclick="adjust(30)">+30 min</button>
+        <button class="btn btn-secondary btn-sm" onclick="adjust(60)">+60 min</button>
+        <button class="btn btn-secondary btn-sm" onclick="adjust(-15)">−15 min</button>
+        <button class="btn btn-secondary btn-sm" onclick="resetUsed()">Reset usage to 0</button>
+      </div>
+      <div class="section-title">Lifetime</div>
+      <div class="field"><label>Total minutes used since joining</label><input id="m-total" type="number" disabled/></div>
+    </div>
+
+    <!-- READINESS -->
+    <div class="pane" id="pane-health">
+      <p class="sub" style="margin-bottom:14px">Whether this student can actually receive a lesson right now. Anything missing can be fixed here — each fix saves straight away, no need to visit the other tabs.</p>
+      <ul class="flag-list" id="health"></ul>
+      <div id="health-fix" style="margin-top:16px"></div>
+    </div>
+
+    <!-- ACCOUNT -->
+    <div class="pane" id="pane-account">
+      <div class="section-title">Login</div>
+      <div class="field"><label>Sign-in email</label><input id="a-email" disabled/></div>
+      <div class="switch-row">
+        <div><div class="switch-label">Must change password at next sign-in</div></div>
+        <button class="toggle" id="a-mcp" onclick="tog('a-mcp')"></button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+        <button class="btn btn-secondary btn-sm" onclick="toast('Password reset email sent (prototype)')">Send password reset</button>
+        <button class="btn btn-secondary btn-sm" onclick="toast('Welcome email resent (prototype)')">Resend welcome email</button>
+      </div>
+      <div class="section-title">Danger zone</div>
+      <div class="danger-zone">
+        <div style="font-weight:600;font-size:14px;margin-bottom:4px">Delete this student</div>
+        <div class="sub" style="margin-bottom:12px">Removes the profile and the login account. Lesson history is kept for reporting.</div>
+        <button class="btn btn-danger btn-sm" onclick="confirmDelete()">Delete student</button>
+      </div>
+    </div>
+
+  </div>
+  <div class="drawer-foot">
+    <button class="btn btn-secondary" onclick="closeDrawer()">Cancel</button>
+    <button class="btn btn-primary" onclick="saveStudent()">Save changes</button>
+  </div>
+</aside>
+
+<!-- SCHEDULE MODAL -->
+<div class="modal" id="mSchedule">
+  <div class="modal-card">
+    <h3 class="modal-title" id="sch-title">Schedule a call</h3>
+    <p class="modal-sub">Times are Rome time. The dispatcher checks every minute.</p>
+    <div class="field"><label>Purpose</label>
+      <select id="s-purpose">
+        <option value="lesson">Lesson</option>
+        <option value="onboarding">Onboarding</option>
+      </select></div>
+    <div class="grid2">
+      <div class="field"><label>Date</label><input id="s-date" type="date"/></div>
+      <div class="field"><label>Time</label><input id="s-time" type="time"/></div>
+    </div>
+    <div class="field"><label>Maximum attempts</label>
+      <select id="s-att"><option>1</option><option selected>3</option><option>5</option></select></div>
+    <div id="s-warn"></div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('mSchedule')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSchedule()">Save call</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal" id="mAdd">
+  <div class="modal-card">
+    <h3 class="modal-title">Add a student</h3>
+    <p class="modal-sub">An account is created and a welcome email sent with a temporary password.</p>
+    <div class="field"><label>Full name</label><input id="n-name" placeholder="Maria Rossi"/></div>
+    <div class="field"><label>Email</label><input id="n-email" placeholder="maria@example.com"/></div>
+    <div class="field"><label>Phone — digits only, no + sign</label><input id="n-phone" placeholder="393401234567"/></div>
+    <div class="grid2">
+      <div class="field"><label>English level</label>
+        <select id="n-level"><option value="">— set later —</option>
+          <option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option>
+          <option>AC1</option><option>AC2</option><option>BC1</option><option>BC2</option><option>CC1</option><option>CC2</option></select></div>
+      <div class="field"><label>Duration</label><select id="n-dur"><option value="10">10 min</option><option value="15">15 min</option></select></div>
+    </div>
+    <div class="switch-row">
+      <div><div class="switch-label">Book an onboarding call now</div>
+        <div class="switch-hint">Penny rings within a minute of saving.</div></div>
+      <button class="toggle on" id="n-call" onclick="tog('n-call')"></button>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('mAdd')">Cancel</button>
+      <button class="btn btn-primary" onclick="addStudent()">Create student</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal" id="mConfirm">
+  <div class="modal-card">
+    <h3 class="modal-title" id="c-title">Are you sure?</h3>
+    <p class="modal-sub" id="c-body">This cannot be undone.</p>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('mConfirm')">Cancel</button>
+      <button class="btn btn-danger" id="c-go">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script type="module">
+/* =========================================================================
+   Penny AI — Super Admin student console
+   Talks to /api/superadmin/* which is restricted to role = system_admin.
+   ========================================================================= */
+
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DAY_FULL = {Mon:'monday',Tue:'tuesday',Wed:'wednesday',Thu:'thursday',Fri:'friday',Sat:'saturday',Sun:'sunday'};
+const FULL_DAY = Object.fromEntries(Object.entries(DAY_FULL).map(([k,v])=>[v,k]));
+
+let supabase = null;
+let students = [];
+let teachers = [];
+let schools  = [];
+let filter = 'all';
+let currentId = null;
+let currentCalls = [];
+let editingCallId = null;
+
+/* ---------------- auth + bootstrap ---------------- */
+async function boot(){
+  const cfg = await fetch('/api/config').then(r=>r.json());
+  const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+  supabase = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+
+  const { data:{ session } } = await supabase.auth.getSession();
+  if(!session){ location.href='/signin.html'; return; }
+
+  const me = await fetch('/api/me',{headers:{Authorization:'Bearer '+session.access_token}}).then(r=>r.json()).catch(()=>({}));
+  document.getElementById('who').textContent = me?.name ? me.name+' · super admin' : 'super admin';
+
+  await Promise.all([loadStudents(), loadTeachers(), loadSchools()]);
+}
+
+async function token(){
+  const { data:{ session } } = await supabase.auth.getSession();
+  if(!session){ location.href='/signin.html'; throw new Error('no session'); }
+  return session.access_token;
+}
+
+async function api(path, opts={}){
+  const t = await token();
+  const res = await fetch(path, {
+    ...opts,
+    headers:{ 'Content-Type':'application/json', Authorization:'Bearer '+t, ...(opts.headers||{}) }
+  });
+  let body=null; try{ body = await res.json(); }catch(e){}
+  if(!res.ok){
+    if(res.status===403){ showBlocked(); }
+    throw new Error(body?.error || ('Request failed ('+res.status+')'));
+  }
+  return body;
+}
+
+function showBlocked(){
+  const n=document.getElementById('live-note');
+  n.style.display='flex';
+  n.style.background='var(--red-light)'; n.style.borderColor='#fecaca'; n.style.color='#7f1d1d';
+  n.innerHTML='<strong>No access.</strong><span>This console is limited to super admin accounts.</span>';
+}
+
+/* ---------------- loading ---------------- */
+async function loadStudents(){
+  const rows = await api('/api/superadmin/students');
+  students = rows.map(r=>({
+    id:r.id, name:r.name||'(no name)', email:r.email||'', phone:r.phone||'',
+    level:r.english_level||'', lesson:r.current_lesson_id, goal:r.goal||'',
+    days:(r.preferred_days||'').split(',').map(s=>s.trim()).filter(Boolean).map(d=>FULL_DAY[d.toLowerCase()]||d).filter(Boolean),
+    time:(r.preferred_times||'').trim(), freq:String(r.lesson_frequency||1),
+    dur:r.lesson_duration?String(r.lesson_duration):'',
+    conv:r.conversation_lesson, outbound:!!r.approved_for_outbound, consent:!!r.consent_given,
+    teacher_id:r.teacher_id||'', school_id:r.school_id||'',
+    alloc:r.allocated_time_this_month??0, used:r.used_time_this_month??0, total:r.total_time_used??0,
+    next:r.next_call||null
+  }));
+  render();
+}
+async function loadTeachers(){
+  try{ teachers = await api('/api/admin/teachers') || []; }catch(e){ teachers=[]; }
+}
+async function loadSchools(){
+  // schools aren't exposed by an endpoint; offer the ids already in use
+  const ids=[...new Set(students.map(s=>s.school_id).filter(Boolean))];
+  schools = ids.map(id=>({id,name:'School '+id}));
+}
+
+/* ---------------- readiness ---------------- */
+function health(s){
+  return [
+    {k:'level',    ok:!!s.level,                    t:'English level set',            bad:'No level — the system cannot choose a lesson for this student'},
+    {k:'conv',     ok:s.conv!==null&&s.conv!==undefined, t:'Lesson type set',        bad:'Lesson type empty — the dispatcher skips students with no value here'},
+    {k:'outbound', ok:!!s.outbound,                 t:'Approved for outbound calls',  bad:'Not approved — Penny will never ring for a lesson', warn:true},
+    {k:'schedule', ok:s.days.length>0&&!!s.time,    t:'Schedule captured',            bad:'No preferred day or time on file', warn:true},
+    {k:'dur',      ok:!!s.dur,                      t:'Lesson duration set',          bad:'Duration empty — must be 10 or 15', warn:true},
+    {k:'call',     ok:!!s.next,                     t:'A call is booked',             bad:'No upcoming call — this student is waiting with nothing scheduled'},
+    {k:'minutes',  ok:s.used<s.alloc,               t:'Within monthly minutes',       bad:'Over the monthly allowance', warn:true},
+  ];
+}
+const blockers = s=>health(s).filter(h=>!h.ok&&!h.warn).length;
+const warnings = s=>health(s).filter(h=>!h.ok&&h.warn).length;
+
+/* ---------------- list ---------------- */
+window.setFilter = f=>{ filter=f; document.querySelectorAll('.filter').forEach(b=>b.classList.toggle('active',b.dataset.f===f)); render(); };
+window.render = function(){
+  const q=(document.getElementById('q').value||'').toLowerCase();
+  let list=students.filter(s=>!q||(s.name+s.phone+s.email).toLowerCase().includes(q));
+  if(filter==='attention') list=list.filter(s=>blockers(s)>0);
+  if(filter==='ready')     list=list.filter(s=>blockers(s)===0);
+  if(filter==='nocall')    list=list.filter(s=>!s.next);
+
+  const notReady=students.filter(s=>blockers(s)>0).length,
+        noCall=students.filter(s=>!s.next).length,
+        over=students.filter(s=>s.used>s.alloc).length;
+  document.getElementById('stats').innerHTML=`
+    <div class="card"><div class="card-label">Students</div><div class="card-value">${students.length}</div><div class="card-foot">across all schools</div></div>
+    <div class="card"><div class="card-label">Cannot be taught</div><div class="card-value ${notReady?'bad':''}">${notReady}</div><div class="card-foot">missing something essential</div></div>
+    <div class="card"><div class="card-label">No call booked</div><div class="card-value ${noCall?'warn':''}">${noCall}</div><div class="card-foot">waiting with nothing scheduled</div></div>
+    <div class="card"><div class="card-label">Over minutes</div><div class="card-value ${over?'warn':''}">${over}</div><div class="card-foot">past monthly allowance</div></div>`;
+
+  const rows=document.getElementById('rows');
+  if(!list.length){ rows.innerHTML='<tr><td colspan="7"><div class="empty">No students match.</div></td></tr>'; return; }
+  rows.innerHTML=list.map(s=>{
+    const b=blockers(s), w=warnings(s);
+    const pct=Math.min(100,Math.round(s.used/Math.max(s.alloc,1)*100));
+    const cls=s.used>s.alloc?'over':(pct>80?'high':'');
+    const status=b?`<span class="badge bad">${b} blocker${b>1?'s':''}</span>`
+                 :(w?`<span class="badge warn">${w} warning${w>1?'s':''}</span>`
+                    :'<span class="badge ok">Ready</span>');
+    return `<tr class="row">
+      <td><div class="name-cell">${esc(s.name)}</div><div class="sub-cell">+${s.phone}</div></td>
+      <td>${s.level?`<span class="badge info">${s.level}</span>`:'<span class="badge bad">not set</span>'}</td>
+      <td>${s.lesson?('#'+s.lesson):'<span class="sub-cell">—</span>'}</td>
+      <td>${s.used}/${s.alloc} min<div class="meter"><i class="${cls}" style="width:${pct}%"></i></div></td>
+      <td>${s.next?`${fmt(s.next.scheduled_time)}<div class="sub-cell">${s.next.call_purpose||'no purpose'}</div>`:'<span class="badge warn">none</span>'}</td>
+      <td>${status}</td>
+      <td style="text-align:right"><button class="btn btn-secondary btn-sm" onclick="openStudent('${s.id}')">Manage</button></td>
+    </tr>`;
+  }).join('');
+};
+
+const esc = t => String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function fmt(iso){
+  if(!iso) return '—';
+  const d=new Date(iso);
+  return d.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'})+' '+
+         d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+function localInput(iso){
+  const d=iso?new Date(iso):new Date();
+  const p=n=>String(n).padStart(2,'0');
+  return {date:`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`, time:`${p(d.getHours())}:${p(d.getMinutes())}`};
+}
+
+/* ---------------- drawer ---------------- */
+window.openStudent = async function(id){
+  currentId=id; const s=students.find(x=>x.id===id);
+  document.getElementById('d-name').textContent=s.name;
+  document.getElementById('d-sub').textContent=`+${s.phone} · ${s.email}`;
+  document.getElementById('f-name').value=s.name;
+  document.getElementById('f-phone').value=s.phone;
+  document.getElementById('f-email').value=s.email;
+  document.getElementById('f-level').value=s.level||'';
+  document.getElementById('f-lesson').value=s.lesson||'';
+  document.getElementById('f-goal').value=s.goal||'';
+  document.getElementById('f-time').value=s.time||'';
+  document.getElementById('f-freq').value=s.freq||'1';
+  document.getElementById('f-dur').value=s.dur||'10';
+  document.getElementById('f-teacher').innerHTML='<option value="">Unassigned</option>'+
+    teachers.map(t=>`<option value="${t.id}" ${t.id===s.teacher_id?'selected':''}>${esc(t.name||t.email||t.id)}</option>`).join('');
+  const schoolIds=[...new Set(students.map(x=>x.school_id).filter(Boolean))];
+  document.getElementById('f-school').innerHTML='<option value="">None</option>'+
+    schoolIds.map(i=>`<option value="${i}" ${String(i)===String(s.school_id)?'selected':''}>School ${i}</option>`).join('');
+  setTog('f-conv',s.conv===true); setTog('f-outb',s.outbound); setTog('f-cons',s.consent);
+  document.getElementById('a-email').value=s.email;
+  setTog('a-mcp',false);
+  paintDays('f-days',s.days);
+  document.getElementById('m-alloc').value=s.alloc;
+  document.getElementById('m-used').value=s.used;
+  document.getElementById('m-total').value=s.total;
+  paintMinutes(); paintHealth(); setPane('profile');
+  document.getElementById('ov').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+  loadCalls();
+};
+function paintDays(el,days){
+  document.getElementById(el).innerHTML=DAYS.map(d=>
+    `<button type="button" class="day ${days.includes(d)?'on':''}" onclick="this.classList.toggle('on')">${d}</button>`).join('');
+}
+window.closeDrawer=()=>{document.getElementById('ov').classList.remove('open');document.getElementById('drawer').classList.remove('open');};
+window.setPane=p=>{
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.p===p));
+  document.querySelectorAll('.pane').forEach(x=>x.classList.remove('active'));
+  document.getElementById('pane-'+p).classList.add('active');
+};
+window.tog=id=>{document.getElementById(id).classList.toggle('on');};
+function setTog(id,on){document.getElementById(id).classList.toggle('on',!!on);}
+const isOn=id=>document.getElementById(id).classList.contains('on');
+
+/* ---------------- minutes ---------------- */
+window.paintMinutes=function(){
+  const a=+document.getElementById('m-alloc').value||0, u=+document.getElementById('m-used').value||0;
+  const rem=a-u, pct=Math.min(100,Math.round(u/Math.max(a,1)*100));
+  const el=document.getElementById('m-remaining');
+  el.innerHTML=`${rem} <small>of ${a} min</small>`;
+  el.style.color=rem<0?'var(--red)':(pct>80?'var(--yellow)':'var(--text)');
+  const bar=document.getElementById('m-bar'); bar.style.width=pct+'%'; bar.className=u>a?'over':(pct>80?'high':'');
+  document.getElementById('m-detail').textContent=rem<0?`${Math.abs(rem)} minutes over the allowance`:`${u} minutes used this month`;
+};
+window.adjust=async n=>{
+  const el=document.getElementById('m-alloc'); el.value=Math.max(0,(+el.value||0)+n); paintMinutes();
+  await saveMinutes(`${n>0?'Added':'Removed'} ${Math.abs(n)} minutes`);
+};
+window.resetUsed=async ()=>{ document.getElementById('m-used').value=0; paintMinutes(); await saveMinutes('Monthly usage reset to zero'); };
+async function saveMinutes(msg){
+  try{
+    const r=await api(`/api/superadmin/students/${currentId}/minutes`,{method:'PUT',body:JSON.stringify({
+      allocated_time_this_month:+document.getElementById('m-alloc').value||0,
+      used_time_this_month:+document.getElementById('m-used').value||0 })});
+    const s=students.find(x=>x.id===currentId);
+    s.alloc=r.allocated_time_this_month??s.alloc; s.used=r.used_time_this_month??s.used;
+    paintHealth(); render(); toast(msg,'ok');
+  }catch(e){ toast(e.message,'bad'); }
+}
+document.addEventListener('input',e=>{ if(e.target.id==='m-alloc'||e.target.id==='m-used') paintMinutes(); });
+document.addEventListener('change',e=>{ if(e.target.id==='m-alloc'||e.target.id==='m-used') saveMinutes('Minutes updated'); });
+
+/* ---------------- calls ---------------- */
+async function loadCalls(){
+  try{ currentCalls = await api(`/api/superadmin/students/${currentId}/calls`) || []; }
+  catch(e){ currentCalls=[]; toast(e.message,'bad'); }
+  paintCalls();
+}
+function paintCalls(){
+  const up=currentCalls.filter(c=>['pending','in_progress'].includes(c.call_status))
+                       .sort((a,b)=>new Date(a.scheduled_time)-new Date(b.scheduled_time));
+  const hist=currentCalls.filter(c=>!['pending','in_progress'].includes(c.call_status))
+                         .sort((a,b)=>new Date(b.scheduled_time)-new Date(a.scheduled_time));
+  document.getElementById('upcoming').innerHTML = up.length ? up.map(c=>{
+    const live=c.call_status==='in_progress';
+    return `<div class="call-item">
+      <div class="call-top">
+        <div><div class="call-when">${fmt(c.scheduled_time)}</div>
+        <div class="call-meta">${c.call_purpose||'<strong style="color:var(--red)">no purpose — will never fire</strong>'} · attempt ${c.attempt_count||0} of ${c.max_attempts||3}</div></div>
+        <span class="badge ${live?'warn':'info'}">${c.call_status}</span>
+      </div>
+      ${live?'<div class="call-meta" style="margin-top:8px">A call in progress cannot be changed.</div>':`
+      <div class="call-actions">
+        <button class="btn btn-secondary btn-sm" onclick="openSchedule('${c.id}')">Reschedule</button>
+        <button class="btn btn-secondary btn-sm" onclick="callNow('${c.id}')">Call now</button>
+        <button class="btn btn-danger btn-sm" onclick="cancelCall('${c.id}')">Cancel</button>
+      </div>`}
+    </div>`;}).join('') : '<div class="empty" style="padding:20px">No upcoming calls.</div>';
+
+  document.getElementById('history').innerHTML = hist.length ? hist.map(c=>`
+    <div class="call-item">
+      <div class="call-top">
+        <div><div class="call-when">${fmt(c.scheduled_time)}</div>
+          <div class="call-meta">${c.call_purpose||'no purpose'} · ${c.attempt_count||0} attempt(s)${c.last_disconnection_reason?' · '+c.last_disconnection_reason:''}</div></div>
+        <span class="badge ${c.call_status==='completed'?'ok':(c.call_status==='missed'?'bad':'neutral')}">${c.call_status}</span>
+      </div>
+    </div>`).join('') : '<div class="empty" style="padding:20px">No past calls.</div>';
+}
+window.openSchedule=function(id){
+  editingCallId=id||null;
+  const c=id?currentCalls.find(x=>String(x.id)===String(id)):null;
+  const s=students.find(x=>x.id===currentId);
+  document.getElementById('sch-title').textContent=id?'Reschedule call':'Schedule a call';
+  document.getElementById('s-purpose').value=c?.call_purpose||(s.level?'lesson':'onboarding');
+  const d=localInput(c?.scheduled_time);
+  document.getElementById('s-date').value=d.date;
+  document.getElementById('s-time').value=c?d.time:(s.time||'18:00');
+  document.getElementById('s-att').value=String(c?.max_attempts||3);
+  document.getElementById('s-warn').innerHTML='';
+  openModal('mSchedule');
+};
+window.saveSchedule=async function(){
+  const d=document.getElementById('s-date').value, t=document.getElementById('s-time').value;
+  if(!d||!t){ document.getElementById('s-warn').innerHTML='<div class="badge bad">Pick a date and a time.</div>'; return; }
+  const when=new Date(d+'T'+t);
+  if(when<new Date() && !window.__pastOk){
+    document.getElementById('s-warn').innerHTML=
+      '<div style="background:var(--yellow-light);border:1px solid #fde68a;color:#78350f;padding:9px 12px;border-radius:8px;font-size:12.5px">That time has passed — the call goes out within a minute. Save again to confirm.</div>';
+    window.__pastOk=true; return;
+  }
+  window.__pastOk=false;
+  const purpose=document.getElementById('s-purpose').value, att=document.getElementById('s-att').value;
+  try{
+    if(editingCallId){
+      await api(`/api/superadmin/calls/${editingCallId}`,{method:'PUT',
+        body:JSON.stringify({action:'reschedule',scheduled_time:when.toISOString(),call_purpose:purpose,max_attempts:att})});
+      toast('Call rescheduled — attempts reset','ok');
+    }else{
+      await api(`/api/superadmin/students/${currentId}/calls`,{method:'POST',
+        body:JSON.stringify({call_purpose:purpose,scheduled_time:when.toISOString(),max_attempts:att})});
+      toast('Call scheduled','ok');
+    }
+    closeModal('mSchedule'); await loadCalls(); await loadStudents(); paintHealth();
+  }catch(e){ toast(e.message,'bad'); }
+};
+window.cancelCall=function(id){
+  const c=currentCalls.find(x=>String(x.id)===String(id));
+  askConfirm('Cancel this call?',`${fmt(c.scheduled_time)} — the student will not be rung. The record stays in history.`,async()=>{
+    try{ await api(`/api/superadmin/calls/${id}`,{method:'PUT',body:JSON.stringify({action:'cancel'})});
+      closeModal('mConfirm'); await loadCalls(); await loadStudents(); paintHealth(); toast('Call cancelled');
+    }catch(e){ toast(e.message,'bad'); }
+  });
+};
+window.callNow=function(id){
+  const s=students.find(x=>x.id===currentId);
+  askConfirm('Call this student now?',`Penny will ring +${s.phone} within about a minute.`,async()=>{
+    try{ await api(`/api/superadmin/calls/${id}`,{method:'PUT',body:JSON.stringify({action:'now'})});
+      closeModal('mConfirm'); await loadCalls(); await loadStudents(); toast('Call queued — Penny will ring shortly','ok');
+    }catch(e){ toast(e.message,'bad'); }
+  });
+};
+
+/* ---------------- readiness fixes ---------------- */
+const FIXERS={
+  level:{label:'Set level',
+    html:s=>`<select id="fx-level">${['A1','A2','B1','B2','C1','C2','AC1','AC2','BC1','BC2','CC1','CC2']
+      .map(l=>`<option ${s.level===l?'selected':''}>${l}</option>`).join('')}</select>`,
+    patch:s=>{const v=document.getElementById('fx-level').value;
+      const p={english_level:v}; if(!s.lesson) p.current_lesson_id=1; return {patch:p,msg:'Level set to '+v};}},
+  conv:{label:'Set lesson type',
+    html:()=>`<select id="fx-conv"><option value="false">Guided curriculum</option><option value="true">Conversation practice</option></select>`,
+    patch:()=>{const v=document.getElementById('fx-conv').value==='true';
+      return {patch:{conversation_lesson:v},msg:'Lesson type set to '+(v?'conversation':'guided')};}},
+  outbound:{label:'Approve calls',
+    html:()=>'<div class="sub" style="font-size:12.5px">Penny will be allowed to ring this student for lessons.</div>',
+    patch:()=>({patch:{approved_for_outbound:true},msg:'Approved for outbound calls'})},
+  schedule:{label:'Set schedule',
+    html:s=>`<div class="day-row" id="fx-days" style="margin-bottom:9px">${DAYS.map(d=>
+        `<button type="button" class="day ${s.days.includes(d)?'on':''}" onclick="this.classList.toggle('on')">${d}</button>`).join('')}</div>
+      <input id="fx-time" type="time" value="${s.time||'18:00'}" style="max-width:150px"/>`,
+    patch:()=>{const days=[...document.querySelectorAll('#fx-days .day.on')].map(b=>DAY_FULL[b.textContent]);
+      const t=document.getElementById('fx-time').value;
+      if(!days.length||!t) return null;
+      return {patch:{preferred_days:days.join(','),preferred_times:t},msg:'Schedule set to '+days.join(', ')+' at '+t};}},
+  dur:{label:'Set duration',
+    html:()=>'<select id="fx-dur"><option value="10">10 minutes</option><option value="15">15 minutes</option></select>',
+    patch:()=>{const v=document.getElementById('fx-dur').value;
+      return {patch:{lesson_duration:v},msg:'Duration set to '+v+' minutes'};}},
+  minutes:{label:'Add minutes',
+    html:s=>`<input id="fx-min" type="number" min="5" step="5" value="${Math.max(30,(s.used-s.alloc)+30)}" style="max-width:150px"/>
+      <div class="sub" style="font-size:12px;margin-top:6px">Minutes to add to the monthly allowance.</div>`,
+    minutes:true},
+  call:{label:'Book a call',
+    html:s=>{const n=new Date(Date.now()+864e5), p=x=>String(x).padStart(2,'0');
+      return `<div class="grid2" style="gap:9px">
+        <select id="fx-purpose"><option value="lesson" ${s.level?'selected':''}>Lesson</option><option value="onboarding" ${s.level?'':'selected'}>Onboarding</option></select>
+        <input id="fx-date" type="date" value="${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())}"/></div>
+      <input id="fx-ctime" type="time" value="${s.time||'18:00'}" style="max-width:150px;margin-top:9px"/>`;},
+    call:true}
+};
+window.openFix=function(k){
+  const s=students.find(x=>x.id===currentId), f=FIXERS[k];
+  const box=document.getElementById('fixbox-'+k), open=box.dataset.open==='1';
+  document.querySelectorAll('[id^=fixbox-]').forEach(b=>{b.innerHTML='';b.dataset.open='0';});
+  if(open) return;
+  box.dataset.open='1';
+  box.innerHTML=`<div style="background:var(--off);border:1px solid var(--border);border-radius:9px;padding:12px;margin-top:9px">
+    ${f.html(s)}
+    <div style="display:flex;gap:7px;margin-top:11px">
+      <button class="btn btn-primary btn-sm" onclick="applyFix('${k}')">Apply</button>
+      <button class="btn btn-secondary btn-sm" onclick="openFix('${k}')">Cancel</button>
+    </div></div>`;
+};
+window.applyFix=async function(k){
+  const f=FIXERS[k], s=students.find(x=>x.id===currentId);
+  try{
+    if(f.minutes){
+      const add=+document.getElementById('fx-min').value||0;
+      document.getElementById('m-alloc').value=s.alloc+add; paintMinutes();
+      await saveMinutes('Allowance raised to '+(s.alloc+add)+' minutes'); await loadStudents(); paintHealth(); return;
+    }
+    if(f.call){
+      const d=document.getElementById('fx-date').value, t=document.getElementById('fx-ctime').value;
+      if(!d||!t){ toast('Pick a date and a time','bad'); return; }
+      await api(`/api/superadmin/students/${currentId}/calls`,{method:'POST',body:JSON.stringify({
+        call_purpose:document.getElementById('fx-purpose').value,
+        scheduled_time:new Date(d+'T'+t).toISOString(), max_attempts:3 })});
+      await loadCalls(); await loadStudents(); paintHealth(); toast('Call booked','ok'); return;
+    }
+    const r=f.patch(s);
+    if(!r){ toast('Fill in every field first','bad'); return; }
+    await api(`/api/superadmin/students/${currentId}`,{method:'PUT',body:JSON.stringify(r.patch)});
+    await loadStudents(); openRefresh(); paintHealth(); toast(r.msg+' — saved','ok');
+  }catch(e){ toast(e.message,'bad'); }
+};
+function openRefresh(){
+  const s=students.find(x=>x.id===currentId); if(!s) return;
+  document.getElementById('f-level').value=s.level||'';
+  document.getElementById('f-lesson').value=s.lesson||'';
+  document.getElementById('f-time').value=s.time||'';
+  document.getElementById('f-dur').value=s.dur||'10';
+  setTog('f-conv',s.conv===true); setTog('f-outb',s.outbound);
+  paintDays('f-days',s.days);
+}
+window.paintHealth=function(){
+  const s=students.find(x=>x.id===currentId); if(!s) return;
+  const h=health(s);
+  document.getElementById('health').innerHTML=h.map(x=>`
+    <li style="display:block">
+      <div style="display:flex;gap:9px;align-items:flex-start">
+        <span class="flag-ico ${x.ok?'ok':(x.warn?'warn':'bad')}">${x.ok?'✓':'!'}</span>
+        <div style="flex:1"><div style="font-weight:${x.ok?'400':'600'}">${x.ok?x.t:x.bad}</div></div>
+        ${x.ok?'':`<button class="btn btn-secondary btn-sm" onclick="openFix('${x.k}')">${FIXERS[x.k].label}</button>`}
+      </div>
+      <div id="fixbox-${x.k}" data-open="0"></div>
+    </li>`).join('');
+  const b=h.filter(x=>!x.ok&&!x.warn).length;
+  document.getElementById('health-fix').innerHTML=b
+    ? '<div style="background:var(--red-light);border:1px solid #fecaca;color:#7f1d1d;padding:12px 14px;border-radius:9px;font-size:13px"><strong>This student cannot receive a lesson.</strong> Fix the items marked in red, then book a call.</div>'
+    : '<div style="background:var(--green-light);border:1px solid #bbf7d0;color:#14532d;padding:12px 14px;border-radius:9px;font-size:13px"><strong>Ready to learn.</strong> Everything the dispatcher needs is in place.</div>';
+};
+
+/* ---------------- save / add / delete ---------------- */
+window.saveStudent=async function(){
+  const phone=(document.getElementById('f-phone').value||'').replace(/\D/g,'');
+  if(!/^[1-9][0-9]{7,14}$/.test(phone)){ toast('Phone must be 8–15 digits, no + sign, not starting with 0','bad'); return; }
+  const days=[...document.querySelectorAll('#f-days .day.on')].map(b=>DAY_FULL[b.textContent]);
+  const body={
+    name:document.getElementById('f-name').value.trim(),
+    email:document.getElementById('f-email').value.trim(),
+    phone,
+    english_level:document.getElementById('f-level').value||null,
+    current_lesson_id:+document.getElementById('f-lesson').value||null,
+    goal:document.getElementById('f-goal').value.trim(),
+    preferred_days:days.join(','),
+    preferred_times:document.getElementById('f-time').value||null,
+    lesson_frequency:+document.getElementById('f-freq').value||1,
+    lesson_duration:document.getElementById('f-dur').value,
+    conversation_lesson:isOn('f-conv'),
+    approved_for_outbound:isOn('f-outb'),
+    consent_given:isOn('f-cons'),
+    teacher_id:document.getElementById('f-teacher').value||null,
+    school_id:document.getElementById('f-school').value||null,
+  };
+  try{
+    await api(`/api/superadmin/students/${currentId}`,{method:'PUT',body:JSON.stringify(body)});
+    await loadStudents(); openRefresh(); paintHealth(); toast('Changes saved','ok');
+  }catch(e){ toast(e.message,'bad'); }
+};
+window.openAdd=()=>{ ['n-name','n-email','n-phone'].forEach(i=>document.getElementById(i).value=''); openModal('mAdd'); };
+window.addStudent=async function(){
+  const name=document.getElementById('n-name').value.trim();
+  const email=document.getElementById('n-email').value.trim();
+  const phone=(document.getElementById('n-phone').value||'').replace(/\D/g,'');
+  if(!name||!email){ toast('Name and email are required','bad'); return; }
+  if(!/^[1-9][0-9]{7,14}$/.test(phone)){ toast('Phone must be 8–15 digits, no + sign','bad'); return; }
+  try{
+    const created=await api('/api/admin/students',{method:'POST',body:JSON.stringify({
+      name,email,phone,
+      english_level:document.getElementById('n-level').value||null,
+      lesson_duration:document.getElementById('n-dur').value })});
+    if(isOn('n-call')){
+      await api(`/api/superadmin/students/${created.id}/calls`,{method:'POST',body:JSON.stringify({
+        call_purpose:'onboarding', scheduled_time:new Date().toISOString(), max_attempts:3 })});
+    }
+    closeModal('mAdd'); await loadStudents();
+    toast('Student created'+(isOn('n-call')?' — Penny will ring shortly':''),'ok');
+  }catch(e){ toast(e.message,'bad'); }
+};
+window.confirmDelete=function(){
+  const s=students.find(x=>x.id===currentId);
+  askConfirm('Delete '+s.name+'?','The profile and the login account are removed, and any upcoming calls are cancelled. This cannot be undone.',async()=>{
+    try{ await api(`/api/superadmin/students/${currentId}`,{method:'DELETE'});
+      closeModal('mConfirm'); closeDrawer(); await loadStudents(); toast('Student deleted');
+    }catch(e){ toast(e.message,'bad'); }
+  });
+};
+
+/* ---------------- util ---------------- */
+window.openModal=id=>document.getElementById(id).classList.add('open');
+window.closeModal=id=>{document.getElementById(id).classList.remove('open');window.__pastOk=false;};
+window.askConfirm=function(title,body,fn){
+  document.getElementById('c-title').textContent=title;
+  document.getElementById('c-body').textContent=body;
+  const btn=document.getElementById('c-go'), c=btn.cloneNode(true);
+  btn.parentNode.replaceChild(c,btn); c.addEventListener('click',fn);
+  openModal('mConfirm');
+};
+window.toast=function(msg,kind){
+  const el=document.createElement('div'); el.className='toast '+(kind||''); el.textContent=msg;
+  document.getElementById('toasts').appendChild(el); setTimeout(()=>el.remove(),3000);
+};
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeDrawer(); ['mSchedule','mAdd','mConfirm'].forEach(closeModal);} });
+
+boot().catch(e=>{ console.error(e); toast('Could not load: '+e.message,'bad'); });
+</script>
+</body>
+</html>
