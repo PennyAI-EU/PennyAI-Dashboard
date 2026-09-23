@@ -793,6 +793,47 @@
     background: #ffbf00 !important; color: #181b30 !important;
   }
   body .goal-fill { background: #ffbf00 !important; }
+
+  /* ---- Account menu (top right) ---- */
+  .account-menu { position: relative; flex-shrink: 0; }
+  .account-trigger {
+    background: none; border: none; cursor: pointer; font: inherit; text-align: left;
+    padding: 4px 8px 4px 4px; border-radius: 28px; transition: background .15s;
+  }
+  .account-trigger:hover, .account-trigger[aria-expanded="true"] { background: rgba(255,255,255,.16); }
+  .account-trigger:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  .account-caret { width: 16px; height: 16px; color: rgba(255,255,255,.85); transition: transform .15s; }
+  .account-trigger[aria-expanded="true"] .account-caret { transform: rotate(180deg); }
+  .topbar-avatar { overflow: hidden; }
+  .topbar-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .account-dropdown {
+    position: absolute; right: 0; top: calc(100% + 8px); z-index: 60;
+    width: 240px; background: #fff; border-radius: 14px; padding: 6px;
+    box-shadow: 0 14px 34px rgba(49, 28, 110, .22);
+  }
+  .account-dropdown[hidden] { display: none; }
+  .account-head { padding: 10px 12px 12px; border-bottom: 1px solid #eee8f8; margin-bottom: 4px; }
+  .account-head-name { font-size: 14px; font-weight: 700; color: #1f1d2b; }
+  .account-head-email { font-size: 12px; color: #6b6780; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .account-item {
+    width: 100%; display: flex; align-items: center; gap: 10px;
+    background: none; border: none; cursor: pointer; text-align: left;
+    padding: 10px 12px; border-radius: 9px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: #2b2840;
+  }
+  .account-item svg { width: 18px; height: 18px; color: #6b4fc4; flex-shrink: 0; }
+  .account-item:hover, .account-item:focus-visible { background: #f1ecfc; outline: none; }
+  .account-signout { color: #b42318; }
+  .account-signout svg { color: #b42318; }
+  .account-signout:hover, .account-signout:focus-visible { background: #fdecea; }
+  .avatar-status {
+    position: absolute; right: 0; top: calc(100% + 8px); z-index: 59;
+    background: #fff; color: #2b2840; font-size: 12.5px; padding: 8px 12px; border-radius: 10px;
+    box-shadow: 0 8px 22px rgba(49, 28, 110, .18); white-space: nowrap;
+  }
+  .avatar-status[hidden] { display: none; }
+  .avatar-status.is-error { color: #b42318; }
+  @media (max-width: 800px) { .account-caret { display: none; } }
 </style>
 </head>
 <body>
@@ -824,10 +865,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg>
       <span>Progress</span>
     </div>
-    <div class="nav-item" id="nav-profile" onclick="showSection('profile')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span>Profile</span>
-    </div>
     <div class="nav-item" id="nav-messages" onclick="showSection('messages')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <span>Messages</span>
@@ -835,19 +872,6 @@
     </div>
   </nav>
 
-  <div class="nav-footer">
-    <div class="user-brief">
-      <div class="user-avatar" id="avatar-initials">—</div>
-      <div class="user-info">
-        <div class="user-name" id="user-display-name">Loading...</div>
-        <div class="user-email" id="user-display-email">...</div>
-      </div>
-    </div>
-    <button class="btn-signout" id="signout-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-      <span>Sign out</span>
-    </button>
-  </div>
 </aside>
 
 <main class="main-content">
@@ -862,12 +886,36 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span class="icon-badge" id="topbar-bell-badge" style="display:none;">0</span>
     </button>
-    <div class="topbar-profile">
-      <div class="topbar-avatar" id="topbar-initials">—</div>
-      <div class="topbar-meta">
-        <strong id="topbar-name">Loading…</strong>
-        <span id="topbar-level">—</span>
+    <div class="account-menu" id="account-menu">
+      <button class="topbar-profile account-trigger" id="account-trigger" type="button"
+              aria-haspopup="menu" aria-expanded="false" aria-controls="account-dropdown">
+        <div class="topbar-avatar" id="topbar-initials">—</div>
+        <div class="topbar-meta">
+          <strong id="topbar-name">Loading…</strong>
+          <span id="topbar-level">—</span>
+        </div>
+        <svg class="account-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="account-dropdown" id="account-dropdown" role="menu" hidden>
+        <div class="account-head">
+          <div class="account-head-name" id="account-head-name">—</div>
+          <div class="account-head-email" id="user-display-email">—</div>
+        </div>
+        <button type="button" role="menuitem" class="account-item" onclick="closeAccountMenu(); showSection('profile')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          My profile
+        </button>
+        <button type="button" role="menuitem" class="account-item" onclick="closeAccountMenu(); document.getElementById('avatar-file').click()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Change photo
+        </button>
+        <button type="button" role="menuitem" class="account-item account-signout" id="signout-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign out
+        </button>
       </div>
+      <input type="file" id="avatar-file" accept="image/jpeg,image/png,image/webp" hidden>
+      <div class="avatar-status" id="avatar-status" role="status" hidden></div>
     </div>
   </header>
 
@@ -1195,6 +1243,94 @@ window.showSection = function(sectionId) {
   }
 }
 
+// ---- Account menu (top right): profile, change photo, sign out ----
+function renderAvatar(url, name) {
+  const box = document.getElementById('topbar-initials');
+  if (!box) return;
+  box.textContent = '';
+  if (url) {
+    const img = document.createElement('img');
+    img.src = url; img.alt = '';
+    img.onerror = () => { box.textContent = initialsOf(name); };
+    box.appendChild(img);
+  } else {
+    box.textContent = initialsOf(name);
+  }
+}
+
+window.closeAccountMenu = function() {
+  const dd = document.getElementById('account-dropdown');
+  const tr = document.getElementById('account-trigger');
+  if (dd) dd.hidden = true;
+  if (tr) tr.setAttribute('aria-expanded', 'false');
+};
+
+(function initAccountMenu() {
+  const tr = document.getElementById('account-trigger');
+  const dd = document.getElementById('account-dropdown');
+  if (!tr || !dd) return;
+  tr.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = dd.hidden;
+    dd.hidden = !open;
+    tr.setAttribute('aria-expanded', String(open));
+    if (open) dd.querySelector('.account-item')?.focus();
+  });
+  document.addEventListener('click', (e) => { if (!document.getElementById('account-menu').contains(e.target)) closeAccountMenu(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !dd.hidden) { closeAccountMenu(); tr.focus(); } });
+})();
+
+function avatarStatus(msg, isError) {
+  const el = document.getElementById('avatar-status');
+  if (!el) return;
+  el.textContent = msg; el.hidden = !msg; el.classList.toggle('is-error', !!isError);
+  clearTimeout(avatarStatus._t);
+  if (msg && !msg.endsWith('...')) avatarStatus._t = setTimeout(() => { el.hidden = true; }, 3500);
+}
+
+// Shrink the photo in the browser to a 256px square JPEG before uploading (fast, small, private-friendly).
+function squareJpeg(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const side = Math.min(img.naturalWidth, img.naturalHeight);
+      const c = document.createElement('canvas'); c.width = c.height = 256;
+      c.getContext('2d').drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, 256, 256);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('bad image')); };
+    img.src = url;
+  });
+}
+
+document.getElementById('avatar-file')?.addEventListener('change', async (e) => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return avatarStatus('Please choose a JPG, PNG or WebP photo.', true);
+  if (file.size > 15 * 1024 * 1024) return avatarStatus('That photo is too large (max 15 MB).', true);
+  avatarStatus('Uploading photo...');
+  try {
+    const dataUrl = await squareJpeg(file);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return avatarStatus('Please sign in again.', true);
+    const res = await fetch('/api/me/avatar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify({ image: dataUrl })
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) return avatarStatus(out.error || 'Could not upload your photo.', true);
+    dashboardData.profile.avatarUrl = out.avatar_url;
+    renderAvatar(out.avatar_url, dashboardData.profile.name);
+    avatarStatus('Photo updated');
+  } catch (err) {
+    avatarStatus('Could not read that photo. Try another one.', true);
+  }
+});
+
 window.closeModal = function(id) {
   document.getElementById(id).classList.remove('active');
 }
@@ -1362,6 +1498,7 @@ async function getDashboardData(userId, userPhone, userEmail, authMeta) {
         goal: user?.goal || 'No goal set.',
         englishLevel: user?.english_level || 'Pending...',
         allocatedLessons: user?.allocated_lesson_count || 0,
+        avatarUrl: user?.avatar_url || null,
         preferences: {
           frequency: user?.lesson_frequency,
           duration: user?.lesson_duration,
@@ -1459,10 +1596,9 @@ function updateUI(data) {
   const hour = new Date().getHours();
   setText('greet-time', hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening'));
   setText('greet-name', first);
-  setText('user-display-name', name);
+  setText('account-head-name', name);
   setText('user-display-email', data.profile.email);
-  setText('avatar-initials', name.substring(0, 1).toUpperCase());
-  setText('topbar-initials', initialsOf(name));
+  renderAvatar(data.profile.avatarUrl, name);
   setText('topbar-name', name);
 
   // ---- HOME: hero ----

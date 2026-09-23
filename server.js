@@ -1482,6 +1482,30 @@ app.post("/api/me/schedule", requireAuth, async (req, res) => {
   res.json(data);
 });
 
+// Student/teacher/admin uploads their own profile photo from the account menu.
+// The browser already shrinks it to a 256px JPEG; we check it again here before storing.
+app.post("/api/me/avatar", requireAuth, async (req, res) => {
+  try {
+    const m = /^data:image\/jpeg;base64,([A-Za-z0-9+/=]+)$/.exec(String((req.body || {}).image || ""));
+    if (!m) return res.status(400).json({ error: "Please upload a JPG, PNG or WebP photo." });
+    const buf = Buffer.from(m[1], "base64");
+    if (buf.length < 100 || buf.length > 512 * 1024) return res.status(400).json({ error: "That photo is too large. Please try a smaller one." });
+    if (buf[0] !== 0xff || buf[1] !== 0xd8) return res.status(400).json({ error: "That file doesn't look like a photo." });
+
+    const path = `${req.dbUser.id}.jpg`;
+    const { error: upErr } = await supabase.storage.from("avatars").upload(path, buf, { contentType: "image/jpeg", upsert: true });
+    if (upErr) return res.status(500).json({ error: "Could not save your photo. Please try again." });
+
+    const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+    const avatarUrl = `${pub.publicUrl}?v=${Date.now()}`;
+    const { error: dbErr } = await supabase.from("users").update({ avatar_url: avatarUrl }).eq("id", req.dbUser.id);
+    if (dbErr) return res.status(500).json({ error: "Could not save your photo. Please try again." });
+    res.json({ avatar_url: avatarUrl });
+  } catch (e) {
+    res.status(500).json({ error: "Could not save your photo. Please try again." });
+  }
+});
+
 app.get("/api/teacher/students", requireTeacher, async (req, res) => {
   const { data, error } = await supabase
     .from("users")
