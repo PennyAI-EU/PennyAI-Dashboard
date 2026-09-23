@@ -953,7 +953,7 @@
     <div class="card lesson-prefs" style="margin-top: 24px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <div class="card-label" style="margin-bottom:0;">Preferences</div>
-        <button class="btn-secondary" style="padding:6px 12px; font-size:12px;" onclick="openPreferencesModal()">Edit Preferences</button>
+        <button class="btn-secondary" style="padding:6px 12px; font-size:12px;" onclick="openPreferencesModal()">Change my schedule</button>
       </div>
       <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 0;">
         <div>
@@ -967,6 +967,10 @@
         <div>
           <div class="field-label">Preferred Days</div>
           <div class="field-value" id="pref-days">—</div>
+        </div>
+        <div>
+          <div class="field-label">Lesson Time</div>
+          <div class="field-value" id="pref-time">—</div>
         </div>
       </div>
     </div>
@@ -1087,29 +1091,45 @@
   </div>
 </div>
 
-<!-- Preferences Edit Modal -->
+<!-- Preferences Edit Modal: student sets their own lesson schedule -->
 <div class="modal-overlay" id="preferencesModal">
   <div class="modal-card">
-    <div class="modal-title">Edit Preferences</div>
+    <div class="modal-title">My lesson schedule</div>
     <div class="form-group">
-      <label class="form-label">Lesson Frequency (e.g., Twice a week)</label>
-      <input type="text" id="edit-pref-frequency" class="form-input" />
+      <label class="form-label" for="edit-pref-frequency">Lessons per week</label>
+      <select id="edit-pref-frequency" class="form-input" onchange="renderDaySelects()">
+        <option value="1">1 lesson a week</option>
+        <option value="2">2 lessons a week</option>
+        <option value="3">3 lessons a week</option>
+      </select>
     </div>
     <div class="form-group">
-      <label class="form-label">Duration (minutes)</label>
+      <label class="form-label">Lesson days</label>
+      <div id="edit-pref-days" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px;"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="edit-pref-time">Lesson time (any time, day or night)</label>
+      <select id="edit-pref-time" class="form-input"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="edit-pref-timezone">Your time zone</label>
+      <select id="edit-pref-timezone" class="form-input">
+        <option value="Europe/Rome">Rome / Central Europe</option>
+        <option value="Europe/London">UK / London</option>
+        <option value="Europe/Athens">Eastern Europe (Athens, Bucharest)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="edit-pref-duration">Lesson length</label>
       <select id="edit-pref-duration" class="form-input">
-        <option value="">— Select duration —</option>
         <option value="10">10 minutes</option>
         <option value="15">15 minutes</option>
       </select>
     </div>
-    <div class="form-group">
-      <label class="form-label">Preferred Days (e.g., Monday, Wednesday)</label>
-      <input type="text" id="edit-pref-days" class="form-input" />
-    </div>
+    <div id="edit-pref-error" role="alert" style="display:none; color:#b42318; font-size:13px; margin-bottom:12px;"></div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('preferencesModal')">Cancel</button>
-      <button class="btn-primary" onclick="savePreferences()">Save</button>
+      <button class="btn-primary" id="edit-pref-save" onclick="savePreferences()">Save</button>
     </div>
   </div>
 </div>
@@ -1216,45 +1236,112 @@ window.saveProfile = async function() {
   closeModal('profileModal');
 }
 
-window.openPreferencesModal = function() {
-  if(!dashboardData) return;
-  document.getElementById('edit-pref-frequency').value = dashboardData.profile.preferences.frequency || '';
-  document.getElementById('edit-pref-duration').value = dashboardData.profile.preferences.duration || '';
-  
-  let days = dashboardData.profile.preferences.days;
-  document.getElementById('edit-pref-days').value = Array.isArray(days) ? days.join(', ') : (days || '');
-  
-  document.getElementById('preferencesModal').classList.add('active');
+const WEEK_DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+const TZ_LABELS = { 'Europe/Rome': 'Rome time', 'Europe/London': 'UK time', 'Europe/Athens': 'Eastern Europe time' };
+const capDay = d => d ? d.charAt(0).toUpperCase() + d.slice(1) : d;
+
+// Rome-time days as stored in the database ("tuesday,thursday", "Monday, Friday" or "{a,b}")
+function parseDays(raw) {
+  if (Array.isArray(raw)) return raw.map(d => String(d).trim().toLowerCase()).filter(Boolean);
+  return String(raw || '').replace(/[{}"]/g, '').split(',').map(d => d.trim().toLowerCase()).filter(Boolean);
 }
+
+// What to show: the student's own choice if they've set one, otherwise the Rome-time schedule.
+function currentSchedule(prefs) {
+  const loc = prefs.local;
+  if (loc && Array.isArray(loc.days) && loc.time) {
+    return { days: loc.days.map(d => d.toLowerCase()), time: loc.time, timezone: loc.timezone || 'Europe/Rome' };
+  }
+  const t = String(prefs.times || '').slice(0, 5);
+  return { days: parseDays(prefs.days), time: /^\d{2}:\d{2}$/.test(t) ? t : '', timezone: 'Europe/Rome' };
+}
+
+window.renderDaySelects = function(chosen) {
+  const n = Number(document.getElementById('edit-pref-frequency').value) || 1;
+  const box = document.getElementById('edit-pref-days');
+  const previous = chosen || Array.from(box.querySelectorAll('select')).map(s => s.value);
+  box.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const sel = document.createElement('select');
+    sel.className = 'form-input';
+    sel.setAttribute('aria-label', 'Lesson day ' + (i + 1));
+    WEEK_DAYS.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = capDay(d); sel.appendChild(o); });
+    // keep earlier picks; otherwise spread new days across the week
+    sel.value = previous[i] && WEEK_DAYS.includes(previous[i]) ? previous[i] : WEEK_DAYS[(i * 2) % 7];
+    box.appendChild(sel);
+  }
+};
+
+function fillTimeSelect(value) {
+  const sel = document.getElementById('edit-pref-time');
+  if (!sel.options.length) {
+    for (let h = 0; h < 24; h++) for (let m = 0; m < 60; m += 15) {
+      const v = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+      const o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o);
+    }
+  }
+  sel.value = value && sel.querySelector('option[value="' + value + '"]') ? value : '18:00';
+}
+
+window.openPreferencesModal = function() {
+  if (!dashboardData) return;
+  const prefs = dashboardData.profile.preferences;
+  const cur = currentSchedule(prefs);
+  const freq = [1, 2, 3].includes(Number(prefs.frequency)) ? Number(prefs.frequency) : Math.min(Math.max(cur.days.length, 1), 3);
+  document.getElementById('edit-pref-frequency').value = String(freq);
+  renderDaySelects(cur.days);
+  fillTimeSelect(cur.time);
+  document.getElementById('edit-pref-timezone').value = TZ_LABELS[cur.timezone] ? cur.timezone : 'Europe/Rome';
+  document.getElementById('edit-pref-duration').value = String(prefs.duration) === '10' ? '10' : '15';
+  document.getElementById('edit-pref-error').style.display = 'none';
+  document.getElementById('preferencesModal').classList.add('active');
+};
 
 window.savePreferences = async function() {
-  const freq = document.getElementById('edit-pref-frequency').value;
-  const dur = parseInt(document.getElementById('edit-pref-duration').value, 10);
-  if (![10, 15].includes(dur)) {
-    alert('Please choose a 10- or 15-minute lesson.');
-    return;
-  }
-  const daysStr = document.getElementById('edit-pref-days').value;
-  const daysArr = daysStr.split(',').map(d => d.trim()).filter(d => d);
-  
+  const errBox = document.getElementById('edit-pref-error');
+  const showErr = msg => { errBox.textContent = msg; errBox.style.display = 'block'; };
+  errBox.style.display = 'none';
+
+  const frequency = Number(document.getElementById('edit-pref-frequency').value);
+  const days = Array.from(document.querySelectorAll('#edit-pref-days select')).map(s => s.value);
+  if (new Set(days).size !== days.length) return showErr('Please choose a different day for each lesson.');
+  const payload = {
+    frequency,
+    days,
+    time: document.getElementById('edit-pref-time').value,
+    timezone: document.getElementById('edit-pref-timezone').value,
+    duration: Number(document.getElementById('edit-pref-duration').value)
+  };
+
   const { data: { session } } = await supabase.auth.getSession();
-  if(!session) return;
+  if (!session) return showErr('Your session has expired. Please sign in again.');
 
-  const { error } = await supabase.from('users').update({
-    lesson_frequency: freq,
-    lesson_duration: String(dur),
-    preferred_days: daysArr
-  }).eq('id', session.user.id);
+  const btn = document.getElementById('edit-pref-save');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    const res = await fetch('/api/me/schedule', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify(payload)
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) return showErr(out.error || 'Could not save your schedule. Please try again.');
 
-  if(error) { alert("Error saving preferences: " + error.message); return; }
-  
-  // Update local state & UI
-  dashboardData.profile.preferences.frequency = freq;
-  dashboardData.profile.preferences.duration = dur || null;
-  dashboardData.profile.preferences.days = daysArr;
-  updateUI(dashboardData);
-  closeModal('preferencesModal');
-}
+    const prefs = dashboardData.profile.preferences;
+    prefs.frequency = frequency;
+    prefs.duration = payload.duration;
+    prefs.days = (out.rome_days || []).join(',');
+    prefs.times = out.rome_time;
+    prefs.local = { days, time: payload.time, timezone: payload.timezone };
+    closeModal('preferencesModal');
+    // reload so "next lesson" and upcoming calls show the moved booking
+    window.location.reload();
+  } catch (e) {
+    showErr('Could not reach the server. Please check your connection and try again.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save';
+  }
+};
 
 async function getDashboardData(userId, userPhone, userEmail, authMeta) {
   try {
@@ -1279,7 +1366,8 @@ async function getDashboardData(userId, userPhone, userEmail, authMeta) {
           frequency: user?.lesson_frequency,
           duration: user?.lesson_duration,
           days: user?.preferred_days,
-          times: user?.preferred_times
+          times: user?.preferred_times,
+          local: user?.schedule_local || null
         }
       },
       timeTracking: {
@@ -1440,11 +1528,12 @@ function updateUI(data) {
     const startBtn = document.getElementById('btn-start-session');
     if (startBtn) startBtn.disabled = false;
   }
-  setText('pref-frequency', data.profile.preferences.frequency || 'Not set');
+  { const f = Number(data.profile.preferences.frequency);
+    setText('pref-frequency', f ? (f === 1 ? '1 lesson a week' : f + ' lessons a week') : 'Not set'); }
   setText('pref-duration', (data.profile.preferences.duration || '—') + ' mins');
-  setText('pref-days', Array.isArray(data.profile.preferences.days)
-    ? data.profile.preferences.days.join(', ')
-    : (data.profile.preferences.days || 'Not set'));
+  { const sch = currentSchedule(data.profile.preferences);
+    setText('pref-days', sch.days.length ? sch.days.map(capDay).join(', ') : 'Not set');
+    setText('pref-time', sch.time ? sch.time + ' (' + (TZ_LABELS[sch.timezone] || 'Rome time') + ')' : 'Not set'); }
 
   // Upcoming calls
   const upcomingEl = document.getElementById('upcoming-calls-list');

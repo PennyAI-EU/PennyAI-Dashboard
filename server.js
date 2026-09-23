@@ -1464,6 +1464,24 @@ async function requireTeacher(req, res, next) {
   next();
 }
 
+// Student sets their own lesson schedule from the dashboard.
+// All validation, time-zone conversion (to Rome time) and moving the next booked call
+// happen inside the database function set_student_schedule, so limits can't be bypassed.
+app.post("/api/me/schedule", requireAuth, async (req, res) => {
+  if (req.dbUser.role !== "student") return res.status(403).json({ error: "Only students can set a lesson schedule here" });
+  const { frequency, days, time, duration, timezone } = req.body || {};
+  const { data, error } = await supabase.rpc("set_student_schedule", {
+    p_user_id: req.dbUser.id,
+    p_frequency: Number(frequency),
+    p_days: Array.isArray(days) ? days : [],
+    p_time: String(time || ""),
+    p_duration: Number(duration),
+    p_timezone: String(timezone || "")
+  });
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
+});
+
 app.get("/api/teacher/students", requireTeacher, async (req, res) => {
   const { data, error } = await supabase
     .from("users")
