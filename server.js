@@ -80,6 +80,28 @@ async function getUserFromToken(token) {
   };
 }
 
+// Find the users-table row for a signed-in login.
+// 1) By login id — how every staff account and most students are linked.
+// 2) Fallback by phone, for older student accounts whose row id differs from their login id.
+//    Staff may share one phone number, so if several rows have the phone we pick the one
+//    whose email matches the login; if none matches we return nothing rather than guess.
+async function findUserRow(user, columns = "*") {
+  const cols = columns === "*" ? "*" : columns + ", email";
+  if (user?.id) {
+    const { data, error } = await supabase.from("users").select(cols).eq("id", user.id).maybeSingle();
+    if (error) return { data: null, error };
+    if (data) return { data, error: null };
+  }
+  const phone = user?.user_metadata?.phone || user?.phone;
+  if (!phone) return { data: null, error: null };
+  const { data: rows, error } = await supabase.from("users").select(cols).eq("phone", String(phone).replace(/\D/g, ""));
+  if (error) return { data: null, error };
+  if (!rows || rows.length === 0) return { data: null, error: null };
+  if (rows.length === 1) return { data: rows[0], error: null };
+  const email = String(user.email || "").toLowerCase();
+  return { data: rows.find(r => String(r.email || "").toLowerCase() === email) || null, error: null };
+}
+
 const DEFAULT_PASSWORD = 'Penny2026!';
 
 // Normalize phone to E164 (+digits). If already has +, keep it; otherwise prepend +.
@@ -857,16 +879,7 @@ app.post("/api/check-onboarding", async (req, res) => {
   }
 
   const phone = user.user_metadata?.phone || user.phone;
-  if (!phone) {
-    console.log("[check-onboarding] PENDING — no phone on user:", user.id);
-    return res.json({ status: "pending", reason: "no_phone" });
-  }
-
-  const { data, error } = await supabase
-    .from("users")
-    .select("english_level, role")
-    .eq("phone", phone)
-    .maybeSingle();
+  const { data, error } = await findUserRow(user, "english_level, role");
 
   if (error) {
     console.error("[check-onboarding] DB error for phone", phone, ":", error.message);
@@ -874,6 +887,10 @@ app.post("/api/check-onboarding", async (req, res) => {
   }
 
   if (!data) {
+    if (!phone) {
+      console.log("[check-onboarding] PENDING — no phone on user:", user.id);
+      return res.json({ status: "pending", reason: "no_phone" });
+    }
     console.log("[check-onboarding] PENDING — phone not found in users table:", phone);
     return res.json({ status: "pending", reason: "phone_not_in_users_table", phone });
   }
@@ -905,14 +922,7 @@ app.get("/api/me", async (req, res) => {
   const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
 
-  let { data, error } = await supabase.from("users").select("*").eq("id", user.id).maybeSingle();
-
-  if (!data && !error) {
-    const phone = user.user_metadata?.phone || user.phone;
-    if (phone) {
-      ({ data, error } = await supabase.from("users").select("*").eq("phone", phone).maybeSingle());
-    }
-  }
+  const { data, error } = await findUserRow(user, "*");
 
   if (error) return res.status(500).json({ error: error.message });
   if (!data) return res.status(404).json({ error: "User not found" });
@@ -1435,9 +1445,7 @@ async function requireAuth(req, res, next) {
   if (!token) return res.status(401).json({ error: "Missing token" });
   const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
-  const phone = user.user_metadata?.phone || user.phone;
-  if (!phone) return res.status(401).json({ error: "No phone on user" });
-  const { data, error } = await supabase.from("users").select("id, role, school_id, name").eq("phone", phone).maybeSingle();
+  const { data, error } = await findUserRow(user, "id, role, school_id, name");
   if (error || !data) return res.status(403).json({ error: "User not found" });
   req.dbUser = data;
   next();
@@ -1448,13 +1456,7 @@ async function requireTeacher(req, res, next) {
   if (!token) return res.status(401).json({ error: "Missing token" });
   const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
-  const phone = user.user_metadata?.phone || user.phone;
-  if (!phone) return res.status(401).json({ error: "No phone on user" });
-  const { data, error } = await supabase
-    .from("users")
-    .select("id, role, school_id, name")
-    .eq("phone", phone)
-    .maybeSingle();
+  const { data, error } = await findUserRow(user, "id, role, school_id, name");
   if (error || !data || !['teacher', 'school_admin', 'system_admin'].includes(data.role)) {
     return res.status(403).json({ error: "Forbidden: Teacher access required" });
   }
@@ -1583,14 +1585,7 @@ async function requireAdmin(req, res, next) {
   const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
 
-  const phone = user.user_metadata?.phone || user.phone;
-  if (!phone) return res.status(401).json({ error: "No phone on user" });
-
-  const { data, error } = await supabase
-    .from("users")
-    .select("role, school_id")
-    .eq("phone", phone)
-    .maybeSingle();
+  const { data, error } = await findUserRow(user, "role, school_id");
 
   if (error || !data || !['school_admin', 'system_admin'].includes(data.role)) {
     return res.status(403).json({ error: "Forbidden: Admin access required" });
@@ -1757,12 +1752,12 @@ app.post("/api/admin/teachers", requireAdmin, async (req, res) => {
   }
 
   // Create auth user first so we can use the auth UUID as the users table id
+  // Staff sign in by email and may share a phone number, so the phone is kept on the
+  // profile only (not on the login record, where Supabase requires it to be unique).
   const { data: authData, error: authError } = await supabase.auth.admin.createUser({
     email,
-    phone: "+" + canonicalPhone,
     password: DEFAULT_PASSWORD,
     email_confirm: true,
-    phone_confirm: true,
     user_metadata: { phone: canonicalPhone, name: name || '', must_change_password: true },
   });
   if (authError) return res.status(500).json({ error: "Auth account creation failed: " + authError.message });
@@ -2212,11 +2207,7 @@ async function requireSuperAdmin(req, res, next) {
   const { data: { user }, error: userError } = await getUserFromToken(token);
   if (userError || !user) return res.status(401).json({ error: "Invalid token" });
 
-  const phone = user.user_metadata?.phone || user.phone;
-  if (!phone) return res.status(401).json({ error: "No phone on user" });
-
-  const { data, error } = await supabase
-    .from("users").select("id, role, school_id, name").eq("phone", phone).maybeSingle();
+  const { data, error } = await findUserRow(user, "id, role, school_id, name");
 
   if (error || !data || data.role !== "system_admin") {
     return res.status(403).json({ error: "Forbidden: super admin access required" });
@@ -2274,7 +2265,7 @@ app.put("/api/superadmin/students/:id", requireSuperAdmin, async (req, res) => {
     if (!isValidCanonicalPhone(canonical)) {
       return res.status(400).json({ error: "Phone must be 8 to 15 digits including the country code, and cannot start with 0." });
     }
-    const { data: clash } = await supabase.from("users").select("id").eq("phone", canonical).neq("id", req.params.id).maybeSingle();
+    const { data: clash } = await supabase.from("users").select("id").eq("phone", canonical).eq("role", "student").neq("id", req.params.id).limit(1).maybeSingle();
     if (clash) return res.status(409).json({ error: "Another account already uses that phone number." });
 
     const { error: authErr } = await supabase.auth.admin.updateUserById(req.params.id, {
