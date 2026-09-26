@@ -1511,7 +1511,7 @@ app.post("/api/me/avatar", requireAuth, async (req, res) => {
 app.get("/api/teacher/students", requireTeacher, async (req, res) => {
   const { data, error } = await supabase
     .from("users")
-    .select("id, name, email, phone, english_level, allocated_lesson_count, current_lesson_id")
+    .select("id, name, last_name, full_name, email, phone, english_level, allocated_lesson_count, current_lesson_id")
     .eq("teacher_id", req.teacherDbId)
     .eq("role", "student")
     .order("name");
@@ -1624,7 +1624,7 @@ function isValidLessonDuration(value) {
 
 app.post("/api/admin/students", requireAdmin, async (req, res) => {
   const allowed = [
-    "name", "email", "phone", "english_level", "goal", "consent_given",
+    "name", "last_name", "email", "phone", "english_level", "goal", "consent_given",
     "preferred_times", "lesson_frequency", "lesson_duration", "preferred_days",
     "current_lesson_id", "approved_for_outbound", "conversation_lesson",
     "allocated_time_this_month", "total_time_used", "used_time_this_month",
@@ -1702,7 +1702,7 @@ app.put("/api/admin/students/:id/allocation", requireAdmin, async (req, res) => 
 app.put("/api/admin/students/:id", requireAdmin, async (req, res) => {
   const { id } = req.params;
   const allowed = [
-    "name", "email", "phone", "english_level", "goal", "consent_given",
+    "name", "last_name", "email", "phone", "english_level", "goal", "consent_given",
     "preferred_times", "lesson_frequency", "lesson_duration", "preferred_days",
     "current_lesson_id", "approved_for_outbound", "conversation_lesson",
     "allocated_time_this_month", "total_time_used", "used_time_this_month",
@@ -1986,27 +1986,27 @@ app.get("/api/messages/contacts", requireAuth, async (req, res) => {
   if (role === "student") {
     const { data: me } = await supabase.from("users").select("teacher_id, school_id").eq("id", userId).maybeSingle();
     if (me?.teacher_id) {
-      const { data: teacher } = await supabase.from("users").select("id, name, role, email").eq("id", me.teacher_id).maybeSingle();
+      const { data: teacher } = await supabase.from("users").select("id, name, full_name, role, email").eq("id", me.teacher_id).maybeSingle();
       if (teacher) contacts.push(teacher);
     }
     if (me?.school_id) {
-      const { data: admins } = await supabase.from("users").select("id, name, role, email")
+      const { data: admins } = await supabase.from("users").select("id, name, full_name, role, email")
         .eq("school_id", me.school_id).in("role", ["school_admin", "system_admin"]);
       contacts.push(...(admins || []));
     }
   } else if (role === "teacher") {
-    const { data: students } = await supabase.from("users").select("id, name, role, email")
+    const { data: students } = await supabase.from("users").select("id, name, full_name, role, email")
       .eq("teacher_id", userId).eq("role", "student");
     contacts.push(...(students || []));
     if (school_id) {
-      const { data: admins } = await supabase.from("users").select("id, name, role, email")
+      const { data: admins } = await supabase.from("users").select("id, name, full_name, role, email")
         .eq("school_id", school_id).in("role", ["school_admin", "system_admin"]);
       contacts.push(...(admins || []));
     }
   } else {
     const scId = school_id || req.adminSchoolId;
     if (scId) {
-      const { data: members } = await supabase.from("users").select("id, name, role, email")
+      const { data: members } = await supabase.from("users").select("id, name, full_name, role, email")
         .eq("school_id", scId).in("role", ["student", "teacher"]);
       contacts.push(...(members || []));
     }
@@ -2218,7 +2218,7 @@ async function requireSuperAdmin(req, res, next) {
 
 // Fields the console is allowed to write. Anything else in the body is ignored.
 const SA_EDITABLE = [
-  "name", "email", "english_level", "current_lesson_id", "goal",
+  "name", "last_name", "email", "english_level", "current_lesson_id", "goal",
   "preferred_days", "preferred_times", "lesson_frequency", "lesson_duration",
   "conversation_lesson", "approved_for_outbound", "consent_given",
   "teacher_id", "school_id",
@@ -2228,7 +2228,7 @@ const SA_EDITABLE = [
 app.get("/api/superadmin/students", requireSuperAdmin, async (req, res) => {
   const { data: users, error } = await supabase
     .from("users")
-    .select("id, name, email, phone, role, english_level, current_lesson_id, goal, preferred_days, preferred_times, lesson_frequency, lesson_duration, conversation_lesson, approved_for_outbound, consent_given, avg_self_rating, teacher_id, school_id, allocated_time_this_month, used_time_this_month, total_time_used, created_at")
+    .select("id, name, last_name, full_name, email, phone, role, english_level, current_lesson_id, goal, preferred_days, preferred_times, lesson_frequency, lesson_duration, conversation_lesson, approved_for_outbound, consent_given, avg_self_rating, teacher_id, school_id, allocated_time_this_month, used_time_this_month, total_time_used, created_at")
     .eq("role", "student")
     .order("created_at", { ascending: false });
 

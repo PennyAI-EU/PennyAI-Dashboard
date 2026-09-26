@@ -757,8 +757,12 @@
     <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:12px;">Personal Info</div>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px 16px; margin-bottom:16px;">
       <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">Name</label>
+        <label class="form-label">First name (what Penny calls them)</label>
         <input type="text" id="edit-name" class="form-input" />
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Surname</label>
+        <input type="text" id="edit-last-name" class="form-input" />
       </div>
       <div class="form-group" style="margin-bottom:0">
         <label class="form-label">Email</label>
@@ -1220,14 +1224,14 @@
     
     tbody.innerHTML = studentsData.map(s => `
       <tr style="cursor:pointer;" onclick="toggleStudentDetails('${s.id}')">
-        <td style="font-weight:500">${s.name || '—'}</td>
+        <td style="font-weight:500">${s.full_name || s.name || '—'}</td>
         <td>${s.phone || '—'}<br><small style="color:var(--muted)">${s.email || '—'}</small></td>
         <td>${s.english_level || 'Pending'}</td>
         <td>${s.teacher?.name || '—'}</td>
         <td><strong>${s.allocated_lesson_count || 0}</strong></td>
         <td>
           <button class="btn-secondary" onclick="event.stopPropagation(); openEditStudent('${s.id}')">Edit</button>
-          <button class="btn-secondary" style="color:#e53e3e;border-color:#e53e3e" onclick="event.stopPropagation(); deleteStudent('${s.id}', '${(s.name||'').replace(/'/g,"\\'")}')">Delete</button>
+          <button class="btn-secondary" style="color:#e53e3e;border-color:#e53e3e" onclick="event.stopPropagation(); deleteStudent('${s.id}', '${(s.full_name||s.name||'').replace(/'/g,"\\'")}')">Delete</button>
         </td>
       </tr>
       <tr id="details-${s.id}" style="display:none; background: var(--off);">
@@ -1359,6 +1363,7 @@
     document.getElementById('edit-student-save-btn').textContent = 'Add Student';
     document.getElementById('edit-student-id').value = '';
     document.getElementById('edit-name').value = '';
+    document.getElementById('edit-last-name').value = '';
     document.getElementById('edit-email').value = '';
     document.getElementById('edit-phone').value = '';
     document.getElementById('edit-consent').value = 'false';
@@ -1403,6 +1408,7 @@
     if (!s) return;
     document.getElementById('edit-student-id').value = s.id;
     document.getElementById('edit-name').value = s.name || '';
+    document.getElementById('edit-last-name').value = s.last_name || '';
     document.getElementById('edit-email').value = s.email || '';
     document.getElementById('edit-phone').value = s.phone || '';
     document.getElementById('edit-consent').value = s.consent_given ? 'true' : 'false';
@@ -1499,6 +1505,7 @@
     const days = Array.from(document.querySelectorAll('#edit-preferred-days input:checked')).map(cb => cb.value).join(',');
     const payload = {
       name:                      document.getElementById('edit-name').value || null,
+      last_name:                 document.getElementById('edit-last-name').value.trim() || null,
       email:                     document.getElementById('edit-email').value || null,
       phone,
       consent_given:             document.getElementById('edit-consent').value === 'true',
@@ -2198,7 +2205,7 @@ async function loadMsgConvList() {
       if (at && bt) return new Date(bt) - new Date(at);
       if (at) return -1;
       if (bt) return 1;
-      return (a.name || '').localeCompare(b.name || '');
+      return (a.full_name || a.name || '').localeCompare(b.full_name || b.name || '');
     });
   }
 
@@ -2215,11 +2222,11 @@ async function loadMsgConvList() {
         const unread = conv?.unread_count || 0;
         const time = lastMsg ? new Date(lastMsg.created_at).toLocaleDateString([], { month:'short', day:'numeric' }) : '';
         const preview = lastMsg ? lastMsg.content.slice(0,60) + (lastMsg.content.length > 60 ? '…' : '') : 'No messages yet';
-        const initials = (contact.name || '?').charAt(0).toUpperCase();
-        return `<div style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;" onclick="openMsgThread('${contact.id}','${escHtml(contact.name||'')}','${escHtml(contact.role === 'teacher' ? 'Teacher' : 'Student')}')" onmouseover="this.style.background='var(--off)'" onmouseout="this.style.background=''">
+        const initials = (contact.full_name || contact.name || '?').charAt(0).toUpperCase();
+        return `<div style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;" onclick="openMsgThread('${contact.id}','${escHtml(contact.full_name||contact.name||'')}','${escHtml(contact.role === 'teacher' ? 'Teacher' : 'Student')}')" onmouseover="this.style.background='var(--off)'" onmouseout="this.style.background=''">
           <div style="width:40px;height:40px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;">${initials}</div>
           <div style="flex:1;min-width:0;">
-            <div style="font-size:14px;font-weight:600;margin-bottom:2px;">${escHtml(contact.name||'Unknown')}</div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:2px;">${escHtml(contact.full_name||contact.name||'Unknown')}</div>
             <div style="font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(preview)}</div>
           </div>
           <div style="flex-shrink:0;text-align:right;">

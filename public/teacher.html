@@ -548,7 +548,7 @@ function renderStudents() {
   }
   tbody.innerHTML = studentsData.map(s => `
     <tr class="clickable" onclick="openStudent('${s.id}')">
-      <td style="font-weight:600;">${s.name || '—'}</td>
+      <td style="font-weight:600;">${s.full_name || s.name || '—'}</td>
       <td>${s.phone || '—'}<br><small style="color:var(--muted)">${s.email || '—'}</small></td>
       <td>${s.english_level ? `<span class="badge badge-blue">${s.english_level}</span>` : '<span class="badge badge-grey">Pending</span>'}</td>
       <td><strong>${s.allocated_lesson_count || 0}</strong></td>
@@ -562,9 +562,9 @@ window.openStudent = async function(id) {
   if (!s) return;
 
   // Populate header
-  const initials = (s.name || '?').charAt(0).toUpperCase();
+  const initials = (s.full_name || s.name || '?').charAt(0).toUpperCase();
   document.getElementById('detail-avatar').textContent = initials;
-  document.getElementById('detail-name').textContent = s.name || '—';
+  document.getElementById('detail-name').textContent = s.full_name || s.name || '—';
   document.getElementById('detail-level').textContent = s.english_level ? `Level ${s.english_level}` : 'Level pending';
   document.getElementById('detail-email').textContent = s.email || '';
   document.getElementById('detail-phone').textContent = s.phone || '';
@@ -823,7 +823,7 @@ async function loadMsgConvList() {
       if (at && bt) return new Date(bt) - new Date(at);
       if (at) return -1;
       if (bt) return 1;
-      return (a.name || '').localeCompare(b.name || '');
+      return (a.full_name || a.name || '').localeCompare(b.full_name || b.name || '');
     });
   }
 
@@ -838,12 +838,12 @@ async function loadMsgConvList() {
     const unread = conv?.unread_count || 0;
     const time = lastMsg ? new Date(lastMsg.created_at).toLocaleDateString([], { month:'short', day:'numeric' }) : '';
     const preview = lastMsg ? lastMsg.content.slice(0,60) + (lastMsg.content.length > 60 ? '…' : '') : 'No messages yet';
-    const initials = (contact.name || '?').charAt(0).toUpperCase();
+    const initials = (contact.full_name || contact.name || '?').charAt(0).toUpperCase();
     const roleLabel = contact.role === 'teacher' ? 'Teacher' : (contact.role === 'school_admin' || contact.role === 'system_admin') ? 'School Admin' : 'Student';
-    return `<div class="list-item" style="cursor:pointer;display:flex;align-items:center;gap:14px;" onclick="openMsgThread('${contact.id}','${escHtml(contact.name||'')}','${escHtml(roleLabel)}')">
+    return `<div class="list-item" style="cursor:pointer;display:flex;align-items:center;gap:14px;" onclick="openMsgThread('${contact.id}','${escHtml(contact.full_name||contact.name||'')}','${escHtml(roleLabel)}')">
       <div style="width:40px;height:40px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;">${initials}</div>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:14px;font-weight:600;margin-bottom:1px;">${escHtml(contact.name||'Unknown')}</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:1px;">${escHtml(contact.full_name||contact.name||'Unknown')}</div>
         <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:3px;">${escHtml(roleLabel)}</div>
         <div style="font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(preview)}</div>
       </div>

@@ -253,10 +253,13 @@
     <div class="pane active" id="pane-profile">
       <div class="section-title">Identity</div>
       <div class="grid2">
-        <div class="field"><label>Full name</label><input id="f-name"/></div>
-        <div class="field"><label>Phone (digits only)</label><input id="f-phone"/></div>
+        <div class="field"><label>First name (what Penny calls them)</label><input id="f-name"/></div>
+        <div class="field"><label>Surname</label><input id="f-last-name"/></div>
       </div>
-      <div class="field"><label>Email</label><input id="f-email"/></div>
+      <div class="grid2">
+        <div class="field"><label>Phone (digits only)</label><input id="f-phone"/></div>
+        <div class="field"><label>Email</label><input id="f-email"/></div>
+      </div>
       <div class="grid2">
         <div class="field"><label>Teacher</label>
           <select id="f-teacher"></select></div>
@@ -501,7 +504,7 @@ function showBlocked(){
 async function loadStudents(){
   const rows = await api('/api/superadmin/students');
   students = rows.map(r=>({
-    id:r.id, name:r.name||'(no name)', email:r.email||'', phone:r.phone||'',
+    id:r.id, name:r.name||'(no name)', last_name:r.last_name||'', full_name:r.full_name||r.name||'(no name)', email:r.email||'', phone:r.phone||'',
     level:r.english_level||'', lesson:r.current_lesson_id, goal:r.goal||'',
     days:(r.preferred_days||'').split(',').map(s=>s.trim()).filter(Boolean).map(d=>FULL_DAY[d.toLowerCase()]||d).filter(Boolean),
     time:(r.preferred_times||'').trim(), freq:String(r.lesson_frequency||1),
@@ -541,7 +544,7 @@ const warnings = s=>health(s).filter(h=>!h.ok&&h.warn).length;
 window.setFilter = f=>{ filter=f; document.querySelectorAll('.filter').forEach(b=>b.classList.toggle('active',b.dataset.f===f)); render(); };
 window.render = function(){
   const q=(document.getElementById('q').value||'').toLowerCase();
-  let list=students.filter(s=>!q||(s.name+s.phone+s.email).toLowerCase().includes(q));
+  let list=students.filter(s=>!q||(s.full_name+s.phone+s.email).toLowerCase().includes(q));
   if(filter==='attention') list=list.filter(s=>blockers(s)>0);
   if(filter==='ready')     list=list.filter(s=>blockers(s)===0);
   if(filter==='nocall')    list=list.filter(s=>!s.next);
@@ -565,7 +568,7 @@ window.render = function(){
                  :(w?`<span class="badge warn">${w} warning${w>1?'s':''}</span>`
                     :'<span class="badge ok">Ready</span>');
     return `<tr class="row">
-      <td><div class="name-cell">${esc(s.name)}</div><div class="sub-cell">+${s.phone}</div></td>
+      <td><div class="name-cell">${esc(s.full_name)}</div><div class="sub-cell">+${s.phone}</div></td>
       <td>${s.level?`<span class="badge info">${s.level}</span>`:'<span class="badge bad">not set</span>'}</td>
       <td>${s.lesson?('#'+s.lesson):'<span class="sub-cell">—</span>'}</td>
       <td>${s.used}/${s.alloc} min<div class="meter"><i class="${cls}" style="width:${pct}%"></i></div></td>
@@ -592,9 +595,10 @@ function localInput(iso){
 /* ---------------- drawer ---------------- */
 window.openStudent = async function(id){
   currentId=id; const s=students.find(x=>x.id===id);
-  document.getElementById('d-name').textContent=s.name;
+  document.getElementById('d-name').textContent=s.full_name;
   document.getElementById('d-sub').textContent=`+${s.phone} · ${s.email}`;
   document.getElementById('f-name').value=s.name;
+  document.getElementById('f-last-name').value=s.last_name;
   document.getElementById('f-phone').value=s.phone;
   document.getElementById('f-email').value=s.email;
   document.getElementById('f-level').value=s.level||'';
@@ -859,6 +863,7 @@ window.saveStudent=async function(){
   const days=[...document.querySelectorAll('#f-days .day.on')].map(b=>DAY_FULL[b.textContent]);
   const body={
     name:document.getElementById('f-name').value.trim(),
+    last_name:document.getElementById('f-last-name').value.trim(),
     email:document.getElementById('f-email').value.trim(),
     phone,
     english_level:document.getElementById('f-level').value||null,
@@ -901,7 +906,7 @@ window.addStudent=async function(){
 };
 window.confirmDelete=function(){
   const s=students.find(x=>x.id===currentId);
-  askConfirm('Delete '+s.name+'?','The profile and the login account are removed, and any upcoming calls are cancelled. This cannot be undone.',async()=>{
+  askConfirm('Delete '+s.full_name+'?','The profile and the login account are removed, and any upcoming calls are cancelled. This cannot be undone.',async()=>{
     try{ await api(`/api/superadmin/students/${currentId}`,{method:'DELETE'});
       closeModal('mConfirm'); closeDrawer(); await loadStudents(); toast('Student deleted');
     }catch(e){ toast(e.message,'bad'); }
