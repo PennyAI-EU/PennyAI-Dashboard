@@ -2254,6 +2254,47 @@ app.get("/api/superadmin/students", requireSuperAdmin, async (req, res) => {
   res.json((users || []).map(u => ({ ...u, next_call: nextByPhone[u.phone] || null })));
 });
 
+// ---- schools: list with head-counts, create, rename -------------------------
+app.get("/api/superadmin/schools", requireSuperAdmin, async (req, res) => {
+  const { data: schools, error } = await supabase.from("schools").select("id, name, created_at").order("id");
+  if (error) return res.status(500).json({ error: error.message });
+  const { data: people, error: pErr } = await supabase.from("users").select("school_id, role").not("school_id", "is", null);
+  if (pErr) return res.status(500).json({ error: pErr.message });
+  const counts = {};
+  (people || []).forEach(p => {
+    const c = counts[p.school_id] || (counts[p.school_id] = { students: 0, teachers: 0, admins: 0 });
+    if (p.role === "student") c.students++;
+    else if (p.role === "teacher") c.teachers++;
+    else c.admins++;
+  });
+  res.json((schools || []).map(sc => ({ ...sc, ...(counts[sc.id] || { students: 0, teachers: 0, admins: 0 }) })));
+});
+
+function cleanSchoolName(v) {
+  const name = String(v || "").replace(/\s+/g, " ").trim();
+  return name.length >= 2 && name.length <= 80 ? name : null;
+}
+
+app.post("/api/superadmin/schools", requireSuperAdmin, async (req, res) => {
+  const name = cleanSchoolName(req.body?.name);
+  if (!name) return res.status(400).json({ error: "Please enter a school name (2 to 80 characters)." });
+  const { data: clash } = await supabase.from("schools").select("id").ilike("name", name).limit(1).maybeSingle();
+  if (clash) return res.status(409).json({ error: "A school with that name already exists." });
+  const { data, error } = await supabase.from("schools").insert({ name }).select("id, name, created_at").single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ ...data, students: 0, teachers: 0, admins: 0 });
+});
+
+app.put("/api/superadmin/schools/:id", requireSuperAdmin, async (req, res) => {
+  const name = cleanSchoolName(req.body?.name);
+  if (!name) return res.status(400).json({ error: "Please enter a school name (2 to 80 characters)." });
+  const { data: clash } = await supabase.from("schools").select("id").ilike("name", name).neq("id", req.params.id).limit(1).maybeSingle();
+  if (clash) return res.status(409).json({ error: "A school with that name already exists." });
+  const { data, error } = await supabase.from("schools").update({ name }).eq("id", req.params.id).select("id, name, created_at").single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
 // ---- update a student's profile --------------------------------------------
 app.put("/api/superadmin/students/:id", requireSuperAdmin, async (req, res) => {
   const patch = {};
