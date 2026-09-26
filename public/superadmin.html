@@ -181,6 +181,7 @@
     .grid2{grid-template-columns:1fr}
   }
 </style>
+<script src="/account-menu.js"></script>
 </head>
 <body>
 
@@ -192,7 +193,7 @@
   
   
   
-  <div class="sidebar-foot"><span id="who">—</span><br/><a href="/admin.html" style="color:var(--accent);text-decoration:none">← Back to admin panel</a></div>
+  <div class="sidebar-foot"><a href="/admin.html" style="color:var(--accent);text-decoration:none">← Back to admin panel</a></div>
 </aside>
 
 <main>
@@ -201,7 +202,10 @@
       <h1>Students</h1>
       <p class="sub">Manage profiles, scheduled calls and lesson minutes.</p>
     </div>
-    <button class="btn btn-primary" onclick="openAdd()">+ Add student</button>
+    <div style="display:flex;align-items:center;gap:14px">
+      <button class="btn btn-primary" onclick="openAdd()">+ Add student</button>
+      <div id="account-slot"></div>
+    </div>
   </div>
 
   <div class="proto-note" id="live-note" style="display:none"></div>
@@ -468,7 +472,11 @@ async function boot(){
   if(!session){ location.href='/signin.html'; return; }
 
   const me = await fetch('/api/me',{headers:{Authorization:'Bearer '+session.access_token}}).then(r=>r.json()).catch(()=>({}));
-  document.getElementById('who').textContent = me?.name ? me.name+' · super admin' : 'super admin';
+  window.PennyAccountMenu.mount({
+    mount: document.getElementById('account-slot'), supabase,
+    me: me && me.id ? me : { id: session.user.id, name: 'Super admin', role: 'system_admin' },
+    email: session.user.email, theme: 'light'
+  });
 
   await Promise.all([loadStudents(), loadTeachers(), loadSchools()]);
 }

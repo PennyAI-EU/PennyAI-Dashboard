@@ -301,6 +301,7 @@
     .topbar-greet h1 { font-size: 20px; }
   }
 </style>
+<script src="/account-menu.js"></script>
 </head>
 <body>
 
@@ -320,19 +321,6 @@
       <span id="nav-msg-badge" style="display:none; background:#ef4444; color:white; border-radius:50%; width:16px; height:16px; font-size:10px; font-weight:700; align-items:center; justify-content:center; margin-left:auto; flex-shrink:0;"></span>
     </div>
   </nav>
-  <div class="nav-footer">
-    <div class="user-brief">
-      <div class="user-avatar" id="teacher-avatar">T</div>
-      <div class="user-info">
-        <div class="user-name" id="teacher-name">Teacher</div>
-        <div class="user-role">Teacher</div>
-      </div>
-    </div>
-    <button class="btn-signout" id="signout-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-      <span>Sign out</span>
-    </button>
-  </div>
 </aside>
 
 <main class="main-content">
@@ -347,13 +335,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span class="icon-badge" id="topbar-bell-badge" style="display:none;">0</span>
     </button>
-    <div class="topbar-profile">
-      <div class="topbar-avatar" id="topbar-initials">T</div>
-      <div class="topbar-meta">
-        <strong id="topbar-name">Teacher</strong>
-        <span>Teacher</span>
-      </div>
-    </div>
+    <div id="account-slot"></div>
   </header>
 
   <!-- STUDENTS LIST SECTION -->
@@ -486,8 +468,6 @@ async function init() {
   if (status !== 'teacher') { window.location.href = '/signin.html'; return; }
 
   const name = session.user.user_metadata?.name || 'Teacher';
-  document.getElementById('teacher-name').textContent = name;
-  document.getElementById('teacher-avatar').textContent = name.charAt(0).toUpperCase();
 
   /* Top bar: greeting varies by time of day; initials from first + last name. */
   (function () {
@@ -502,15 +482,16 @@ async function init() {
       : 'T');
   })();
 
-  document.getElementById('signout-btn').addEventListener('click', async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/signin.html';
-  });
 
   await loadStudents(session.access_token);
 
   const meData = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + session.access_token } }).then(r => r.json()).catch(() => null);
   dbUserId = meData?.id || session.user.id;
+  window.PennyAccountMenu.mount({
+    mount: document.getElementById('account-slot'), supabase,
+    me: meData || { id: session.user.id, name, role: 'teacher' },
+    email: session.user.email, theme: 'dark'
+  });
 
   const { unread } = await fetch('/api/messages/unread', { headers: { 'Authorization': 'Bearer ' + session.access_token } }).then(r => r.json()).catch(() => ({ unread: 0 }));
   updateMsgBadge(unread);

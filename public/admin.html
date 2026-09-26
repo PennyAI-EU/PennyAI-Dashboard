@@ -418,6 +418,7 @@
     .topbar-greet h1 { font-size: 20px; }
   }
 </style>
+<script src="/account-menu.js"></script>
 </head>
 <body>
 
@@ -453,19 +454,6 @@
     </div>
   </nav>
 
-  <div class="nav-footer">
-    <div class="user-brief">
-      <div class="user-avatar" id="admin-avatar">A</div>
-      <div class="user-info">
-        <div class="user-name" id="admin-name">Administrator</div>
-        <div class="user-email" id="admin-email">admin@pennyai.com</div>
-      </div>
-    </div>
-    <button class="btn-signout" id="signout-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-      <span>Sign out</span>
-    </button>
-  </div>
 </aside>
 
 <main class="main-content">
@@ -480,13 +468,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span class="icon-badge" id="topbar-bell-badge" style="display:none;">0</span>
     </button>
-    <div class="topbar-profile">
-      <div class="topbar-avatar" id="topbar-initials">A</div>
-      <div class="topbar-meta">
-        <strong id="topbar-name">Administrator</strong>
-        <span id="topbar-role">Admin</span>
-      </div>
-    </div>
+    <div id="account-slot"></div>
   </header>
   <!-- STUDENTS SECTION -->
   <section id="section-students" class="section active">
@@ -1161,9 +1143,13 @@
 
     const adminName = session.user.user_metadata?.name || 'Administrator';
     const adminEmail = session.user.email;
-    document.getElementById('admin-name').textContent = adminName;
-    document.getElementById('admin-email').textContent = adminEmail;
-    document.getElementById('admin-avatar').textContent = adminName.charAt(0).toUpperCase();
+    const me = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + session.access_token } }).then(r => r.json()).catch(() => null);
+    dbUserId = me?.id || session.user.id;
+    window.PennyAccountMenu.mount({
+      mount: document.getElementById('account-slot'), supabase,
+      me: me || { id: session.user.id, name: adminName },
+      email: adminEmail, theme: 'dark'
+    });
 
     /* Top bar: greeting by time of day, and role label so a superadmin can tell
        at a glance which account they are signed in as. */
@@ -1177,9 +1163,7 @@
       setT('topbar-initials', parts.length
         ? (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase()
         : 'A');
-      var role = session.user.user_metadata?.role || '';
-      var isSuper = role === 'system_admin';
-      setT('topbar-role', isSuper ? 'Super Admin' : 'School Admin');
+      var isSuper = me?.role === 'system_admin';
       setT('greet-sub', isSuper
         ? 'Full platform access — students, teachers, campaigns and lessons.'
         : 'Manage your students, teachers and lessons.');
@@ -1188,7 +1172,6 @@
     await Promise.all([loadStudents(session.access_token), loadTeachers(session.access_token)]);
     loadCampaigns(session.access_token);
     loadLessons(session.access_token);
-    fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + session.access_token } }).then(r => r.json()).then(d => { dbUserId = d.id || session.user.id; }).catch(() => { dbUserId = session.user.id; });
     fetch('/api/messages/unread', { headers: { 'Authorization': 'Bearer ' + session.access_token } }).then(r => r.json()).then(d => updateMsgBadge(d.unread || 0)).catch(() => {});
 
     const savedSection = location.hash.replace('#', '');
@@ -1196,10 +1179,6 @@
       showSection(savedSection);
     }
 
-    document.getElementById('signout-btn').addEventListener('click', async () => {
-      await supabase.auth.signOut();
-      window.location.href = '/signin.html';
-    });
   }
 
   async function apiGet(path, token) {
