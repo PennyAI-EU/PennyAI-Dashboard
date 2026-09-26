@@ -504,6 +504,7 @@ async function boot(){
   });
 
   await Promise.all([loadStudents(), loadTeachers(), loadSchools()]);
+  if (location.hash === '#schools') showView('schools');
 }
 
 async function token(){
