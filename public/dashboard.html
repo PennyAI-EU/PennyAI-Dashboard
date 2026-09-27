@@ -854,11 +854,11 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       <span>My Lessons</span>
     </div>
-    <div class="nav-item is-soon" id="nav-selfstudy" title="Coming soon">
+    <div class="nav-item is-soon" id="nav-selfstudy" title="Coming soon" style="display:none">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.25 4 3v15l8 3 8-3V3z"/><path d="M12 6.25V21"/></svg>
       <span>Self-Study</span>
     </div>
-    <div class="nav-item is-soon" id="nav-practice" title="Coming soon">
+    <div class="nav-item is-soon" id="nav-practice" title="Coming soon" style="display:none">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/><path d="M19 11a7 7 0 0 1-14 0"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
       <span>Practice with Penny</span>
     </div>
@@ -912,16 +912,14 @@
         <h3>My Lessons</h3>
         <p id="act-lessons-sub">Your next live lesson is ready.</p>
       </button>
-      <div class="activity-card card-mint is-soon">
-        <h3>Self-Study</h3>
-        <p>Unlimited practice at your pace.</p>
-        <span class="soon-tag">COMING SOON</span>
-      </div>
-      <div class="activity-card card-peach is-soon">
-        <h3>Practice with Penny</h3>
-        <p>Start an informal speaking call.</p>
-        <span class="soon-tag">COMING SOON</span>
-      </div>
+      <a class="activity-card card-mint" href="tel:+3909651960070" style="text-decoration:none; color:inherit;">
+        <h3>Call Penny now</h3>
+        <p>Missed your call or want your lesson early? Ring +39 0965 1960070.</p>
+      </a>
+      <button class="activity-card card-peach" onclick="showSection('history')">
+        <h3>My progress</h3>
+        <p>Scores, recordings and Penny's feedback from every lesson.</p>
+      </button>
     </div>
 
     <div class="home-bottom">
@@ -952,11 +950,15 @@
       <h2 id="lesson-title" style="font-size: 24px; margin-bottom: 8px;">—</h2>
       <p id="lesson-instruction" style="display:none;"></p>
       
-      <div style="display: flex; gap: 12px;">
-        <button class="btn-primary" id="btn-start-session" disabled onclick="startLiveSession()">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M8 5v14l11-7z"></path></svg>
-          Start Live Session
-        </button>
+      <p style="margin: 4px 0 16px; color: #fff; opacity: .95; line-height: 1.5; font-size: 15px;">
+        Penny will phone you at your lesson time. Can't wait, or missed the call?
+        Call Penny yourself and she'll start this lesson.
+      </p>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <a class="btn-primary" id="btn-call-penny" href="tel:+3909651960070" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Call Penny: +39 0965 1960070
+        </a>
       </div>
     </div>
 
@@ -1507,10 +1509,16 @@ function updateUI(data) {
 
   // ---- HOME: weekly goal (target = lessons per week from preferences) ----
   const target = Number(data.profile.preferences.frequency) || 0;
-  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  // Same rule as the phone system: the week runs Monday to Sunday (Rome time) and a
+  // lesson counts once it is passed or at least 60% complete.
+  const romeDay = d => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(d);
+  const todayRome = new Date(romeDay(new Date()) + 'T12:00:00Z');
+  const mondayRome = new Date(todayRome.getTime() - ((todayRome.getUTCDay() + 6) % 7) * 86400000);
+  const weekStart = mondayRome.toISOString().slice(0, 10);
   const thisWeek = (data.history || []).filter(h => {
-    const t = new Date(h.attempt_time).getTime();
-    return !isNaN(t) && t >= weekAgo;
+    const t = new Date(h.attempt_time);
+    if (isNaN(t.getTime()) || romeDay(t) < weekStart) return false;
+    return h.pass_status === 'passed' || Number(h.completion_percentage) >= 60;
   }).length;
   if (target > 0) {
     setText('goal-count', thisWeek + ' of ' + target + ' lesson' + (target === 1 ? '' : 's'));

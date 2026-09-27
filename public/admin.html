@@ -416,6 +416,14 @@
     .brand-name { display: none; }
     .topbar-meta { display: none; }
     .topbar-greet h1 { font-size: 20px; }
+    /* Phones: shrink the sidebar to an icon rail, like the student dashboard */
+    body .sidebar { width: 64px !important; padding: 18px 8px !important; overflow-y: auto; }
+    .brand { justify-content: center; padding: 4px 0 18px; }
+    .nav-item span, body .nav-section-label { display: none !important; }
+    .nav-item { justify-content: center; padding: 12px !important; }
+    .main-content { margin-left: 64px !important; min-width: 0; }
+    body .main-content { padding: 0 12px 40px !important; }
+    .topbar { margin-left: -12px !important; margin-right: -12px !important; }
   }
 </style>
 <script src="/account-menu.js"></script>

@@ -932,16 +932,21 @@ app.get("/api/me", async (req, res) => {
 
 // Public demo endpoint — no auth required, used by the landing page free session
 app.post("/create-demo-call", async (req, res) => {
-  const { level, lesson_number, instruction } = req.body;
+  // Retired: the landing page now uses the verified trial flow (/api/trial/*) and the
+  // one-minute hello demo. Left open, this route gave anyone unlimited free web calls.
+  return res.status(410).json({ error: "This demo is no longer available. Please use \"Try a Free Session\" instead." });
+  // The lesson text is always looked up here on the server. Any "instruction"
+  // sent from the browser is ignored so nobody can make Penny say arbitrary text.
+  const { level, lesson_number } = req.body || {};
 
   if (!level || lesson_number === undefined) {
     return res.status(400).json({ error: "level and lesson_number are required" });
   }
 
-  let finalInstruction = instruction;
+  let finalInstruction = null;
   let lessonName = null;
 
-  if (!finalInstruction) {
+  {
     const { data, error } = await supabase
       .from("lessons")
       .select("lesson_instruction, title")
@@ -971,11 +976,14 @@ app.post("/create-demo-call", async (req, res) => {
     });
   } catch (err) {
     console.error("Retell demo error:", err);
-    res.status(500).json({ error: err.message || "Failed to create demo call" });
+    res.status(500).json({ error: "Could not start the session. Please try again." });
   }
 });
 
 app.post("/create-call", async (req, res) => {
+  // Browser lessons are switched off: they were never scored, did not count towards
+  // the weekly goal and skipped the one-attempt rule. Lessons happen by phone.
+  return res.status(410).json({ error: "Lessons now happen by phone: Penny calls you at your lesson time, or you can call Penny on +39 0965 1960070." });
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
 
@@ -985,16 +993,18 @@ app.post("/create-call", async (req, res) => {
   const phone = user.user_metadata?.phone;
   if (!phone) return res.status(400).json({ error: "User phone number not found" });
 
-  const { level, lesson_number, instruction } = req.body;
+  // The lesson text is always looked up here on the server. Any "instruction"
+  // sent from the browser is ignored so nobody can make Penny say arbitrary text.
+  const { level, lesson_number } = req.body || {};
 
   if (!level || lesson_number === undefined) {
     return res.status(400).json({ error: "level and lesson_number are required" });
   }
 
-  let finalInstruction = instruction;
+  let finalInstruction = null;
   let lessonName = null;
 
-  if (!finalInstruction) {
+  {
     const { data, error } = await supabase
       .from("lessons")
       .select("lesson_instruction, title")
@@ -1028,7 +1038,7 @@ app.post("/create-call", async (req, res) => {
     });
   } catch (err) {
     console.error("Retell error:", err);
-    res.status(500).json({ error: err.message || "Failed to create call" });
+    res.status(500).json({ error: "Could not start the lesson. Please try again." });
   }
 });
 
@@ -1040,8 +1050,7 @@ app.post("/create-call", async (req, res) => {
 //
 // Security note: the client only ever sends a `topic` slug, which is validated
 // against TOPIC_PROMPTS below. The actual call instruction is always looked up
-// server-side — unlike /create-demo-call, this endpoint never accepts raw
-// client-supplied instruction text.
+// server-side; no call route accepts client-supplied instruction text.
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const TRIAL_CODE_TTL_MS = 15 * 60 * 1000; // 15 minutes, matches the email copy
@@ -1126,13 +1135,8 @@ app.post("/api/trial/send-code", async (req, res) => {
     await sendTrialCodeEmail(cleanEmail, code);
     res.json({ success: true });
   } catch (err) {
-    const detail = err.message || String(err);
-    console.error("[trial/send-code] error:", detail);
-    // `detail` surfaces the upstream provider's own rejection message (e.g.
-    // Resend's validation_error text) so a failure can be diagnosed from the
-    // browser without digging through platform logs. It never contains the API
-    // key or any other secret.
-    res.status(500).json({ error: "Could not send the verification code. Please try again.", detail });
+    console.error("[trial/send-code] error:", err.message || err);
+    res.status(500).json({ error: "Could not send the verification code. Please try again." });
   }
 });
 
@@ -1227,7 +1231,7 @@ app.post("/api/trial/start-call", async (req, res) => {
     });
   } catch (err) {
     console.error("[trial/start-call] error:", err.message || err);
-    res.status(500).json({ error: err.message || "Failed to start the trial call." });
+    res.status(500).json({ error: "Could not start the trial call. Please try again." });
   }
 });
 
@@ -1578,6 +1582,42 @@ app.put("/api/teacher/attempts/:id/feedback", requireTeacher, async (req, res) =
 });
 
 // --- ADMIN API ENDPOINTS ---
+// Keep the login record in step with a profile's email (and, for students, phone),
+// so "Forgot password" and sign-in follow the address shown in the dashboards.
+// Returns an error message, or null when everything is in step.
+async function syncLoginRecord(userId, { email, phone, isStudent } = {}) {
+  const authPatch = {};
+  if (email !== undefined) {
+    const clean = String(email || "").trim().toLowerCase();
+    if (!EMAIL_RE.test(clean)) return "Please enter a valid email address.";
+    const { data: clash } = await supabase.from("users").select("id").ilike("email", clean).neq("id", userId).limit(1).maybeSingle();
+    if (clash) return "Another account already uses that email address.";
+    authPatch.email = clean;
+    authPatch.email_confirm = true;
+  }
+  if (phone !== undefined && isStudent) {
+    authPatch.phone = "+" + phone;
+    authPatch.user_metadata = { phone };
+  }
+  if (!Object.keys(authPatch).length) return null;
+  const { data: existing } = await supabase.auth.admin.getUserById(userId);
+  if (!existing?.user) return null; // profile without a login record: nothing to sync
+  if (authPatch.email && (existing.user.email || "").toLowerCase() === authPatch.email) {
+    delete authPatch.email; delete authPatch.email_confirm;
+  }
+  if (authPatch.phone) {
+    if (String(existing.user.phone || "").replace(/\D/g, "") === phone) {
+      delete authPatch.phone; delete authPatch.user_metadata;
+    } else {
+      authPatch.phone_confirm = true;
+      authPatch.user_metadata = { ...(existing.user.user_metadata || {}), phone };
+    }
+  }
+  if (!Object.keys(authPatch).length) return null;
+  const { error } = await supabase.auth.admin.updateUserById(userId, authPatch);
+  return error ? "Could not update the login record: " + error.message : null;
+}
+
 async function requireAdmin(req, res, next) {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });
@@ -1592,6 +1632,7 @@ async function requireAdmin(req, res, next) {
   }
   
   req.adminUser = user;
+  req.adminRole = data.role;
   req.adminSchoolId = data.school_id;
   next();
 }
@@ -1607,7 +1648,7 @@ app.get("/api/admin/students", requireAdmin, async (req, res) => {
 });
 
 app.get("/api/admin/teachers", requireAdmin, async (req, res) => {
-  let query = supabase.from("users").select("id, name, email").eq("role", "teacher").order("name");
+  let query = supabase.from("users").select("id, name, last_name, full_name, email, phone").eq("role", "teacher").order("name");
   if (req.adminSchoolId) {
     query = query.eq("school_id", req.adminSchoolId);
   }
@@ -1706,7 +1747,7 @@ app.put("/api/admin/students/:id", requireAdmin, async (req, res) => {
     "preferred_times", "lesson_frequency", "lesson_duration", "preferred_days",
     "current_lesson_id", "approved_for_outbound", "conversation_lesson",
     "allocated_time_this_month", "total_time_used", "used_time_this_month",
-    "personal_details", "role", "allocated_lesson_count",
+    "personal_details", "allocated_lesson_count",
     "call_feedback_score", "call_feedback_notes", "teacher_id"
   ];
   const updates = {};
@@ -1723,6 +1764,33 @@ app.put("/api/admin/students/:id", requireAdmin, async (req, res) => {
       ? null
       : String(updates.lesson_duration);
   }
+
+  const { data: target } = await supabase.from("users").select("id, role, school_id").eq("id", id).maybeSingle();
+  if (!target) return res.status(404).json({ error: "Student not found." });
+  if (req.adminRole !== "system_admin" && req.adminSchoolId && target.school_id !== req.adminSchoolId) {
+    return res.status(403).json({ error: "This student belongs to another school." });
+  }
+
+  if (Object.prototype.hasOwnProperty.call(updates, "phone")) {
+    const canonical = toCanonicalPhone(updates.phone);
+    if (!isValidCanonicalPhone(canonical)) {
+      return res.status(400).json({ error: "Phone must be 8 to 15 digits including the country code, and cannot start with 0." });
+    }
+    const { data: clash } = await supabase.from("users").select("id").eq("phone", canonical).eq("role", "student").neq("id", id).limit(1).maybeSingle();
+    if (clash) return res.status(409).json({ error: "Another student already uses that phone number." });
+    updates.phone = canonical;
+  }
+  if (Object.prototype.hasOwnProperty.call(updates, "email")) {
+    const clean = String(updates.email || "").trim().toLowerCase();
+    if (clean) updates.email = clean; else delete updates.email; // a blank box never wipes the email
+  }
+  const loginError = await syncLoginRecord(id, {
+    email: updates.email,
+    phone: updates.phone,
+    isStudent: target.role === "student",
+  });
+  if (loginError) return res.status(400).json({ error: loginError });
+
   const { error } = await supabase.from("users").update(updates).eq("id", id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
@@ -1774,8 +1842,28 @@ app.post("/api/admin/teachers", requireAdmin, async (req, res) => {
 
 app.put("/api/admin/teachers/:id", requireAdmin, async (req, res) => {
   const { id } = req.params;
-  const { name, email, phone } = req.body;
-  const { error } = await supabase.from("users").update({ name, email, phone }).eq("id", id);
+  const { name, email, phone } = req.body || {};
+  const { data: target } = await supabase.from("users").select("id, role, school_id").eq("id", id).maybeSingle();
+  if (!target || target.role !== "teacher") return res.status(404).json({ error: "Teacher not found." });
+  if (req.adminRole !== "system_admin" && req.adminSchoolId && target.school_id !== req.adminSchoolId) {
+    return res.status(403).json({ error: "This teacher belongs to another school." });
+  }
+  const updates = {};
+  if (name !== undefined) updates.name = String(name || "").trim();
+  if (phone !== undefined) {
+    // Staff may share one phone number, so it is only checked for format here.
+    const canonical = toCanonicalPhone(phone);
+    if (!isValidCanonicalPhone(canonical)) {
+      return res.status(400).json({ error: "Phone must be 8 to 15 digits including the country code, and cannot start with 0." });
+    }
+    updates.phone = canonical;
+  }
+  if (email !== undefined && String(email).trim()) {
+    updates.email = String(email).trim().toLowerCase();
+    const loginError = await syncLoginRecord(id, { email: updates.email });
+    if (loginError) return res.status(400).json({ error: loginError });
+  }
+  const { error } = await supabase.from("users").update(updates).eq("id", id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
 });
@@ -2315,6 +2403,13 @@ app.put("/api/superadmin/students/:id", requireSuperAdmin, async (req, res) => {
     });
     if (authErr) return res.status(400).json({ error: "Could not update the login record: " + authErr.message });
     patch.phone = canonical;
+  }
+
+  if ("email" in patch) {
+    if (!patch.email) return res.status(400).json({ error: "Email cannot be empty." });
+    patch.email = String(patch.email).trim().toLowerCase();
+    const loginError = await syncLoginRecord(req.params.id, { email: patch.email });
+    if (loginError) return res.status(400).json({ error: loginError });
   }
 
   if (patch.lesson_duration != null && !["10", "15"].includes(String(patch.lesson_duration))) {
