@@ -66,7 +66,7 @@
   .btn-signout svg { width: 18px; height: 18px; }
 
   /* MAIN */
-  .main-content { margin-left: var(--sidebar-width); flex: 1; min-height: 100vh; padding: 0 clamp(18px, 3vw, 32px) 48px; }
+  .main-content { margin-left: var(--sidebar-width); flex: 1; min-height: 100vh; min-width: 0; padding: 0 clamp(18px, 3vw, 32px) 48px; }
   .section { display: none; max-width: 1000px; margin: 0 auto; animation: fadeIn 0.3s ease-out; }
   .section.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -300,6 +300,34 @@
     .topbar-meta { display: none; }
     .topbar-greet h1 { font-size: 20px; }
   }
+
+  /* Needs-attention flags, level and schedule controls */
+  .flag { display:inline-block; padding:3px 9px; border-radius:20px; font-size:12px; font-weight:600; margin:2px 4px 2px 0; white-space:nowrap; }
+  .flag-red { background:#fde2e1; color:#b42318; }
+  .flag-amber { background:#fff4d6; color:#8a5a00; }
+  .flag-blue { background:var(--accent-light); color:var(--accent); }
+  .flag-grey { background:#eceef3; color:var(--muted); }
+  .flag-ok { background:var(--green-light); color:var(--green); }
+  .attention-banner { background:#fff4d6; color:#5c3d00; border-radius:14px; padding:12px 16px; margin-bottom:16px; font-size:14px; }
+  .attention-banner.ok { background:var(--green-light); color:#14532d; }
+  .manage-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr)); gap:24px; margin-bottom:24px; }
+  .manage-grid .card { margin-bottom:0; }
+  .t-field { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+  .t-field label { font-size:12px; font-weight:600; color:var(--muted); }
+  .t-input { font:inherit; font-size:14px; padding:9px 10px; border:1px solid var(--border); border-radius:10px; background:#fff; color:var(--text); width:100%; }
+  .t-row { display:flex; gap:10px; flex-wrap:wrap; }
+  .t-row > .t-field { flex:1; min-width:110px; }
+  .t-days { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:8px; }
+  .t-btn { font:inherit; font-size:14px; font-weight:600; border:none; border-radius:12px; padding:9px 16px; cursor:pointer; background:var(--amber); color:var(--ink); }
+  .t-btn:hover { background:var(--amber-dark); }
+  .t-btn:disabled { opacity:.6; cursor:default; }
+  .t-btn-ghost { background:var(--off); color:var(--text); border:1px solid var(--border); }
+  .t-btn-ghost:hover { background:var(--border); }
+  .t-msg { font-size:13px; margin-top:10px; display:none; }
+  .t-msg.err { color:#b42318; display:block; }
+  .t-msg.ok { color:var(--green); display:block; }
+  .t-summary { font-size:15px; line-height:1.6; margin-bottom:14px; }
+  .t-summary b { font-weight:600; }
 </style>
 <script src="/account-menu.js"></script>
 </head>
@@ -343,17 +371,18 @@
     <div class="section-header">
       <div>
         <h1>My Students</h1>
-        <p>Click a student to view their progress and leave feedback.</p>
+        <p>Click a student to see their lessons, leave feedback, or change their level and schedule.</p>
       </div>
     </div>
+    <div id="attention-banner" class="attention-banner" style="display:none;"></div>
     <div class="table-container">
       <table>
         <thead>
           <tr>
             <th>Name</th>
-            <th>Phone / Email</th>
-            <th>Level</th>
-            <th>Lessons Allocated</th>
+            <th>Level &amp; lesson</th>
+            <th>Next lesson</th>
+            <th>Needs attention</th>
           </tr>
         </thead>
         <tbody id="students-tbody">
@@ -382,8 +411,71 @@
         </div>
       </div>
       <div style="text-align:right;">
-        <div style="font-size:12px; color:var(--muted); margin-bottom:4px;">Allocated lessons</div>
-        <div style="font-size:24px; font-weight:600;" id="detail-allocated">—</div>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:4px;">Next lesson</div>
+        <div style="font-size:16px; font-weight:600;" id="detail-allocated">—</div>
+      </div>
+    </div>
+
+    <div class="manage-grid">
+      <!-- LEVEL -->
+      <div class="card">
+        <div class="card-label">Level and lesson</div>
+        <div class="t-summary" id="lvl-summary">—</div>
+        <div class="t-row">
+          <div class="t-field">
+            <label for="lvl-level">Level</label>
+            <select id="lvl-level" class="t-input" onchange="fillLessonSelect()">
+              <option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option>
+            </select>
+          </div>
+          <div class="t-field">
+            <label for="lvl-lesson">Next lesson</label>
+            <select id="lvl-lesson" class="t-input"></select>
+          </div>
+        </div>
+        <button class="t-btn" id="lvl-save" onclick="saveLevel()">Save level</button>
+        <div class="t-msg" id="lvl-msg"></div>
+      </div>
+
+      <!-- SCHEDULE -->
+      <div class="card">
+        <div class="card-label">Lesson schedule</div>
+        <div class="t-summary" id="sch-summary">—</div>
+        <button class="t-btn t-btn-ghost" id="sch-open" onclick="openScheduleForm()">Change schedule</button>
+        <div id="sch-form" style="display:none;">
+          <div class="t-row">
+            <div class="t-field">
+              <label for="sch-frequency">Lessons per week</label>
+              <select id="sch-frequency" class="t-input" onchange="renderTeacherDays()">
+                <option value="1">1 a week</option><option value="2">2 a week</option><option value="3">3 a week</option>
+              </select>
+            </div>
+            <div class="t-field">
+              <label for="sch-duration">Length</label>
+              <select id="sch-duration" class="t-input"><option value="10">10 minutes</option><option value="15">15 minutes</option></select>
+            </div>
+          </div>
+          <div class="t-field"><label>Days</label><div class="t-days" id="sch-days"></div></div>
+          <div class="t-row">
+            <div class="t-field">
+              <label for="sch-time">Time</label>
+              <select id="sch-time" class="t-input"></select>
+            </div>
+            <div class="t-field">
+              <label for="sch-timezone">Student's time zone</label>
+              <select id="sch-timezone" class="t-input">
+                <option value="Europe/Rome">Rome / Central Europe</option>
+                <option value="Europe/London">UK / London</option>
+                <option value="Europe/Athens">Eastern Europe</option>
+              </select>
+            </div>
+          </div>
+          <div class="t-row" style="gap:8px;">
+            <button class="t-btn" id="sch-save" onclick="saveSchedule()">Save schedule</button>
+            <button class="t-btn t-btn-ghost" onclick="closeScheduleForm()">Cancel</button>
+          </div>
+        </div>
+        <div class="t-msg" id="sch-msg"></div>
       </div>
     </div>
 
@@ -521,21 +613,198 @@ async function loadStudents(token) {
   renderStudents();
 }
 
+const LESSON_COUNTS = { A1: 11, A2: 11, B1: 11, B2: 11, C1: 11, C2: 2 };
+const WEEK_DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+const TZ_LABELS = { 'Europe/Rome': 'Rome time', 'Europe/London': 'UK time', 'Europe/Athens': 'Eastern Europe time' };
+const capDay = d => d ? d.charAt(0).toUpperCase() + d.slice(1) : d;
+const FLAG_ORDER = { red: 0, amber: 1, blue: 2, grey: 3 };
+
+function fmtWhen(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' }) + ', ' +
+         d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+function parseDays(raw) {
+  if (Array.isArray(raw)) return raw.map(d => String(d).trim().toLowerCase()).filter(Boolean);
+  return String(raw || '').replace(/[{}"]/g, '').split(',').map(d => d.trim().toLowerCase()).filter(Boolean);
+}
+function studentSchedule(s) {
+  const loc = s.schedule_local;
+  if (loc && Array.isArray(loc.days) && loc.time) {
+    return { days: loc.days.map(d => d.toLowerCase()), time: loc.time, timezone: loc.timezone || 'Europe/Rome' };
+  }
+  const t = String(s.preferred_times || '').slice(0, 5);
+  return { days: parseDays(s.preferred_days), time: /^\d{2}:\d{2}$/.test(t) ? t : '', timezone: 'Europe/Rome' };
+}
+function scheduleText(s) {
+  const sch = studentSchedule(s);
+  if (!sch.days.length || !sch.time) return 'No schedule set yet.';
+  const f = Number(s.lesson_frequency) || sch.days.length;
+  return `<b>${f === 1 ? '1 lesson' : f + ' lessons'} a week</b>, ${s.lesson_duration || '—'} minutes<br>` +
+         `${sch.days.map(capDay).join(' and ')} at ${sch.time} (${TZ_LABELS[sch.timezone] || 'Rome time'})` +
+         (s.approved_for_outbound === false ? '<br><span class="flag flag-grey">Lessons paused</span>' : '');
+}
+
 function renderStudents() {
   const tbody = document.getElementById('students-tbody');
-  if (!studentsData || studentsData.length === 0) {
+  const banner = document.getElementById('attention-banner');
+  if (!Array.isArray(studentsData) || studentsData.length === 0) {
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px; color:var(--muted);">No students assigned to you yet.</td></tr>';
+    banner.style.display = 'none';
     return;
   }
-  tbody.innerHTML = studentsData.map(s => `
+  const urgent = s => (s.flags || []).some(f => f.level === 'red' || f.level === 'amber');
+  const count = studentsData.filter(urgent).length;
+  banner.style.display = '';
+  banner.className = 'attention-banner' + (count ? '' : ' ok');
+  banner.textContent = count
+    ? (count === 1 ? '1 student needs your attention.' : count + ' students need your attention.') + ' They are listed first.'
+    : 'All your students are on track.';
+
+  const rank = s => Math.min(4, ...(s.flags || []).map(f => FLAG_ORDER[f.level] ?? 4));
+  const rows = [...studentsData].sort((a, b) => rank(a) - rank(b) || String(a.full_name || a.name).localeCompare(String(b.full_name || b.name)));
+  tbody.innerHTML = rows.map(s => {
+    const flags = (s.flags || []).slice().sort((a, b) => (FLAG_ORDER[a.level] ?? 4) - (FLAG_ORDER[b.level] ?? 4));
+    return `
     <tr class="clickable" onclick="openStudent('${s.id}')">
-      <td style="font-weight:600;">${s.full_name || s.name || '—'}</td>
-      <td>${s.phone || '—'}<br><small style="color:var(--muted)">${s.email || '—'}</small></td>
-      <td>${s.english_level ? `<span class="badge badge-blue">${s.english_level}</span>` : '<span class="badge badge-grey">Pending</span>'}</td>
-      <td><strong>${s.allocated_lesson_count || 0}</strong></td>
-    </tr>
-  `).join('');
+      <td style="font-weight:600;">${escHtml(s.full_name || s.name || '—')}<br><small style="color:var(--muted); font-weight:400;">${escHtml(s.email || '')}</small></td>
+      <td>${s.english_level ? `<span class="badge badge-blue">${s.english_level}</span> <small style="color:var(--muted)">Lesson ${s.current_lesson_id || 1}</small>` : '<span class="badge badge-grey">Pending</span>'}</td>
+      <td>${s.next_lesson ? fmtWhen(s.next_lesson) : '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${flags.length ? flags.map(f => `<span class="flag flag-${f.level}">${escHtml(f.text)}</span>`).join('') : '<span class="flag flag-ok">On track</span>'}</td>
+    </tr>`;
+  }).join('');
 }
+
+function renderManage(s) {
+  // Level card
+  document.getElementById('lvl-summary').innerHTML = s.english_level
+    ? `Currently on <b>${s.english_level}, lesson ${s.current_lesson_id || 1}</b>.<br><small style="color:var(--muted)">Moving a student starts their next call on the lesson you choose.</small>`
+    : 'Level not set yet.';
+  document.getElementById('lvl-level').value = LESSON_COUNTS[s.english_level] ? s.english_level : 'A1';
+  fillLessonSelect(s.current_lesson_id || 1);
+  hideMsg('lvl-msg');
+  // Schedule card
+  document.getElementById('sch-summary').innerHTML = scheduleText(s);
+  closeScheduleForm();
+  hideMsg('sch-msg');
+}
+function showMsg(id, text, ok) { const el = document.getElementById(id); el.textContent = text; el.className = 't-msg ' + (ok ? 'ok' : 'err'); }
+function hideMsg(id) { document.getElementById(id).className = 't-msg'; }
+
+window.fillLessonSelect = function(selected) {
+  const level = document.getElementById('lvl-level').value;
+  const sel = document.getElementById('lvl-lesson');
+  const keep = selected || Number(sel.value) || 1;
+  sel.innerHTML = '';
+  for (let i = 1; i <= (LESSON_COUNTS[level] || 1); i++) {
+    const o = document.createElement('option'); o.value = String(i); o.textContent = 'Lesson ' + i; sel.appendChild(o);
+  }
+  sel.value = String(Math.min(keep, LESSON_COUNTS[level] || 1));
+};
+
+window.saveLevel = async function() {
+  const s = studentsData.find(x => x.id === selectedStudentId);
+  if (!s) return;
+  const level = document.getElementById('lvl-level').value;
+  const lesson_number = Number(document.getElementById('lvl-lesson').value);
+  if (level === s.english_level && lesson_number === Number(s.current_lesson_id || 1)) {
+    return showMsg('lvl-msg', 'Nothing to change.', true);
+  }
+  const name = (s.name || 'this student').split(' ')[0];
+  if (!confirm(`Move ${name} to ${level}, lesson ${lesson_number}? Their next call will use this lesson.`)) return;
+  const btn = document.getElementById('lvl-save');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    const token = await getToken();
+    const res = await fetch(`/api/teacher/students/${s.id}/level`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ level, lesson_number })
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) return showMsg('lvl-msg', out.error || 'Could not save. Please try again.');
+    s.english_level = out.english_level; s.current_lesson_id = out.current_lesson_id;
+    document.getElementById('detail-level').textContent = `Level ${s.english_level}`;
+    renderManage(s); renderStudents();
+    showMsg('lvl-msg', `Saved. ${name} is now on ${s.english_level}, lesson ${s.current_lesson_id}.`, true);
+  } catch (e) {
+    showMsg('lvl-msg', 'Could not reach the server. Please try again.');
+  } finally { btn.disabled = false; btn.textContent = 'Save level'; }
+};
+
+window.renderTeacherDays = function(chosen) {
+  const n = Number(document.getElementById('sch-frequency').value) || 1;
+  const box = document.getElementById('sch-days');
+  const previous = chosen || Array.from(box.querySelectorAll('select')).map(x => x.value);
+  box.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const sel = document.createElement('select');
+    sel.className = 't-input'; sel.setAttribute('aria-label', 'Lesson day ' + (i + 1));
+    WEEK_DAYS.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = capDay(d); sel.appendChild(o); });
+    sel.value = previous[i] && WEEK_DAYS.includes(previous[i]) ? previous[i] : WEEK_DAYS[(i * 2) % 7];
+    box.appendChild(sel);
+  }
+};
+window.openScheduleForm = function() {
+  const s = studentsData.find(x => x.id === selectedStudentId);
+  if (!s) return;
+  const sch = studentSchedule(s);
+  const f = [1, 2, 3].includes(Number(s.lesson_frequency)) ? Number(s.lesson_frequency) : Math.min(Math.max(sch.days.length, 1), 3);
+  document.getElementById('sch-frequency').value = String(f);
+  renderTeacherDays(sch.days);
+  const tsel = document.getElementById('sch-time');
+  if (!tsel.options.length) {
+    for (let h = 0; h < 24; h++) for (let m = 0; m < 60; m += 15) {
+      const v = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+      const o = document.createElement('option'); o.value = v; o.textContent = v; tsel.appendChild(o);
+    }
+  }
+  tsel.value = sch.time && tsel.querySelector(`option[value="${sch.time}"]`) ? sch.time : '18:00';
+  document.getElementById('sch-timezone').value = TZ_LABELS[sch.timezone] ? sch.timezone : 'Europe/Rome';
+  document.getElementById('sch-duration').value = String(s.lesson_duration) === '10' ? '10' : '15';
+  document.getElementById('sch-form').style.display = '';
+  document.getElementById('sch-open').style.display = 'none';
+  hideMsg('sch-msg');
+};
+window.closeScheduleForm = function() {
+  document.getElementById('sch-form').style.display = 'none';
+  document.getElementById('sch-open').style.display = '';
+};
+window.saveSchedule = async function() {
+  const s = studentsData.find(x => x.id === selectedStudentId);
+  if (!s) return;
+  const days = Array.from(document.querySelectorAll('#sch-days select')).map(x => x.value);
+  if (new Set(days).size !== days.length) return showMsg('sch-msg', 'Please choose a different day for each lesson.');
+  const payload = {
+    frequency: Number(document.getElementById('sch-frequency').value),
+    days,
+    time: document.getElementById('sch-time').value,
+    timezone: document.getElementById('sch-timezone').value,
+    duration: Number(document.getElementById('sch-duration').value)
+  };
+  const btn = document.getElementById('sch-save');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    const token = await getToken();
+    const res = await fetch(`/api/teacher/students/${s.id}/schedule`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(payload)
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) return showMsg('sch-msg', out.error || 'Could not save. Please try again.');
+    s.lesson_frequency = payload.frequency; s.lesson_duration = String(payload.duration);
+    s.preferred_days = (out.rome_days || []).join(','); s.preferred_times = out.rome_time;
+    s.schedule_local = { days, time: payload.time, timezone: payload.timezone };
+    if (out.next_lesson) { s.next_lesson = out.next_lesson; document.getElementById('detail-allocated').textContent = fmtWhen(out.next_lesson); }
+    renderManage(s);
+    showMsg('sch-msg', out.next_lesson ? `Saved. Next lesson: ${fmtWhen(out.next_lesson)}.` : 'Saved.', true);
+    const upcoming = await apiGet(`/api/teacher/students/${s.id}/upcoming`, token);
+    renderUpcoming(upcoming);
+    loadStudents(token);
+  } catch (e) {
+    showMsg('sch-msg', 'Could not reach the server. Please try again.');
+  } finally { btn.disabled = false; btn.textContent = 'Save schedule'; }
+};
 
 window.openStudent = async function(id) {
   selectedStudentId = id;
@@ -549,7 +818,8 @@ window.openStudent = async function(id) {
   document.getElementById('detail-level').textContent = s.english_level ? `Level ${s.english_level}` : 'Level pending';
   document.getElementById('detail-email').textContent = s.email || '';
   document.getElementById('detail-phone').textContent = s.phone || '';
-  document.getElementById('detail-allocated').textContent = s.allocated_lesson_count || 0;
+  document.getElementById('detail-allocated').textContent = s.next_lesson ? fmtWhen(s.next_lesson) : (s.approved_for_outbound === false ? 'Paused' : 'Not booked');
+  renderManage(s);
 
   document.getElementById('detail-upcoming').innerHTML = '<div style="padding:16px; color:var(--muted); font-size:14px;">Loading...</div>';
   document.getElementById('detail-history').innerHTML = '<div class="empty-state"><p>Loading...</p></div>';

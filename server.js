@@ -1465,10 +1465,24 @@ async function requireTeacher(req, res, next) {
     return res.status(403).json({ error: "Forbidden: Teacher access required" });
   }
   req.teacherDbId = data.id;
+  req.teacherRole = data.role;
   req.teacherSchoolId = data.school_id;
   req.teacherName = data.name;
   next();
 }
+
+// A teacher may manage their own students; admins may manage students in their school
+// (a system admin may manage any student). Returns the student row, or null.
+async function teacherStudent(req, id, columns = "id, role, teacher_id, school_id, phone") {
+  const { data: student } = await supabase.from("users").select(columns).eq("id", id).maybeSingle();
+  if (!student || student.role !== "student") return null;
+  if (student.teacher_id === req.teacherDbId) return student;
+  if (req.teacherRole === "system_admin") return student;
+  if (req.teacherRole === "school_admin" && req.teacherSchoolId && student.school_id === req.teacherSchoolId) return student;
+  return null;
+}
+
+const digitsOnly = v => String(v || "").replace(/\D/g, "");
 
 // Student sets their own lesson schedule from the dashboard.
 // All validation, time-zone conversion (to Rome time) and moving the next booked call
@@ -1515,21 +1529,95 @@ app.post("/api/me/avatar", requireAuth, async (req, res) => {
 app.get("/api/teacher/students", requireTeacher, async (req, res) => {
   const { data, error } = await supabase
     .from("users")
-    .select("id, name, last_name, full_name, email, phone, english_level, allocated_lesson_count, current_lesson_id")
+    .select("id, name, last_name, full_name, email, phone, english_level, allocated_lesson_count, current_lesson_id, lesson_frequency, lesson_duration, preferred_days, preferred_times, schedule_local, approved_for_outbound")
     .eq("teacher_id", req.teacherDbId)
     .eq("role", "student")
     .order("name");
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data || []);
+  const students = data || [];
+  if (!students.length) return res.json([]);
+
+  // Everything the "needs attention" flags are built from, in two queries.
+  const sinceMs = Date.now() - 14 * 24 * 60 * 60 * 1000;
+  const since = new Date(sinceMs).toISOString().slice(0, 19) + "Z";
+  const [{ data: calls }, { data: attempts }] = await Promise.all([
+    supabase.from("call_triggers")
+      .select("phone_number, call_status, scheduled_time")
+      .eq("call_purpose", "lesson")
+      .or(`call_status.eq.pending,scheduled_time.gte.${since}`),
+    supabase.from("lesson_attempts")
+      .select("user_id, attempt_time, final_score, overall_score, score, pass_status, completion_percentage, teacher_feedback")
+      .in("user_id", students.map(s => s.id))
+      .order("attempt_time", { ascending: false }),
+  ]);
+
+  const now = Date.now();
+  res.json(students.map(s => {
+    const phone = digitsOnly(s.phone);
+    const mine = (calls || []).filter(c => phone && digitsOnly(c.phone_number) === phone);
+    const missed = mine.filter(c => c.call_status === "missed" && new Date(c.scheduled_time).getTime() >= sinceMs).length;
+    const next = mine.filter(c => c.call_status === "pending" && new Date(c.scheduled_time).getTime() > now - 3600000)
+      .map(c => c.scheduled_time).sort()[0] || null;
+    const last = (attempts || []).find(a => a.user_id === s.id) || null;
+    const lastScore = last ? Number(last.final_score ?? last.overall_score ?? last.score) : null;
+
+    const flags = [];
+    if (missed >= 1) flags.push({ level: missed >= 2 ? "red" : "amber", text: missed === 1 ? "Missed a lesson" : `Missed ${missed} lessons` });
+    if (last && last.pass_status && last.pass_status !== "passed") flags.push({ level: "amber", text: `Last lesson ${Number.isFinite(lastScore) ? Math.round(lastScore) + "%" : "not passed"}` });
+    if (s.approved_for_outbound === false) flags.push({ level: "grey", text: "Lessons paused" });
+    else if (!next) flags.push({ level: "red", text: "No lesson booked" });
+    if (last && last.pass_status && !String(last.teacher_feedback || "").trim()) flags.push({ level: "blue", text: "New lesson to review" });
+
+    return {
+      ...s,
+      next_lesson: next,
+      missed_recent: missed,
+      last_result: last ? { attempt_time: last.attempt_time, score: Number.isFinite(lastScore) ? lastScore : null, pass_status: last.pass_status } : null,
+      flags,
+    };
+  }));
+});
+
+// ---- teacher: change a student's level / lesson ------------------------------
+app.put("/api/teacher/students/:id/level", requireTeacher, async (req, res) => {
+  const student = await teacherStudent(req, req.params.id);
+  if (!student) return res.status(403).json({ error: "Not your student" });
+  const level = String(req.body?.level || "").toUpperCase();
+  const lessonNumber = parseInt(req.body?.lesson_number, 10);
+  if (!["A1", "A2", "B1", "B2", "C1", "C2"].includes(level)) return res.status(400).json({ error: "Please choose a level from A1 to C2." });
+  const { count } = await supabase.from("lessons").select("id", { count: "exact", head: true }).eq("level", level);
+  if (!count) return res.status(400).json({ error: `There are no ${level} lessons yet.` });
+  if (!Number.isInteger(lessonNumber) || lessonNumber < 1 || lessonNumber > count) {
+    return res.status(400).json({ error: `Please choose a lesson from 1 to ${count} for ${level}.` });
+  }
+  const { data, error } = await supabase.from("users")
+    .update({ english_level: level, current_lesson_id: lessonNumber, updated_at: new Date().toISOString() })
+    .eq("id", student.id).select("id, english_level, current_lesson_id").single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+// ---- teacher: change a student's schedule (same rules as the student's own box) ----
+app.post("/api/teacher/students/:id/schedule", requireTeacher, async (req, res) => {
+  const student = await teacherStudent(req, req.params.id);
+  if (!student) return res.status(403).json({ error: "Not your student" });
+  const { frequency, days, time, duration, timezone } = req.body || {};
+  const { data, error } = await supabase.rpc("set_student_schedule", {
+    p_user_id: student.id,
+    p_frequency: Number(frequency),
+    p_days: Array.isArray(days) ? days : [],
+    p_time: String(time || ""),
+    p_duration: Number(duration),
+    p_timezone: String(timezone || "")
+  });
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
 });
 
 app.get("/api/teacher/students/:id/history", requireTeacher, async (req, res) => {
   const { id } = req.params;
-  const { data: student, error: sErr } = await supabase
-    .from("users").select("teacher_id, phone").eq("id", id).maybeSingle();
-  if (sErr || !student || student.teacher_id !== req.teacherDbId) {
-    return res.status(403).json({ error: "Not your student" });
-  }
+  const student = await teacherStudent(req, id);
+  if (!student) return res.status(403).json({ error: "Not your student" });
   const { data: rawAttempts, error } = await supabase
     .from("lesson_attempts")
     .select("*")
@@ -1554,11 +1642,8 @@ app.get("/api/teacher/students/:id/history", requireTeacher, async (req, res) =>
 
 app.get("/api/teacher/students/:id/upcoming", requireTeacher, async (req, res) => {
   const { id } = req.params;
-  const { data: student, error: sErr } = await supabase
-    .from("users").select("teacher_id, phone").eq("id", id).maybeSingle();
-  if (sErr || !student || student.teacher_id !== req.teacherDbId) {
-    return res.status(403).json({ error: "Not your student" });
-  }
+  const student = await teacherStudent(req, id);
+  if (!student) return res.status(403).json({ error: "Not your student" });
   const { data, error } = await supabase
     .from("call_triggers")
     .select("id, scheduled_time, call_status")
@@ -1573,6 +1658,8 @@ app.put("/api/teacher/attempts/:id/feedback", requireTeacher, async (req, res) =
   const { id } = req.params;
   const { teacher_feedback } = req.body;
   if (teacher_feedback === undefined) return res.status(400).json({ error: "teacher_feedback is required" });
+  const { data: attempt } = await supabase.from("lesson_attempts").select("user_id").eq("id", id).maybeSingle();
+  if (!attempt || !(await teacherStudent(req, attempt.user_id))) return res.status(403).json({ error: "Not your student" });
   const { error } = await supabase
     .from("lesson_attempts")
     .update({ teacher_feedback })
