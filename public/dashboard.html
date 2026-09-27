@@ -1094,9 +1094,14 @@
   <div class="modal-card">
     <div class="modal-title">Edit Profile</div>
     <div class="form-group">
-      <label class="form-label">Full Name</label>
-      <input type="text" id="edit-profile-name" class="form-input" />
+      <label class="form-label" for="edit-profile-name">First name (what Penny calls you)</label>
+      <input type="text" id="edit-profile-name" class="form-input" autocomplete="given-name" />
     </div>
+    <div class="form-group">
+      <label class="form-label" for="edit-profile-last-name">Surname</label>
+      <input type="text" id="edit-profile-last-name" class="form-input" autocomplete="family-name" />
+    </div>
+    <div id="edit-profile-error" role="alert" style="display:none; color:#b42318; font-size:13px; margin-bottom:12px;"></div>
     <div class="form-group">
       <label class="form-label">Personal Bio / Details</label>
       <textarea id="edit-profile-bio" class="form-input" rows="3"></textarea>
@@ -1223,14 +1228,19 @@ window.closeModal = function(id) {
 window.openProfileModal = function() {
   if(!dashboardData) return;
   document.getElementById('edit-profile-name').value = dashboardData.profile.name || '';
+  document.getElementById('edit-profile-last-name').value = dashboardData.profile.lastName || '';
+  document.getElementById('edit-profile-error').style.display = 'none';
   document.getElementById('edit-profile-bio').value = dashboardData.profile.bio === 'No profile details yet.' ? '' : (dashboardData.profile.bio || '');
   document.getElementById('edit-profile-goal').value = dashboardData.profile.goal === 'No goal set.' ? '' : (dashboardData.profile.goal || '');
   document.getElementById('profileModal').classList.add('active');
 }
 
 window.saveProfile = async function() {
-  const name = document.getElementById('edit-profile-name').value;
+  const name = document.getElementById('edit-profile-name').value.trim();
+  const lastName = document.getElementById('edit-profile-last-name').value.trim();
   const bio = document.getElementById('edit-profile-bio').value;
+  const errBox = document.getElementById('edit-profile-error');
+  if (!name) { errBox.textContent = 'Please enter your first name.'; errBox.style.display = 'block'; return; }
   const goal = document.getElementById('edit-profile-goal').value;
   
   const { data: { session } } = await supabase.auth.getSession();
@@ -1238,11 +1248,12 @@ window.saveProfile = async function() {
 
   const { error } = await supabase.from('users').update({
     name: name,
+    last_name: lastName || null,
     personal_details: bio,
     goal: goal
   }).eq('id', session.user.id);
 
-  if(error) { alert("Error saving profile: " + error.message); return; }
+  if (error) { errBox.textContent = 'Could not save your profile. Please try again.'; errBox.style.display = 'block'; return; }
 
   // Keep Auth user_metadata.name in sync — updateUser() updates the caller's own metadata,
   // no service role needed. Non-fatal if it fails: the users-table save (source of truth) already succeeded.
@@ -1251,6 +1262,7 @@ window.saveProfile = async function() {
 
   // Update local state & UI
   dashboardData.profile.name = name;
+  dashboardData.profile.lastName = lastName;
   dashboardData.profile.bio = bio;
   dashboardData.profile.goal = goal;
   updateUI(dashboardData);
@@ -1377,7 +1389,8 @@ async function getDashboardData(userId, userPhone, userEmail, authMeta) {
     // Default structure using auth data
     const result = {
       profile: {
-        name: authMeta?.name || user?.name || 'Learner',
+        name: user?.name || authMeta?.name || 'Learner',
+        lastName: user?.last_name || '',
         email: userEmail || user?.email,
         bio: user?.personal_details || 'No profile details yet.',
         goal: user?.goal || 'No goal set.',
@@ -1652,7 +1665,7 @@ function updateUI(data) {
   }
 
   // Profile
-  document.getElementById('profile-name').textContent = data.profile.name || '—';
+  document.getElementById('profile-name').textContent = [data.profile.name, data.profile.lastName].filter(Boolean).join(' ') || '—';
   document.getElementById('profile-email').textContent = data.profile.email || '—';
   document.getElementById('profile-level').textContent = data.profile.englishLevel || '—';
   document.getElementById('profile-bio').textContent = data.profile.bio || 'No details provided.';

@@ -245,7 +245,8 @@
         '<h2>My profile</h2>' +
         '<div class="pam-photo-row"><div class="pam-avatar" id="pam-profile-avatar"></div>' +
           '<button type="button" class="pam-link" id="pam-profile-photo">Change photo</button></div>' +
-        '<div class="pam-field"><label for="pam-profile-name">Display name</label><input id="pam-profile-name" autocomplete="name"></div>' +
+        '<div class="pam-field"><label for="pam-profile-name">First name</label><input id="pam-profile-name" autocomplete="given-name"></div>' +
+        '<div class="pam-field"><label for="pam-profile-last">Surname</label><input id="pam-profile-last" autocomplete="family-name"></div>' +
         '<div class="pam-field"><label>Sign-in email</label><input id="pam-profile-email" readonly>' +
           '<div class="pam-hint">To change your sign-in email, ask the super admin.</div></div>' +
         '<div class="pam-field"><label>Role</label><input id="pam-profile-role" readonly></div>' +
@@ -253,6 +254,7 @@
         '<div class="pam-actions"><button type="button" class="pam-btn" id="pam-profile-cancel">Cancel</button>' +
           '<button type="button" class="pam-btn pam-btn-primary" id="pam-profile-save">Save</button></div>');
       document.getElementById('pam-profile-name').value = me.name || '';
+      document.getElementById('pam-profile-last').value = me.last_name || '';
       document.getElementById('pam-profile-email').value = email;
       document.getElementById('pam-profile-role').value = roleLabel;
       document.getElementById('pam-profile-err').hidden = true;
@@ -262,13 +264,15 @@
       document.getElementById('pam-profile-save').onclick = async function () {
         var btn = this, err = document.getElementById('pam-profile-err');
         var name = document.getElementById('pam-profile-name').value.trim();
-        if (!name) { err.textContent = 'Please enter a name.'; err.hidden = false; return; }
+        var last = document.getElementById('pam-profile-last').value.trim();
+        if (!name) { err.textContent = 'Please enter your first name.'; err.hidden = false; return; }
         btn.disabled = true; btn.textContent = 'Saving...';
         try {
-          var r = await supabase.from('users').update({ name: name }).eq('id', me.id);
+          var r = await supabase.from('users').update({ name: name, last_name: last || null }).eq('id', me.id);
           if (r.error) throw r.error;
           await supabase.auth.updateUser({ data: { name: name } });
           me.name = name;
+          me.last_name = last || null;
           me.full_name = (name + ' ' + (me.last_name || '')).trim();
           refresh();
           bg.hidden = true;
