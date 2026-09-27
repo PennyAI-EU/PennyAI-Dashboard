@@ -1489,14 +1489,15 @@ const digitsOnly = v => String(v || "").replace(/\D/g, "");
 // happen inside the database function set_student_schedule, so limits can't be bypassed.
 app.post("/api/me/schedule", requireAuth, async (req, res) => {
   if (req.dbUser.role !== "student") return res.status(403).json({ error: "Only students can set a lesson schedule here" });
-  const { frequency, days, time, duration, timezone } = req.body || {};
+  const { frequency, days, time, times, duration, timezone } = req.body || {};
   const { data, error } = await supabase.rpc("set_student_schedule", {
     p_user_id: req.dbUser.id,
     p_frequency: Number(frequency),
     p_days: Array.isArray(days) ? days : [],
     p_time: String(time || ""),
     p_duration: Number(duration),
-    p_timezone: String(timezone || "")
+    p_timezone: String(timezone || ""),
+    p_times: Array.isArray(times) && times.length ? times.map(String) : null
   });
   if (error) return res.status(400).json({ error: error.message });
   res.json(data);
@@ -1601,14 +1602,15 @@ app.put("/api/teacher/students/:id/level", requireTeacher, async (req, res) => {
 app.post("/api/teacher/students/:id/schedule", requireTeacher, async (req, res) => {
   const student = await teacherStudent(req, req.params.id);
   if (!student) return res.status(403).json({ error: "Not your student" });
-  const { frequency, days, time, duration, timezone } = req.body || {};
+  const { frequency, days, time, times, duration, timezone } = req.body || {};
   const { data, error } = await supabase.rpc("set_student_schedule", {
     p_user_id: student.id,
     p_frequency: Number(frequency),
     p_days: Array.isArray(days) ? days : [],
     p_time: String(time || ""),
     p_duration: Number(duration),
-    p_timezone: String(timezone || "")
+    p_timezone: String(timezone || ""),
+    p_times: Array.isArray(times) && times.length ? times.map(String) : null
   });
   if (error) return res.status(400).json({ error: error.message });
   res.json(data);

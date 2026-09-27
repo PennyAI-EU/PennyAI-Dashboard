@@ -455,9 +455,13 @@
               <select id="sch-duration" class="t-input"><option value="10">10 minutes</option><option value="15">15 minutes</option></select>
             </div>
           </div>
-          <div class="t-field"><label>Days</label><div class="t-days" id="sch-days"></div></div>
+          <div class="t-field"><label>Days</label><div id="sch-days" style="display:grid; gap:8px;"></div>
+            <label id="sch-perday-wrap" style="display:flex; align-items:center; gap:8px; margin-top:6px; font-size:14px; font-weight:500; color:var(--text); cursor:pointer;">
+              <input type="checkbox" id="sch-perday" onchange="renderTeacherDays()" /> Different time for each day
+            </label>
+          </div>
           <div class="t-row">
-            <div class="t-field">
+            <div class="t-field" id="sch-time-field">
               <label for="sch-time">Time</label>
               <select id="sch-time" class="t-input"></select>
             </div>
@@ -632,7 +636,8 @@ function parseDays(raw) {
 function studentSchedule(s) {
   const loc = s.schedule_local;
   if (loc && Array.isArray(loc.days) && loc.time) {
-    return { days: loc.days.map(d => d.toLowerCase()), time: loc.time, timezone: loc.timezone || 'Europe/Rome' };
+    const times = Array.isArray(loc.times) && loc.times.length === loc.days.length ? loc.times : null;
+    return { days: loc.days.map(d => d.toLowerCase()), time: loc.time, times, timezone: loc.timezone || 'Europe/Rome' };
   }
   const t = String(s.preferred_times || '').slice(0, 5);
   return { days: parseDays(s.preferred_days), time: /^\d{2}:\d{2}$/.test(t) ? t : '', timezone: 'Europe/Rome' };
@@ -641,8 +646,11 @@ function scheduleText(s) {
   const sch = studentSchedule(s);
   if (!sch.days.length || !sch.time) return 'No schedule set yet.';
   const f = Number(s.lesson_frequency) || sch.days.length;
+  const when = sch.times && new Set(sch.times).size > 1
+    ? sch.days.map((d, i) => `${capDay(d)} at ${sch.times[i]}`).join(', ')
+    : `${sch.days.map(capDay).join(' and ')} at ${sch.time}`;
   return `<b>${f === 1 ? '1 lesson' : f + ' lessons'} a week</b>, ${s.lesson_duration || '—'} minutes<br>` +
-         `${sch.days.map(capDay).join(' and ')} at ${sch.time} (${TZ_LABELS[sch.timezone] || 'Rome time'})` +
+         `${when} (${TZ_LABELS[sch.timezone] || 'Rome time'})` +
          (s.approved_for_outbound === false ? '<br><span class="flag flag-grey">Lessons paused</span>' : '');
 }
 
@@ -732,18 +740,43 @@ window.saveLevel = async function() {
   } finally { btn.disabled = false; btn.textContent = 'Save level'; }
 };
 
-window.renderTeacherDays = function(chosen) {
+function fillTimeOptions(sel, value) {
+  if (!sel.options.length) {
+    for (let h = 0; h < 24; h++) for (let m = 0; m < 60; m += 15) {
+      const v = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+      const o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o);
+    }
+  }
+  sel.value = value && sel.querySelector(`option[value="${value}"]`) ? value : '18:00';
+}
+window.renderTeacherDays = function(chosen, chosenTimes) {
   const n = Number(document.getElementById('sch-frequency').value) || 1;
   const box = document.getElementById('sch-days');
-  const previous = chosen || Array.from(box.querySelectorAll('select')).map(x => x.value);
+  const perDayBox = document.getElementById('sch-perday');
+  if (n < 2) perDayBox.checked = false;
+  document.getElementById('sch-perday-wrap').style.display = n < 2 ? 'none' : 'flex';
+  const perDay = perDayBox.checked;
+  const mainTime = document.getElementById('sch-time').value || '18:00';
+  const previous = chosen || Array.from(box.querySelectorAll('select.day-sel')).map(x => x.value);
+  const previousTimes = chosenTimes || Array.from(box.querySelectorAll('select.time-sel')).map(x => x.value);
   box.innerHTML = '';
   for (let i = 0; i < n; i++) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:grid; grid-template-columns:' + (perDay ? '1fr 1fr' : '1fr') + '; gap:8px;';
     const sel = document.createElement('select');
-    sel.className = 't-input'; sel.setAttribute('aria-label', 'Lesson day ' + (i + 1));
+    sel.className = 't-input day-sel'; sel.setAttribute('aria-label', 'Lesson day ' + (i + 1));
     WEEK_DAYS.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = capDay(d); sel.appendChild(o); });
     sel.value = previous[i] && WEEK_DAYS.includes(previous[i]) ? previous[i] : WEEK_DAYS[(i * 2) % 7];
-    box.appendChild(sel);
+    row.appendChild(sel);
+    if (perDay) {
+      const tsel = document.createElement('select');
+      tsel.className = 't-input time-sel'; tsel.setAttribute('aria-label', 'Time for lesson ' + (i + 1));
+      fillTimeOptions(tsel, previousTimes[i] || mainTime);
+      row.appendChild(tsel);
+    }
+    box.appendChild(row);
   }
+  document.getElementById('sch-time-field').style.display = perDay ? 'none' : '';
 };
 window.openScheduleForm = function() {
   const s = studentsData.find(x => x.id === selectedStudentId);
@@ -751,15 +784,9 @@ window.openScheduleForm = function() {
   const sch = studentSchedule(s);
   const f = [1, 2, 3].includes(Number(s.lesson_frequency)) ? Number(s.lesson_frequency) : Math.min(Math.max(sch.days.length, 1), 3);
   document.getElementById('sch-frequency').value = String(f);
-  renderTeacherDays(sch.days);
-  const tsel = document.getElementById('sch-time');
-  if (!tsel.options.length) {
-    for (let h = 0; h < 24; h++) for (let m = 0; m < 60; m += 15) {
-      const v = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-      const o = document.createElement('option'); o.value = v; o.textContent = v; tsel.appendChild(o);
-    }
-  }
-  tsel.value = sch.time && tsel.querySelector(`option[value="${sch.time}"]`) ? sch.time : '18:00';
+  fillTimeOptions(document.getElementById('sch-time'), sch.time);
+  document.getElementById('sch-perday').checked = !!(sch.times && new Set(sch.times).size > 1);
+  renderTeacherDays(sch.days, sch.times || []);
   document.getElementById('sch-timezone').value = TZ_LABELS[sch.timezone] ? sch.timezone : 'Europe/Rome';
   document.getElementById('sch-duration').value = String(s.lesson_duration) === '10' ? '10' : '15';
   document.getElementById('sch-form').style.display = '';
@@ -773,12 +800,15 @@ window.closeScheduleForm = function() {
 window.saveSchedule = async function() {
   const s = studentsData.find(x => x.id === selectedStudentId);
   if (!s) return;
-  const days = Array.from(document.querySelectorAll('#sch-days select')).map(x => x.value);
+  const days = Array.from(document.querySelectorAll('#sch-days select.day-sel')).map(x => x.value);
   if (new Set(days).size !== days.length) return showMsg('sch-msg', 'Please choose a different day for each lesson.');
+  const perDay = document.getElementById('sch-perday').checked && days.length > 1;
+  const times = perDay ? Array.from(document.querySelectorAll('#sch-days select.time-sel')).map(x => x.value) : null;
   const payload = {
     frequency: Number(document.getElementById('sch-frequency').value),
     days,
-    time: document.getElementById('sch-time').value,
+    time: times ? times[0] : document.getElementById('sch-time').value,
+    times,
     timezone: document.getElementById('sch-timezone').value,
     duration: Number(document.getElementById('sch-duration').value)
   };
@@ -795,6 +825,7 @@ window.saveSchedule = async function() {
     s.lesson_frequency = payload.frequency; s.lesson_duration = String(payload.duration);
     s.preferred_days = (out.rome_days || []).join(','); s.preferred_times = out.rome_time;
     s.schedule_local = { days, time: payload.time, timezone: payload.timezone };
+    if (times && new Set(times).size > 1) s.schedule_local.times = times;
     if (out.next_lesson) { s.next_lesson = out.next_lesson; document.getElementById('detail-allocated').textContent = fmtWhen(out.next_lesson); }
     renderManage(s);
     showMsg('sch-msg', out.next_lesson ? `Saved. Next lesson: ${fmtWhen(out.next_lesson)}.` : 'Saved.', true);

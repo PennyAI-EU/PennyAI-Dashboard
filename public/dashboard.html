@@ -1131,9 +1131,12 @@
     </div>
     <div class="form-group">
       <label class="form-label">Lesson days</label>
-      <div id="edit-pref-days" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px;"></div>
+      <div id="edit-pref-days" style="display:grid; gap:8px;"></div>
+      <label id="edit-pref-perday-wrap" style="display:flex; align-items:center; gap:8px; margin-top:10px; font-size:14px; cursor:pointer;">
+        <input type="checkbox" id="edit-pref-perday" onchange="renderDaySelects()" /> Different time for each day
+      </label>
     </div>
-    <div class="form-group">
+    <div class="form-group" id="edit-pref-time-group">
       <label class="form-label" for="edit-pref-time">Lesson time (any time, day or night)</label>
       <select id="edit-pref-time" class="form-input"></select>
     </div>
@@ -1283,27 +1286,62 @@ function parseDays(raw) {
 function currentSchedule(prefs) {
   const loc = prefs.local;
   if (loc && Array.isArray(loc.days) && loc.time) {
-    return { days: loc.days.map(d => d.toLowerCase()), time: loc.time, timezone: loc.timezone || 'Europe/Rome' };
+    const times = Array.isArray(loc.times) && loc.times.length === loc.days.length ? loc.times : null;
+    return { days: loc.days.map(d => d.toLowerCase()), time: loc.time, times, timezone: loc.timezone || 'Europe/Rome' };
   }
   const t = String(prefs.times || '').slice(0, 5);
   return { days: parseDays(prefs.days), time: /^\d{2}:\d{2}$/.test(t) ? t : '', timezone: 'Europe/Rome' };
 }
 
-window.renderDaySelects = function(chosen) {
+// One row per lesson: a day, plus its own time when "Different time for each day" is ticked.
+window.renderDaySelects = function(chosen, chosenTimes) {
   const n = Number(document.getElementById('edit-pref-frequency').value) || 1;
   const box = document.getElementById('edit-pref-days');
-  const previous = chosen || Array.from(box.querySelectorAll('select')).map(s => s.value);
+  const perDayBox = document.getElementById('edit-pref-perday');
+  const wrap = document.getElementById('edit-pref-perday-wrap');
+  if (n < 2) perDayBox.checked = false;
+  wrap.style.display = n < 2 ? 'none' : 'flex';
+  const perDay = perDayBox.checked;
+  const mainTime = document.getElementById('edit-pref-time').value || '18:00';
+  const previous = chosen || Array.from(box.querySelectorAll('select.day-sel')).map(s => s.value);
+  const previousTimes = chosenTimes || Array.from(box.querySelectorAll('select.time-sel')).map(s => s.value);
   box.innerHTML = '';
   for (let i = 0; i < n; i++) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:grid; grid-template-columns:' + (perDay ? '1fr 1fr' : '1fr') + '; gap:8px;';
     const sel = document.createElement('select');
-    sel.className = 'form-input';
+    sel.className = 'form-input day-sel';
     sel.setAttribute('aria-label', 'Lesson day ' + (i + 1));
     WEEK_DAYS.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = capDay(d); sel.appendChild(o); });
     // keep earlier picks; otherwise spread new days across the week
     sel.value = previous[i] && WEEK_DAYS.includes(previous[i]) ? previous[i] : WEEK_DAYS[(i * 2) % 7];
-    box.appendChild(sel);
+    row.appendChild(sel);
+    if (perDay) {
+      const tsel = document.createElement('select');
+      tsel.className = 'form-input time-sel';
+      tsel.setAttribute('aria-label', 'Time for lesson ' + (i + 1));
+      fillTimeOptions(tsel, previousTimes[i] || mainTime);
+      row.appendChild(tsel);
+    }
+    box.appendChild(row);
   }
+  document.getElementById('edit-pref-time-group').style.display = perDay ? 'none' : '';
 };
+function fillTimeOptions(sel, value) {
+  if (!sel.options.length) {
+    for (let h = 0; h < 24; h++) for (let m = 0; m < 60; m += 15) {
+      const v = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+      const o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o);
+    }
+  }
+  sel.value = value && sel.querySelector('option[value="' + value + '"]') ? value : '18:00';
+}
+function scheduleTimeText(sch) {
+  if (sch.times && new Set(sch.times).size > 1) {
+    return sch.days.map((d, i) => capDay(d) + ' ' + sch.times[i]).join(', ');
+  }
+  return sch.time;
+}
 
 function fillTimeSelect(value) {
   const sel = document.getElementById('edit-pref-time');
@@ -1322,8 +1360,9 @@ window.openPreferencesModal = function() {
   const cur = currentSchedule(prefs);
   const freq = [1, 2, 3].includes(Number(prefs.frequency)) ? Number(prefs.frequency) : Math.min(Math.max(cur.days.length, 1), 3);
   document.getElementById('edit-pref-frequency').value = String(freq);
-  renderDaySelects(cur.days);
   fillTimeSelect(cur.time);
+  document.getElementById('edit-pref-perday').checked = !!(cur.times && new Set(cur.times).size > 1);
+  renderDaySelects(cur.days, cur.times || []);
   document.getElementById('edit-pref-timezone').value = TZ_LABELS[cur.timezone] ? cur.timezone : 'Europe/Rome';
   document.getElementById('edit-pref-duration').value = String(prefs.duration) === '10' ? '10' : '15';
   document.getElementById('edit-pref-error').style.display = 'none';
@@ -1336,12 +1375,15 @@ window.savePreferences = async function() {
   errBox.style.display = 'none';
 
   const frequency = Number(document.getElementById('edit-pref-frequency').value);
-  const days = Array.from(document.querySelectorAll('#edit-pref-days select')).map(s => s.value);
+  const days = Array.from(document.querySelectorAll('#edit-pref-days select.day-sel')).map(s => s.value);
   if (new Set(days).size !== days.length) return showErr('Please choose a different day for each lesson.');
+  const perDay = document.getElementById('edit-pref-perday').checked && days.length > 1;
+  const times = perDay ? Array.from(document.querySelectorAll('#edit-pref-days select.time-sel')).map(s => s.value) : null;
   const payload = {
     frequency,
     days,
-    time: document.getElementById('edit-pref-time').value,
+    time: times ? times[0] : document.getElementById('edit-pref-time').value,
+    times,
     timezone: document.getElementById('edit-pref-timezone').value,
     duration: Number(document.getElementById('edit-pref-duration').value)
   };
@@ -1366,6 +1408,7 @@ window.savePreferences = async function() {
     prefs.days = (out.rome_days || []).join(',');
     prefs.times = out.rome_time;
     prefs.local = { days, time: payload.time, timezone: payload.timezone };
+    if (times && new Set(times).size > 1) prefs.local.times = times;
     closeModal('preferencesModal');
     // reload so "next lesson" and upcoming calls show the moved booking
     window.location.reload();
@@ -1571,7 +1614,7 @@ function updateUI(data) {
   setText('pref-duration', (data.profile.preferences.duration || '—') + ' mins');
   { const sch = currentSchedule(data.profile.preferences);
     setText('pref-days', sch.days.length ? sch.days.map(capDay).join(', ') : 'Not set');
-    setText('pref-time', sch.time ? sch.time + ' (' + (TZ_LABELS[sch.timezone] || 'Rome time') + ')' : 'Not set'); }
+    setText('pref-time', sch.time ? scheduleTimeText(sch) + ' (' + (TZ_LABELS[sch.timezone] || 'Rome time') + ')' : 'Not set'); }
 
   // Upcoming calls
   const upcomingEl = document.getElementById('upcoming-calls-list');
