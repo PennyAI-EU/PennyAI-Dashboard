@@ -1213,6 +1213,8 @@ app.post("/api/trial/start-call", async (req, res) => {
     const webCallResponse = await retell.call.createWebCall({
       agent_id: process.env.RETELL_AGENT_ID,
       retell_llm_dynamic_variables: { instruction: `${LESSON_PREAMBLE}\n\n${TRIAL_LESSON_INTRO}\n\n${instruction}` },
+      // The free trial is a ~5-minute lesson; hard stop at 7 minutes as a cost safety net.
+      agent_override: { agent: { max_call_duration_ms: 7 * 60 * 1000 } },
     });
 
     await supabase
@@ -1261,6 +1263,8 @@ app.post("/api/hello/start-call", async (req, res) => {
     const webCallResponse = await retell.call.createWebCall({
       agent_id: process.env.RETELL_AGENT_ID,
       retell_llm_dynamic_variables: { instruction: HELLO_PREAMBLE },
+      // Hard stop so the free public demo can never run up costs.
+      agent_override: { agent: { max_call_duration_ms: 60 * 1000 } },
     });
 
     const { error: logErr } = await supabase.from("hello_calls").insert({
