@@ -1401,15 +1401,18 @@ async function attachLessonTitles(attempts) {
   const lessonIds = [...new Set((attempts || []).filter(a => a.lesson_id).map(a => a.lesson_id))];
   let titleMap = {};
   if (lessonIds.length > 0) {
+    // lesson_attempts.lesson_id holds the lesson's database id (lessons.id), not its
+    // "A2.01"-style code, so look lessons up by id and return both title and code.
     const { data: lessons } = await supabase
       .from("lessons")
-      .select("lesson_id, title")
-      .in("lesson_id", lessonIds);
-    if (lessons) lessons.forEach(l => { titleMap[l.lesson_id] = l.title; });
+      .select("id, lesson_id, title")
+      .in("id", lessonIds);
+    if (lessons) lessons.forEach(l => { titleMap[l.id] = { title: l.title, code: l.lesson_id }; });
   }
   return (attempts || []).map(a => ({
     ...a,
-    lessons: { title: titleMap[a.lesson_id] || null },
+    lesson_code: titleMap[a.lesson_id]?.code || null,
+    lessons: { title: titleMap[a.lesson_id]?.title || null },
   }));
 }
 

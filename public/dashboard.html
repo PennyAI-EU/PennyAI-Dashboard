@@ -836,6 +836,180 @@
   @media (max-width: 800px) { .account-caret { display: none; } }
 </style>
 <script src="/account-menu.js"></script>
+<script>
+/* EN / IT for the student dashboard. Static text uses data-i18n="key" (or data-i18n-ph for
+   placeholders); script text uses t('key', {vars}). The choice is shared with the homepage. */
+(function () {
+  var D = {
+    'nav.home': ['Home', 'Home'],
+    'nav.lessons': ['My Lessons', 'Le mie lezioni'],
+    'nav.progress': ['Progress', 'Progressi'],
+    'nav.messages': ['Messages', 'Messaggi'],
+    'greet.morning': ['Good morning', 'Buongiorno'],
+    'greet.afternoon': ['Good afternoon', 'Buon pomeriggio'],
+    'greet.evening': ['Good evening', 'Buonasera'],
+    'greet.sub': ['Ready for another step towards confident English?', 'Pronto per un altro passo verso un inglese sicuro?'],
+    'hero.title': ['Continue your journey', 'Continua il tuo percorso'],
+    'hero.preparing': ['Your next lesson is being prepared.', 'Stiamo preparando la tua prossima lezione.'],
+    'hero.continue': ['Continue lesson →', 'Vai alla lezione →'],
+    'hero.pending': ['LEVEL PENDING', 'LIVELLO DA DEFINIRE'],
+    'hero.inprogress': ['{level} · IN PROGRESS', '{level} · IN CORSO'],
+    'hero.lessonLine': ['Lesson {n} · {title}', 'Lezione {n} · {title}'],
+    'hero.levelProgress': ['level progress', 'progresso del livello'],
+    'hero.levelProgressOf': ['{level} progress', 'progresso {level}'],
+    'act.title': ['Choose your next activity', 'Scegli la prossima attività'],
+    'act.lessons': ['My Lessons', 'Le mie lezioni'],
+    'act.lessonsReady': ['Your next live lesson is ready.', 'La tua prossima lezione è pronta.'],
+    'act.nextUp': ['Next up: {title}', 'Prossima: {title}'],
+    'act.call': ['Call Penny now', 'Chiama Penny ora'],
+    'act.callSub': ['Missed your call or want your lesson early? Ring +39 0965 1960070.', 'Hai perso la chiamata o vuoi anticipare la lezione? Chiama il +39 0965 1960070.'],
+    'act.progress': ['My progress', 'I miei progressi'],
+    'act.progressSub': ["Scores, recordings and Penny's feedback from every lesson.", 'Punteggi, registrazioni e i consigli di Penny per ogni lezione.'],
+    'up.eyebrow': ['Upcoming lesson', 'Prossima lezione'],
+    'up.none': ['No lesson scheduled yet', 'Nessuna lezione in programma'],
+    'up.noneSub': ['Your teacher will schedule your next session.', "Il tuo insegnante programmerà la prossima lezione."],
+    'up.view': ['View lesson →', 'Vedi lezione →'],
+    'up.yourNext': ['Your next lesson', 'La tua prossima lezione'],
+    'up.today': ['Today', 'Oggi'],
+    'up.minutes': ['{n} minutes', '{n} minuti'],
+    'up.levelLesson': ['{level} Lesson {n}', '{level} Lezione {n}'],
+    'goal.title': ['Weekly goal', 'Obiettivo settimanale'],
+    'goal.count': ['{done} of {target} lessons', '{done} di {target} lezioni'],
+    'goal.count1': ['{done} of 1 lesson', '{done} di 1 lezione'],
+    'goal.left': ['{n} more lessons to reach your goal.', 'Ancora {n} lezioni per raggiungere il tuo obiettivo.'],
+    'goal.left1': ['1 more lesson to reach your goal.', 'Ancora 1 lezione per raggiungere il tuo obiettivo.'],
+    'goal.done': ['Goal reached this week. Nicely done.', 'Obiettivo della settimana raggiunto. Bravo!'],
+    'goal.thisWeek': ['{n} this week', '{n} questa settimana'],
+    'goal.set': ['Set a weekly frequency to track your goal.', 'Imposta quante lezioni a settimana per seguire il tuo obiettivo.'],
+    'les.title': ['My Lessons', 'Le mie lezioni'],
+    'les.sub': ['Your current path and upcoming sessions.', 'Il tuo percorso e le prossime lezioni.'],
+    'les.current': ['Current Lesson', 'Lezione attuale'],
+    'les.lessonN': ['Lesson {n}', 'Lezione {n}'],
+    'les.callNote': ["Penny will phone you at your lesson time. Can't wait, or missed the call? Call Penny yourself and she'll start this lesson.", "Penny ti chiamerà all'ora della lezione. Non vuoi aspettare o hai perso la chiamata? Chiama tu Penny e inizierà questa lezione."],
+    'les.callBtn': ['Call Penny: +39 0965 1960070', 'Chiama Penny: +39 0965 1960070'],
+    'les.upcoming': ['Upcoming Scheduled Sessions', 'Prossime lezioni in programma'],
+    'les.noUpcoming': ['No upcoming sessions scheduled.', 'Nessuna lezione in programma.'],
+    'les.at': ['{date} at {time}', '{date} alle {time}'],
+    'les.aiLesson': ['AI English Lesson', 'Lezione di inglese con Penny'],
+    'les.scheduled': ['Scheduled', 'Programmata'],
+    'pref.title': ['Preferences', 'Preferenze'],
+    'pref.change': ['Change my schedule', 'Cambia orario'],
+    'pref.frequency': ['Frequency', 'Frequenza'],
+    'pref.duration': ['Duration', 'Durata'],
+    'pref.days': ['Preferred Days', 'Giorni'],
+    'pref.time': ['Lesson Time', 'Orario'],
+    'pref.notSet': ['Not set', 'Non impostato'],
+    'pref.perWeek1': ['1 lesson a week', '1 lezione a settimana'],
+    'pref.perWeek': ['{n} lessons a week', '{n} lezioni a settimana'],
+    'pref.mins': ['{n} mins', '{n} min'],
+    'tz.Europe/Rome': ['Rome time', 'ora di Roma'],
+    'tz.Europe/London': ['UK time', 'ora UK'],
+    'tz.Europe/Athens': ['Eastern Europe time', "ora dell'Europa dell'Est"],
+    'hist.title': ['Progress', 'Progressi'],
+    'hist.sub': ['Your past sessions, recordings, transcripts and feedback.', 'Le tue lezioni passate, registrazioni, trascrizioni e consigli.'],
+    'hist.none': ['No sessions yet', 'Ancora nessuna lezione'],
+    'hist.noneSub': ['Your lesson history will appear here after your first session.', 'Lo storico delle tue lezioni apparirà qui dopo la prima lezione.'],
+    'hist.lesson': ['Lesson {id}', 'Lezione {id}'],
+    'hist.attempt': ['Lesson', 'Lezione'],
+    'hist.noSummary': ['No summary available.', 'Nessun riepilogo disponibile.'],
+    'hist.recording': ['Recording', 'Registrazione'],
+    'hist.transcript': ['Transcript', 'Trascrizione'],
+    'hist.penny': ["Penny's feedback", 'I consigli di Penny'],
+    'hist.teacher': ['Teacher Feedback', "Commento dell'insegnante"],
+    'hist.noFeedback': ['No feedback provided.', 'Nessun commento disponibile.'],
+    'hist.passed': ['Passed', 'Superata'],
+    'hist.notYet': ['Not yet passed', 'Non ancora superata'],
+    'prof.title': ['Profile Settings', 'Il mio profilo'],
+    'prof.sub': ['Manage your personal details and learning goals.', 'Gestisci i tuoi dati e i tuoi obiettivi.'],
+    'prof.edit': ['Edit Profile', 'Modifica profilo'],
+    'prof.name': ['Full Name', 'Nome e cognome'],
+    'prof.email': ['Email Address', 'Email'],
+    'prof.level': ['Current Level', 'Livello attuale'],
+    'prof.bio': ['Personal Bio / Details', 'Qualcosa su di te'],
+    'prof.goal': ['Learning Goal', 'Obiettivo'],
+    'prof.noBio': ['No details provided.', 'Nessun dettaglio inserito.'],
+    'prof.noGoal': ['No goal set yet.', 'Nessun obiettivo impostato.'],
+    'prof.first': ['First name (what Penny calls you)', 'Nome (come ti chiama Penny)'],
+    'prof.last': ['Surname', 'Cognome'],
+    'prof.errFirst': ['Please enter your first name.', 'Inserisci il tuo nome.'],
+    'prof.errSave': ['Could not save your profile. Please try again.', 'Non è stato possibile salvare il profilo. Riprova.'],
+    'msg.title': ['Messages', 'Messaggi'],
+    'msg.sub': ['Your dedicated chats with your teacher and school.', 'Le tue chat con il tuo insegnante e la scuola.'],
+    'msg.loading': ['Loading…', 'Caricamento…'],
+    'msg.back': ['Back to messages', 'Torna ai messaggi'],
+    'msg.placeholder': ['Write a message… (Enter to send)', 'Scrivi un messaggio… (Invio per inviare)'],
+    'msg.noContacts': ["No contacts yet. You'll be able to message your teacher once one is assigned.", 'Ancora nessun contatto. Potrai scrivere al tuo insegnante appena ti verrà assegnato.'],
+    'msg.startChat': ['No messages yet — tap to start', 'Nessun messaggio — tocca per iniziare'],
+    'msg.sayHello': ['No messages yet — say hello!', 'Nessun messaggio — scrivi un saluto!'],
+    'msg.teacher': ['Teacher', 'Insegnante'],
+    'msg.school': ['School Admin', 'Scuola'],
+    'msg.unknown': ['Unknown', 'Sconosciuto'],
+    'msg.openErr': ['Could not open conversation: ', 'Impossibile aprire la conversazione: '],
+    'sch.title': ['My lesson schedule', 'Il mio orario delle lezioni'],
+    'sch.perWeek': ['Lessons per week', 'Lezioni a settimana'],
+    'sch.days': ['Lesson days', 'Giorni delle lezioni'],
+    'sch.perDay': ['Different time for each day', 'Orario diverso per ogni giorno'],
+    'sch.time': ['Lesson time (any time, day or night)', 'Orario della lezione (a qualsiasi ora)'],
+    'sch.tz': ['Your time zone', 'Il tuo fuso orario'],
+    'sch.tzRome': ['Rome / Central Europe', 'Roma / Europa centrale'],
+    'sch.tzLondon': ['UK / London', 'Regno Unito / Londra'],
+    'sch.tzAthens': ['Eastern Europe (Athens, Bucharest)', 'Europa dell\'Est (Atene, Bucarest)'],
+    'sch.length': ['Lesson length', 'Durata della lezione'],
+    'sch.min10': ['10 minutes', '10 minuti'],
+    'sch.min15': ['15 minutes', '15 minuti'],
+    'sch.errDays': ['Please choose a different day for each lesson.', 'Scegli un giorno diverso per ogni lezione.'],
+    'sch.errSession': ['Your session has expired. Please sign in again.', 'La sessione è scaduta. Accedi di nuovo.'],
+    'sch.errSave': ['Could not save your schedule. Please try again.', "Non è stato possibile salvare l'orario. Riprova."],
+    'sch.errNet': ['Could not reach the server. Please check your connection and try again.', 'Impossibile contattare il server. Controlla la connessione e riprova.'],
+    'btn.cancel': ['Cancel', 'Annulla'],
+    'btn.save': ['Save', 'Salva'],
+    'btn.saving': ['Saving...', 'Salvataggio...'],
+    'day.monday': ['Monday', 'Lunedì'], 'day.tuesday': ['Tuesday', 'Martedì'], 'day.wednesday': ['Wednesday', 'Mercoledì'],
+    'day.thursday': ['Thursday', 'Giovedì'], 'day.friday': ['Friday', 'Venerdì'], 'day.saturday': ['Saturday', 'Sabato'], 'day.sunday': ['Sunday', 'Domenica'],
+    'lvl.student': ['Student', 'Studente'],
+    'lvl.level': ['Level {level}', 'Livello {level}']
+  };
+  var lang = 'en';
+  try {
+    var saved = localStorage.getItem('pennyLang');
+    lang = saved === 'it' || saved === 'en' ? saved : ((navigator.language || '').toLowerCase().indexOf('it') === 0 ? 'it' : 'en');
+  } catch (e) {
+    lang = (navigator.language || '').toLowerCase().indexOf('it') === 0 ? 'it' : 'en';
+  }
+  function t(key, vars) {
+    var row = D[key];
+    var s = row ? (lang === 'it' ? row[1] : row[0]) : key;
+    if (vars) Object.keys(vars).forEach(function (k) { s = s.split('{' + k + '}').join(vars[k]); });
+    return s;
+  }
+  function apply() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
+    document.querySelectorAll('[data-i18n-ph]').forEach(function (el) { el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph'))); });
+    document.querySelectorAll('.lang-btn').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-lang') === lang); });
+  }
+  window.PennyI18N = {
+    t: t,
+    lang: function () { return lang; },
+    locale: function () { return lang === 'it' ? 'it-IT' : 'en-GB'; },
+    day: function (d) { return t('day.' + String(d || '').toLowerCase()); },
+    set: function (l) {
+      lang = l === 'it' ? 'it' : 'en';
+      try { localStorage.setItem('pennyLang', lang); } catch (e) {}
+      apply();
+      if (typeof window.__rerenderDashboard === 'function') window.__rerenderDashboard();
+    },
+    apply: apply
+  };
+  window.t = t;
+  document.addEventListener('DOMContentLoaded', apply);
+})();
+</script>
+<style>
+  .lang-switch { display:inline-flex; border-radius:999px; background:rgba(255,255,255,.18); padding:3px; gap:2px; flex-shrink:0; }
+  .lang-btn { border:none; background:transparent; color:#fff; font:inherit; font-size:12px; font-weight:700; letter-spacing:.04em; padding:6px 10px; border-radius:999px; cursor:pointer; opacity:.8; }
+  .lang-btn.active { background:#fff; color:#4b36a8; opacity:1; }
+</style>
 </head>
 <body>
 
@@ -848,11 +1022,11 @@
   <nav class="nav-menu">
     <div class="nav-item active" id="nav-overview" onclick="showSection('overview')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>
-      <span>Home</span>
+      <span data-i18n="nav.home">Home</span>
     </div>
     <div class="nav-item" id="nav-lessons" onclick="showSection('lessons')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-      <span>My Lessons</span>
+      <span data-i18n="nav.lessons">My Lessons</span>
     </div>
     <div class="nav-item is-soon" id="nav-selfstudy" title="Coming soon" style="display:none">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.25 4 3v15l8 3 8-3V3z"/><path d="M12 6.25V21"/></svg>
@@ -864,11 +1038,11 @@
     </div>
     <div class="nav-item" id="nav-history" onclick="showSection('history')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg>
-      <span>Progress</span>
+      <span data-i18n="nav.progress">Progress</span>
     </div>
     <div class="nav-item" id="nav-messages" onclick="showSection('messages')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span>Messages</span>
+      <span data-i18n="nav.messages">Messages</span>
       <span id="nav-msg-badge" style="display:none; background:#ef4444; color:white; border-radius:50%; width:16px; height:16px; font-size:10px; font-weight:700; align-items:center; justify-content:center; margin-left:auto; flex-shrink:0;"></span>
     </div>
   </nav>
@@ -881,7 +1055,11 @@
   <header class="topbar">
     <div class="topbar-greet">
       <h1><span id="greet-time">Welcome back</span>, <span id="greet-name">learner</span></h1>
-      <p>Ready for another step towards confident English?</p>
+      <p data-i18n="greet.sub">Ready for another step towards confident English?</p>
+    </div>
+    <div class="lang-switch" role="group" aria-label="Language / Lingua">
+      <button type="button" class="lang-btn" data-lang="en" onclick="PennyI18N.set('en')">EN</button>
+      <button type="button" class="lang-btn" data-lang="it" onclick="PennyI18N.set('it')">IT</button>
     </div>
     <button class="icon-btn" id="topbar-bell" onclick="showSection('messages')" aria-label="Messages">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -896,9 +1074,9 @@
     <div class="journey-hero">
       <div>
         <div class="level-chip" id="hero-chip">LEVEL PENDING</div>
-        <h2>Continue your journey</h2>
+        <h2 data-i18n="hero.title">Continue your journey</h2>
         <div class="hero-sub" id="hero-sub">Your next lesson is being prepared.</div>
-        <button class="btn-ink" id="hero-continue" onclick="showSection('lessons')" disabled>Continue lesson →</button>
+        <button class="btn-ink" id="hero-continue" onclick="showSection('lessons')" disabled data-i18n="hero.continue">Continue lesson →</button>
       </div>
       <div class="hero-progress">
         <b id="hero-pct">0%</b>
@@ -906,31 +1084,31 @@
       </div>
     </div>
 
-    <h2 class="home-h2">Choose your next activity</h2>
+    <h2 class="home-h2" data-i18n="act.title">Choose your next activity</h2>
     <div class="activity-grid">
       <button class="activity-card card-lilac" onclick="showSection('lessons')">
-        <h3>My Lessons</h3>
+        <h3 data-i18n="act.lessons">My Lessons</h3>
         <p id="act-lessons-sub">Your next live lesson is ready.</p>
       </button>
       <a class="activity-card card-mint" href="tel:+3909651960070" style="text-decoration:none; color:inherit;">
-        <h3>Call Penny now</h3>
-        <p>Missed your call or want your lesson early? Ring +39 0965 1960070.</p>
+        <h3 data-i18n="act.call">Call Penny now</h3>
+        <p data-i18n="act.callSub">Missed your call or want your lesson early? Ring +39 0965 1960070.</p>
       </a>
       <button class="activity-card card-peach" onclick="showSection('history')">
-        <h3>My progress</h3>
-        <p>Scores, recordings and Penny's feedback from every lesson.</p>
+        <h3 data-i18n="act.progress">My progress</h3>
+        <p data-i18n="act.progressSub">Scores, recordings and Penny's feedback from every lesson.</p>
       </button>
     </div>
 
     <div class="home-bottom">
       <div class="panel">
-        <div class="panel-eyebrow">Upcoming lesson</div>
+        <div class="panel-eyebrow" data-i18n="up.eyebrow">Upcoming lesson</div>
         <h3 id="upcoming-title">No lesson scheduled yet</h3>
         <div class="panel-meta" id="upcoming-meta">Your teacher will schedule your next session.</div>
-        <button class="btn-accent" onclick="showSection('lessons')">View lesson →</button>
+        <button class="btn-accent" onclick="showSection('lessons')" data-i18n="up.view">View lesson →</button>
       </div>
       <div class="panel">
-        <h4>Weekly goal</h4>
+        <h4 data-i18n="goal.title">Weekly goal</h4>
         <div class="goal-count" id="goal-count">0 of 0 lessons</div>
         <div class="goal-track"><div class="goal-fill" id="goal-fill"></div></div>
         <div class="goal-note" id="goal-note">Set a weekly frequency to track your goal.</div>
@@ -941,56 +1119,56 @@
   <!-- LESSONS SECTION -->
   <section id="section-lessons" class="section">
     <div class="section-header">
-      <h1>My Lessons</h1>
-      <p>Your current path and upcoming sessions.</p>
+      <h1 data-i18n="les.title">My Lessons</h1>
+      <p data-i18n="les.sub">Your current path and upcoming sessions.</p>
     </div>
 
     <div class="card lesson-current">
-      <div class="card-label">Current Lesson</div>
+      <div class="card-label" data-i18n="les.current">Current Lesson</div>
       <h2 id="lesson-title" style="font-size: 24px; margin-bottom: 8px;">—</h2>
       <p id="lesson-instruction" style="display:none;"></p>
       
-      <p style="margin: 4px 0 16px; color: #fff; opacity: .95; line-height: 1.5; font-size: 15px;">
+      <p style="margin: 4px 0 16px; color: #fff; opacity: .95; line-height: 1.5; font-size: 15px;" data-i18n="les.callNote">
         Penny will phone you at your lesson time. Can't wait, or missed the call?
         Call Penny yourself and she'll start this lesson.
       </p>
       <div style="display: flex; gap: 12px; flex-wrap: wrap;">
         <a class="btn-primary" id="btn-call-penny" href="tel:+3909651960070" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          Call Penny: +39 0965 1960070
+          <span data-i18n="les.callBtn">Call Penny: +39 0965 1960070</span>
         </a>
       </div>
     </div>
 
     <div class="card lesson-upcoming" style="margin-top: 24px;">
-      <div class="card-label">Upcoming Scheduled Sessions</div>
+      <div class="card-label" data-i18n="les.upcoming">Upcoming Scheduled Sessions</div>
       <div id="upcoming-calls-list">
         <div class="empty-state" style="padding: 24px 0;">
-          <p>No upcoming sessions scheduled.</p>
+          <p data-i18n="les.noUpcoming">No upcoming sessions scheduled.</p>
         </div>
       </div>
     </div>
 
     <div class="card lesson-prefs" style="margin-top: 24px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <div class="card-label" style="margin-bottom:0;">Preferences</div>
-        <button class="btn-secondary" style="padding:6px 12px; font-size:12px;" onclick="openPreferencesModal()">Change my schedule</button>
+        <div class="card-label" style="margin-bottom:0;" data-i18n="pref.title">Preferences</div>
+        <button class="btn-secondary" style="padding:6px 12px; font-size:12px;" onclick="openPreferencesModal()" data-i18n="pref.change">Change my schedule</button>
       </div>
       <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 0;">
         <div>
-          <div class="field-label">Frequency</div>
+          <div class="field-label" data-i18n="pref.frequency">Frequency</div>
           <div class="field-value" id="pref-frequency">—</div>
         </div>
         <div>
-          <div class="field-label">Duration</div>
+          <div class="field-label" data-i18n="pref.duration">Duration</div>
           <div class="field-value" id="pref-duration">—</div>
         </div>
         <div>
-          <div class="field-label">Preferred Days</div>
+          <div class="field-label" data-i18n="pref.days">Preferred Days</div>
           <div class="field-value" id="pref-days">—</div>
         </div>
         <div>
-          <div class="field-label">Lesson Time</div>
+          <div class="field-label" data-i18n="pref.time">Lesson Time</div>
           <div class="field-value" id="pref-time">—</div>
         </div>
       </div>
@@ -1000,14 +1178,14 @@
   <!-- HISTORY SECTION -->
   <section id="section-history" class="section">
     <div class="section-header">
-      <h1>Progress</h1>
-      <p>Your past sessions, recordings, transcripts and feedback.</p>
+      <h1 data-i18n="hist.title">Progress</h1>
+      <p data-i18n="hist.sub">Your past sessions, recordings, transcripts and feedback.</p>
     </div>
 
     <div class="list-card" id="history-list">
       <div class="empty-state">
-        <h3>No sessions yet</h3>
-        <p>Your practice history will appear here once you complete your first lesson.</p>
+        <h3 data-i18n="hist.none">No sessions yet</h3>
+        <p data-i18n="hist.noneSub">Your practice history will appear here once you complete your first lesson.</p>
       </div>
     </div>
   </section>
@@ -1016,35 +1194,35 @@
   <section id="section-profile" class="section">
     <div class="section-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
       <div>
-        <h1>Profile Settings</h1>
-        <p>Manage your personal details and learning goals.</p>
+        <h1 data-i18n="prof.title">Profile Settings</h1>
+        <p data-i18n="prof.sub">Manage your personal details and learning goals.</p>
       </div>
-      <button class="btn-primary" onclick="openProfileModal()">Edit Profile</button>
+      <button class="btn-primary" onclick="openProfileModal()" data-i18n="prof.edit">Edit Profile</button>
     </div>
 
     <div class="card profile-card">
       <div class="profile-grid">
         <div style="border-right: 1px solid var(--border); padding-right: 40px;">
           <div class="profile-field">
-            <div class="field-label">Full Name</div>
+            <div class="field-label" data-i18n="prof.name">Full Name</div>
             <div class="field-value" id="profile-name">—</div>
           </div>
           <div class="profile-field">
-            <div class="field-label">Email Address</div>
+            <div class="field-label" data-i18n="prof.email">Email Address</div>
             <div class="field-value" id="profile-email">—</div>
           </div>
           <div class="profile-field">
-            <div class="field-label">Current Level</div>
+            <div class="field-label" data-i18n="prof.level">Current Level</div>
             <div class="field-value" id="profile-level">—</div>
           </div>
         </div>
         <div style="padding-left: 20px;">
           <div class="profile-field">
-            <div class="field-label">Personal Bio / Details</div>
+            <div class="field-label" data-i18n="prof.bio">Personal Bio / Details</div>
             <div class="field-value" id="profile-bio" style="line-height: 1.6;">—</div>
           </div>
           <div class="profile-field">
-            <div class="field-label">Learning Goal</div>
+            <div class="field-label" data-i18n="prof.goal">Learning Goal</div>
             <div class="field-value" id="profile-goal" style="font-weight: 500; color: var(--accent);">—</div>
           </div>
         </div>
@@ -1058,17 +1236,17 @@
     <!-- Contact list view -->
     <div id="msg-conv-list-view">
       <div class="section-header">
-        <div><h1>Messages</h1><p>Your dedicated chats with your teacher and school.</p></div>
+        <div><h1 data-i18n="msg.title">Messages</h1><p data-i18n="msg.sub">Your dedicated chats with your teacher and school.</p></div>
       </div>
       <div class="msg-list-card" id="msg-conv-list">
-        <div style="text-align:center; color:var(--muted); padding:40px;">Loading…</div>
+        <div style="text-align:center; color:var(--muted); padding:40px;" data-i18n="msg.loading">Loading…</div>
       </div>
     </div>
 
     <!-- Thread view -->
     <div id="msg-thread-view" style="display:none;">
       <button onclick="closeMsgThread()" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--muted);background:none;border:none;cursor:pointer;padding:0;margin-bottom:24px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Back to messages
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> <span data-i18n="msg.back">Back to messages</span>
       </button>
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
         <div style="width:44px;height:44px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;" id="msg-thread-avatar">—</div>
@@ -1077,7 +1255,7 @@
       <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column;">
         <div id="msg-thread" style="flex:1; overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:12px; min-height:360px; max-height:calc(100vh - 380px);"></div>
         <div style="padding:14px 20px; border-top:1px solid var(--border); display:flex; gap:10px; align-items:flex-end;">
-          <textarea id="msg-input" rows="1" placeholder="Write a message… (Enter to send)" style="flex:1; border:1px solid var(--border); border-radius:10px; padding:10px 14px; font-family:inherit; font-size:14px; resize:none; max-height:120px; outline:none; line-height:1.5; transition:border-color 0.15s;" onkeydown="msgKeyDown(event)" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+          <textarea id="msg-input" rows="1" placeholder="Write a message… (Enter to send)" data-i18n-ph="msg.placeholder" style="flex:1; border:1px solid var(--border); border-radius:10px; padding:10px 14px; font-family:inherit; font-size:14px; resize:none; max-height:120px; outline:none; line-height:1.5; transition:border-color 0.15s;" onkeydown="msgKeyDown(event)" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
           <button onclick="sendMsg()" style="width:40px;height:40px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s;" onmouseover="this.style.background='var(--accent-dark)'" onmouseout="this.style.background='var(--accent)'">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
@@ -1092,27 +1270,27 @@
 <!-- Profile Edit Modal -->
 <div class="modal-overlay" id="profileModal">
   <div class="modal-card">
-    <div class="modal-title">Edit Profile</div>
+    <div class="modal-title" data-i18n="prof.edit">Edit Profile</div>
     <div class="form-group">
-      <label class="form-label" for="edit-profile-name">First name (what Penny calls you)</label>
+      <label class="form-label" for="edit-profile-name" data-i18n="prof.first">First name (what Penny calls you)</label>
       <input type="text" id="edit-profile-name" class="form-input" autocomplete="given-name" />
     </div>
     <div class="form-group">
-      <label class="form-label" for="edit-profile-last-name">Surname</label>
+      <label class="form-label" for="edit-profile-last-name" data-i18n="prof.last">Surname</label>
       <input type="text" id="edit-profile-last-name" class="form-input" autocomplete="family-name" />
     </div>
     <div id="edit-profile-error" role="alert" style="display:none; color:#b42318; font-size:13px; margin-bottom:12px;"></div>
     <div class="form-group">
-      <label class="form-label">Personal Bio / Details</label>
+      <label class="form-label" data-i18n="prof.bio">Personal Bio / Details</label>
       <textarea id="edit-profile-bio" class="form-input" rows="3"></textarea>
     </div>
     <div class="form-group">
-      <label class="form-label">Learning Goal</label>
+      <label class="form-label" data-i18n="prof.goal">Learning Goal</label>
       <input type="text" id="edit-profile-goal" class="form-input" />
     </div>
     <div class="modal-actions">
-      <button class="btn-secondary" onclick="closeModal('profileModal')">Cancel</button>
-      <button class="btn-primary" onclick="saveProfile()">Save</button>
+      <button class="btn-secondary" onclick="closeModal('profileModal')" data-i18n="btn.cancel">Cancel</button>
+      <button class="btn-primary" onclick="saveProfile()" data-i18n="btn.save">Save</button>
     </div>
   </div>
 </div>
@@ -1120,45 +1298,45 @@
 <!-- Preferences Edit Modal: student sets their own lesson schedule -->
 <div class="modal-overlay" id="preferencesModal">
   <div class="modal-card">
-    <div class="modal-title">My lesson schedule</div>
+    <div class="modal-title" data-i18n="sch.title">My lesson schedule</div>
     <div class="form-group">
-      <label class="form-label" for="edit-pref-frequency">Lessons per week</label>
+      <label class="form-label" for="edit-pref-frequency" data-i18n="sch.perWeek">Lessons per week</label>
       <select id="edit-pref-frequency" class="form-input" onchange="renderDaySelects()">
-        <option value="1">1 lesson a week</option>
+        <option value="1" data-i18n="pref.perWeek1">1 lesson a week</option>
         <option value="2">2 lessons a week</option>
         <option value="3">3 lessons a week</option>
       </select>
     </div>
     <div class="form-group">
-      <label class="form-label">Lesson days</label>
+      <label class="form-label" data-i18n="sch.days">Lesson days</label>
       <div id="edit-pref-days" style="display:grid; gap:8px;"></div>
       <label id="edit-pref-perday-wrap" style="display:flex; align-items:center; gap:8px; margin-top:10px; font-size:14px; cursor:pointer;">
-        <input type="checkbox" id="edit-pref-perday" onchange="renderDaySelects()" /> Different time for each day
+        <input type="checkbox" id="edit-pref-perday" onchange="renderDaySelects()" /> <span data-i18n="sch.perDay">Different time for each day</span>
       </label>
     </div>
     <div class="form-group" id="edit-pref-time-group">
-      <label class="form-label" for="edit-pref-time">Lesson time (any time, day or night)</label>
+      <label class="form-label" for="edit-pref-time" data-i18n="sch.time">Lesson time (any time, day or night)</label>
       <select id="edit-pref-time" class="form-input"></select>
     </div>
     <div class="form-group">
-      <label class="form-label" for="edit-pref-timezone">Your time zone</label>
+      <label class="form-label" for="edit-pref-timezone" data-i18n="sch.tz">Your time zone</label>
       <select id="edit-pref-timezone" class="form-input">
-        <option value="Europe/Rome">Rome / Central Europe</option>
-        <option value="Europe/London">UK / London</option>
-        <option value="Europe/Athens">Eastern Europe (Athens, Bucharest)</option>
+        <option value="Europe/Rome" data-i18n="sch.tzRome">Rome / Central Europe</option>
+        <option value="Europe/London" data-i18n="sch.tzLondon">UK / London</option>
+        <option value="Europe/Athens" data-i18n="sch.tzAthens">Eastern Europe (Athens, Bucharest)</option>
       </select>
     </div>
     <div class="form-group">
-      <label class="form-label" for="edit-pref-duration">Lesson length</label>
+      <label class="form-label" for="edit-pref-duration" data-i18n="sch.length">Lesson length</label>
       <select id="edit-pref-duration" class="form-input">
-        <option value="10">10 minutes</option>
-        <option value="15">15 minutes</option>
+        <option value="10" data-i18n="sch.min10">10 minutes</option>
+        <option value="15" data-i18n="sch.min15">15 minutes</option>
       </select>
     </div>
     <div id="edit-pref-error" role="alert" style="display:none; color:#b42318; font-size:13px; margin-bottom:12px;"></div>
     <div class="modal-actions">
-      <button class="btn-secondary" onclick="closeModal('preferencesModal')">Cancel</button>
-      <button class="btn-primary" id="edit-pref-save" onclick="savePreferences()">Save</button>
+      <button class="btn-secondary" onclick="closeModal('preferencesModal')" data-i18n="btn.cancel">Cancel</button>
+      <button class="btn-primary" id="edit-pref-save" onclick="savePreferences()" data-i18n="btn.save">Save</button>
     </div>
   </div>
 </div>
@@ -1243,7 +1421,7 @@ window.saveProfile = async function() {
   const lastName = document.getElementById('edit-profile-last-name').value.trim();
   const bio = document.getElementById('edit-profile-bio').value;
   const errBox = document.getElementById('edit-profile-error');
-  if (!name) { errBox.textContent = 'Please enter your first name.'; errBox.style.display = 'block'; return; }
+  if (!name) { errBox.textContent = t('prof.errFirst'); errBox.style.display = 'block'; return; }
   const goal = document.getElementById('edit-profile-goal').value;
   
   const { data: { session } } = await supabase.auth.getSession();
@@ -1256,7 +1434,7 @@ window.saveProfile = async function() {
     goal: goal
   }).eq('id', session.user.id);
 
-  if (error) { errBox.textContent = 'Could not save your profile. Please try again.'; errBox.style.display = 'block'; return; }
+  if (error) { errBox.textContent = t('prof.errSave'); errBox.style.display = 'block'; return; }
 
   // Keep Auth user_metadata.name in sync — updateUser() updates the caller's own metadata,
   // no service role needed. Non-fatal if it fails: the users-table save (source of truth) already succeeded.
@@ -1274,7 +1452,8 @@ window.saveProfile = async function() {
 
 const WEEK_DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
 const TZ_LABELS = { 'Europe/Rome': 'Rome time', 'Europe/London': 'UK time', 'Europe/Athens': 'Eastern Europe time' };
-const capDay = d => d ? d.charAt(0).toUpperCase() + d.slice(1) : d;
+const tzLabel = tz => t('tz.' + (TZ_LABELS[tz] ? tz : 'Europe/Rome'));
+const capDay = d => d ? PennyI18N.day(d) : d;
 
 // Rome-time days as stored in the database ("tuesday,thursday", "Monday, Friday" or "{a,b}")
 function parseDays(raw) {
@@ -1376,7 +1555,7 @@ window.savePreferences = async function() {
 
   const frequency = Number(document.getElementById('edit-pref-frequency').value);
   const days = Array.from(document.querySelectorAll('#edit-pref-days select.day-sel')).map(s => s.value);
-  if (new Set(days).size !== days.length) return showErr('Please choose a different day for each lesson.');
+  if (new Set(days).size !== days.length) return showErr(t('sch.errDays'));
   const perDay = document.getElementById('edit-pref-perday').checked && days.length > 1;
   const times = perDay ? Array.from(document.querySelectorAll('#edit-pref-days select.time-sel')).map(s => s.value) : null;
   const payload = {
@@ -1389,10 +1568,10 @@ window.savePreferences = async function() {
   };
 
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return showErr('Your session has expired. Please sign in again.');
+  if (!session) return showErr(t('sch.errSession'));
 
   const btn = document.getElementById('edit-pref-save');
-  btn.disabled = true; btn.textContent = 'Saving...';
+  btn.disabled = true; btn.textContent = t('btn.saving');
   try {
     const res = await fetch('/api/me/schedule', {
       method: 'POST',
@@ -1400,7 +1579,7 @@ window.savePreferences = async function() {
       body: JSON.stringify(payload)
     });
     const out = await res.json().catch(() => ({}));
-    if (!res.ok) return showErr(out.error || 'Could not save your schedule. Please try again.');
+    if (!res.ok) return showErr(out.error || t('sch.errSave'));
 
     const prefs = dashboardData.profile.preferences;
     prefs.frequency = frequency;
@@ -1413,9 +1592,9 @@ window.savePreferences = async function() {
     // reload so "next lesson" and upcoming calls show the moved booking
     window.location.reload();
   } catch (e) {
-    showErr('Could not reach the server. Please check your connection and try again.');
+    showErr(t('sch.errNet'));
   } finally {
-    btn.disabled = false; btn.textContent = 'Save';
+    btn.disabled = false; btn.textContent = t('btn.save');
   }
 };
 
@@ -1528,6 +1707,13 @@ function initialsOf(name) {
 /* Lessons per level — used for the hero progress ring. Keep in step with the lessons table. */
 const LEVEL_LESSON_COUNTS = { A1: 11, A2: 11, B1: 11, B2: 11, C1: 11, C2: 2 };
 
+// Re-draw everything in the chosen language when the EN / IT switch is used.
+window.__rerenderDashboard = function () {
+  if (dashboardData) updateUI(dashboardData);
+  const listView = document.getElementById('msg-conv-list-view');
+  if (listView && listView.style.display !== 'none' && document.getElementById('section-messages').classList.contains('active')) initMessages();
+};
+
 function updateUI(data) {
   if (!data) return;
 
@@ -1535,7 +1721,7 @@ function updateUI(data) {
   const name = data.profile.name || 'Learner';
   const first = name.split(' ')[0];
   const hour = new Date().getHours();
-  setText('greet-time', hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening'));
+  setText('greet-time', t(hour < 12 ? 'greet.morning' : (hour < 18 ? 'greet.afternoon' : 'greet.evening')));
   setText('greet-name', first);
   if (window.__accountMenu) window.__accountMenu.update({ name: name, avatar_url: data.profile.avatarUrl });
   setText('topbar-name', name);
@@ -1544,24 +1730,25 @@ function updateUI(data) {
   const level = data.profile.englishLevel && data.profile.englishLevel !== 'Pending...'
     ? data.profile.englishLevel : null;
   setText('topbar-level', level ? level + ' learner' : 'Level pending');
-  setText('hero-chip', level ? level + ' · IN PROGRESS' : 'LEVEL PENDING');
+  setText('hero-chip', level ? t('hero.inprogress', { level }) : t('hero.pending'));
 
   const lessonNo = data.lessonProgress.currentLessonId;
   const nextLesson = data.lessonProgress.nextLessonDetails;
   if (nextLesson && nextLesson.title) {
-    setText('hero-sub', 'Lesson ' + (lessonNo || '') + ' · ' + nextLesson.title);
-    setText('act-lessons-sub', 'Next up: ' + nextLesson.title);
+    setText('hero-sub', t('hero.lessonLine', { n: lessonNo || '', title: nextLesson.title }));
+    setText('act-lessons-sub', t('act.nextUp', { title: nextLesson.title }));
     const btn = document.getElementById('hero-continue');
     if (btn) btn.disabled = false;
   } else {
-    setText('hero-sub', 'Your next lesson is being prepared.');
+    setText('hero-sub', t('hero.preparing'));
+    setText('act-lessons-sub', t('act.lessonsReady'));
   }
 
   const totalInLevel = (level && LEVEL_LESSON_COUNTS[level]) || 10;
   const done = Math.max(0, (lessonNo || 1) - 1);
   const levelPct = Math.min(100, Math.round((done / totalInLevel) * 100));
   setText('hero-pct', levelPct + '%');
-  setText('hero-pct-label', level ? level + ' progress' : 'level progress');
+  setText('hero-pct-label', level ? t('hero.levelProgressOf', { level }) : t('hero.levelProgress'));
 
   // ---- HOME: weekly goal (target = lessons per week from preferences) ----
   const target = Number(data.profile.preferences.frequency) || 0;
@@ -1577,16 +1764,16 @@ function updateUI(data) {
     return h.pass_status === 'passed' || Number(h.completion_percentage) >= 60;
   }).length;
   if (target > 0) {
-    setText('goal-count', thisWeek + ' of ' + target + ' lesson' + (target === 1 ? '' : 's'));
+    setText('goal-count', t(target === 1 ? 'goal.count1' : 'goal.count', { done: thisWeek, target }));
     const gf = document.getElementById('goal-fill');
     if (gf) gf.style.width = Math.min(100, (thisWeek / target) * 100) + '%';
     const left = target - thisWeek;
     setText('goal-note', left > 0
-      ? left + ' more lesson' + (left === 1 ? '' : 's') + ' to reach your goal.'
-      : 'Goal reached this week. Nicely done.');
+      ? t(left === 1 ? 'goal.left1' : 'goal.left', { n: left })
+      : t('goal.done'));
   } else {
-    setText('goal-count', thisWeek + ' this week');
-    setText('goal-note', 'Set a weekly frequency in Profile to track a goal.');
+    setText('goal-count', t('goal.thisWeek', { n: thisWeek }));
+    setText('goal-note', t('goal.set'));
   }
 
   // ---- HOME: upcoming lesson panel ----
@@ -1594,47 +1781,47 @@ function updateUI(data) {
     const d = new Date(data.scheduling.nextCallTime);
     const today = new Date();
     const sameDay = d.toDateString() === today.toDateString();
-    const dayLabel = sameDay ? 'Today' : d.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
-    const timeLabel = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const dur = data.profile.preferences.duration ? data.profile.preferences.duration + ' minutes' : null;
-    setText('upcoming-title', (nextLesson && nextLesson.title) || 'Your next lesson');
-    setText('upcoming-meta', [dayLabel, timeLabel, dur, level && lessonNo ? level + ' Lesson ' + lessonNo : null]
+    const dayLabel = sameDay ? t('up.today') : d.toLocaleDateString(PennyI18N.locale(), { weekday: 'long', month: 'short', day: 'numeric' });
+    const timeLabel = d.toLocaleTimeString(PennyI18N.locale(), { hour: '2-digit', minute: '2-digit' });
+    const dur = data.profile.preferences.duration ? t('up.minutes', { n: data.profile.preferences.duration }) : null;
+    setText('upcoming-title', (nextLesson && nextLesson.title) || t('up.yourNext'));
+    setText('upcoming-meta', [dayLabel, timeLabel, dur, level && lessonNo ? t('up.levelLesson', { level, n: lessonNo }) : null]
       .filter(Boolean).join(' · '));
   }
 
   // ---- LESSONS section ----
   if (data.lessonProgress.nextLessonDetails) {
-    setText('lesson-title', data.lessonProgress.nextLessonDetails.title || 'Lesson ' + data.lessonProgress.currentLessonId);
+    setText('lesson-title', data.lessonProgress.nextLessonDetails.title || t('les.lessonN', { n: data.lessonProgress.currentLessonId }));
     setText('lesson-instruction', data.lessonProgress.nextLessonDetails.lesson_instruction || 'No instructions provided.');
     const startBtn = document.getElementById('btn-start-session');
     if (startBtn) startBtn.disabled = false;
   }
   { const f = Number(data.profile.preferences.frequency);
-    setText('pref-frequency', f ? (f === 1 ? '1 lesson a week' : f + ' lessons a week') : 'Not set'); }
-  setText('pref-duration', (data.profile.preferences.duration || '—') + ' mins');
+    setText('pref-frequency', f ? (f === 1 ? t('pref.perWeek1') : t('pref.perWeek', { n: f })) : t('pref.notSet')); }
+  setText('pref-duration', t('pref.mins', { n: data.profile.preferences.duration || '—' }));
   { const sch = currentSchedule(data.profile.preferences);
-    setText('pref-days', sch.days.length ? sch.days.map(capDay).join(', ') : 'Not set');
-    setText('pref-time', sch.time ? scheduleTimeText(sch) + ' (' + (TZ_LABELS[sch.timezone] || 'Rome time') + ')' : 'Not set'); }
+    setText('pref-days', sch.days.length ? sch.days.map(capDay).join(', ') : t('pref.notSet'));
+    setText('pref-time', sch.time ? scheduleTimeText(sch) + ' (' + tzLabel(sch.timezone) + ')' : t('pref.notSet')); }
 
   // Upcoming calls
   const upcomingEl = document.getElementById('upcoming-calls-list');
   if (data.upcomingCalls && data.upcomingCalls.length > 0) {
     upcomingEl.innerHTML = data.upcomingCalls.map(c => {
       const d = new Date(c.scheduled_time);
-      const dateStr = d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
-      const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const dateStr = d.toLocaleDateString(PennyI18N.locale(), { weekday: 'short', month: 'short', day: 'numeric' });
+      const timeStr = d.toLocaleTimeString(PennyI18N.locale(), { hour: '2-digit', minute: '2-digit' });
       return `
         <div class="upcoming-item">
           <div class="upcoming-dot"></div>
           <div style="flex:1;">
-            <div style="font-size:14px; font-weight:600;">${dateStr} at ${timeStr}</div>
-            <div style="font-size:12px; color:var(--muted);">AI English Lesson</div>
+            <div style="font-size:14px; font-weight:600;">${t('les.at', { date: dateStr, time: timeStr })}</div>
+            <div style="font-size:12px; color:var(--muted);">${t('les.aiLesson')}</div>
           </div>
-          <span style="font-size:12px; padding:4px 10px; background:var(--accent-light); color:var(--accent); border-radius:20px; font-weight:600;">Scheduled</span>
+          <span style="font-size:12px; padding:4px 10px; background:var(--accent-light); color:var(--accent); border-radius:20px; font-weight:600;">${t('les.scheduled')}</span>
         </div>`;
     }).join('');
   } else {
-    upcomingEl.innerHTML = '<div style="padding:20px; color:var(--muted); font-size:14px;">No upcoming sessions scheduled.</div>';
+    upcomingEl.innerHTML = '<div style="padding:20px; color:var(--muted); font-size:14px;">' + t('les.noUpcoming') + '</div>';
   }
 
   // History
@@ -1652,23 +1839,24 @@ function updateUI(data) {
         <div class="list-item" style="flex-direction:column; align-items:stretch; cursor:pointer;" onclick="toggleHistoryItem('${detailsId}')">
           <div style="display:flex; align-items:center; gap:20px;">
             <div class="item-content">
-              ${item.lesson_id ? `<div class="item-lesson-id">Lesson ${item.lesson_id}</div>` : ''}
-              <div class="item-title">${item.lessons?.title || 'Lesson Attempt'}</div>
-              <div class="item-meta">${item.call_summary || 'No summary available.'}</div>
+              ${item.lesson_code ? `<div class="item-lesson-id">${t('hist.lesson', { id: item.lesson_code })}</div>` : ''}
+              <div class="item-title">${item.lessons?.title || item.lesson_title || t('hist.attempt')}</div>
+              <div class="item-meta">${item.call_summary || t('hist.noSummary')}</div>
             </div>
             <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0;">
               <div style="display:flex; align-items:center; gap:8px;">
                 ${hasRecording ? '<svg title="Recording available" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16"/></svg>' : ''}
                 <div class="item-score ${scoreClass}">${score}%</div>
               </div>
-              <div class="item-date-small">${d.toLocaleDateString([], { month: 'short', day: 'numeric' })}</div>
+              <div class="item-date-small">${d.toLocaleDateString(PennyI18N.locale(), { month: 'short', day: 'numeric' })}</div>
+              ${item.pass_status ? `<div class="item-date-small" style="font-weight:600; color:${item.pass_status === 'passed' ? 'var(--green)' : 'var(--muted)'};">${t(item.pass_status === 'passed' ? 'hist.passed' : 'hist.notYet')}</div>` : ''}
             </div>
           </div>
 
           <div id="${detailsId}" onclick="event.stopPropagation()" style="display:none; margin-top:16px; padding:16px 0 0; font-size:13px;">
             ${hasRecording ? `
             <div style="margin-bottom:12px;">
-              <strong style="display:block; margin-bottom:8px;">Recording</strong>
+              <strong style="display:block; margin-bottom:8px;">${t('hist.recording')}</strong>
               <div class="recording-player">
                 <div class="recording-player-top">
                   <button class="play-btn" id="play-btn-h${idx}" onclick="event.stopPropagation(); toggleWavePlay('h${idx}', '${item.recording_url}')">
@@ -1681,21 +1869,21 @@ function updateUI(data) {
             </div>` : ''}
             ${hasTranscript ? `
             <div style="margin-bottom:12px;">
-              <strong style="display:block; margin-bottom:8px;">Transcript</strong>
+              <strong style="display:block; margin-bottom:8px;">${t('hist.transcript')}</strong>
               <div class="transcript-wrap">${formatTranscript(item.transcript)}</div>
             </div>` : ''}
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
               <div>
-                <strong style="display:block; margin-bottom:4px; color:var(--accent);">AI Feedback</strong>
+                <strong style="display:block; margin-bottom:4px; color:var(--accent);">${t('hist.penny')}</strong>
                 <div style="color:var(--text);">${
-                  typeof item.grading_rationale === 'string' && item.grading_rationale.startsWith('{')
+                  item.student_feedback ? escHtml(item.student_feedback) : typeof item.grading_rationale === 'string' && item.grading_rationale.startsWith('{')
                     ? (() => { try { const g = JSON.parse(item.grading_rationale); return (g.strengths ? '<strong>Strengths:</strong> ' + g.strengths + '<br>' : '') + (g.areas_for_improvement ? '<strong>Areas to improve:</strong> ' + g.areas_for_improvement : ''); } catch(e) { return item.grading_rationale; } })()
-                    : (item.grading_rationale || 'No feedback provided.')
+                    : (item.grading_rationale || t('hist.noFeedback'))
                 }</div>
               </div>
               ${hasTeacherFeedback ? `
               <div>
-                <strong style="display:block; margin-bottom:4px; color:var(--green);">Teacher Feedback</strong>
+                <strong style="display:block; margin-bottom:4px; color:var(--green);">${t('hist.teacher')}</strong>
                 <div style="color:var(--text);">${item.teacher_feedback}</div>
               </div>` : ''}
             </div>
@@ -1704,15 +1892,17 @@ function updateUI(data) {
       `;
     }).join('');
   } else {
-    historyContainer.innerHTML = '<div class="empty-state"><h3>No sessions yet</h3><p>Your lesson history will appear here after your first session.</p></div>';
+    historyContainer.innerHTML = '<div class="empty-state"><h3>' + t('hist.none') + '</h3><p>' + t('hist.noneSub') + '</p></div>';
   }
 
   // Profile
   document.getElementById('profile-name').textContent = [data.profile.name, data.profile.lastName].filter(Boolean).join(' ') || '—';
   document.getElementById('profile-email').textContent = data.profile.email || '—';
   document.getElementById('profile-level').textContent = data.profile.englishLevel || '—';
-  document.getElementById('profile-bio').textContent = data.profile.bio || 'No details provided.';
-  document.getElementById('profile-goal').textContent = data.profile.goal || 'No goal set yet.';
+  document.getElementById('profile-bio').textContent = (data.profile.bio && data.profile.bio !== 'No profile details yet.') ? data.profile.bio : t('prof.noBio');
+  document.getElementById('profile-goal').textContent = (data.profile.goal && data.profile.goal !== 'No goal set.') ? data.profile.goal : t('prof.noGoal');
+  { const sel = document.getElementById('edit-pref-frequency');
+    if (sel) [...sel.options].forEach(o => { o.textContent = o.value === '1' ? t('pref.perWeek1') : t('pref.perWeek', { n: o.value }); }); }
 }
 
 // HISTORY HELPERS
@@ -1950,7 +2140,7 @@ endBtn.addEventListener('click', () => {
       mount: document.getElementById('account-slot'), supabase,
       me: { id: session.user.id, name: dashData.profile.name, avatar_url: dashData.profile.avatarUrl, role: 'student' },
       email: dashData.profile.email || session.user.email, theme: 'dark',
-      subtitle: dashData.profile.englishLevel && dashData.profile.englishLevel !== 'Pending...' ? 'Level ' + dashData.profile.englishLevel : 'Student',
+      subtitle: dashData.profile.englishLevel && dashData.profile.englishLevel !== 'Pending...' ? t('lvl.level', { level: dashData.profile.englishLevel }) : t('lvl.student'),
       onProfile: () => showSection('profile'),
       onChange: (m) => { dashboardData.profile.avatarUrl = m.avatar_url; }
     });
@@ -2002,7 +2192,7 @@ async function initMessages() {
 
   const el = document.getElementById('msg-conv-list');
   if (!Array.isArray(contacts) || !contacts.length) {
-    el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px;font-size:14px;">No contacts yet. You\'ll be able to message your teacher once one is assigned.</div>';
+    el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px;font-size:14px;">' + t('msg.noContacts') + '</div>';
     return;
   }
 
@@ -2025,13 +2215,13 @@ async function initMessages() {
     const lastMsg = conv?.last_message;
     const unread = conv?.unread_count || 0;
     const time = lastMsg ? new Date(lastMsg.created_at).toLocaleDateString([], { month:'short', day:'numeric' }) : '';
-    const preview = lastMsg ? lastMsg.content.slice(0,60) + (lastMsg.content.length > 60 ? '…' : '') : 'No messages yet — tap to start';
+    const preview = lastMsg ? lastMsg.content.slice(0,60) + (lastMsg.content.length > 60 ? '…' : '') : t('msg.startChat');
     const initials = (contact.name || '?').charAt(0).toUpperCase();
-    const roleLabel = contact.role === 'teacher' ? 'Teacher' : (contact.role === 'school_admin' || contact.role === 'system_admin') ? 'School Admin' : contact.role;
+    const roleLabel = contact.role === 'teacher' ? t('msg.teacher') : (contact.role === 'school_admin' || contact.role === 'system_admin') ? t('msg.school') : contact.role;
     return `<div style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;" onclick="openMsgThread('${contact.id}','${escHtml(contact.name||'')}','${escHtml(roleLabel)}')" onmouseover="this.style.background='var(--off)'" onmouseout="this.style.background=''">
       <div style="width:40px;height:40px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;">${initials}</div>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:14px;font-weight:600;margin-bottom:1px;">${escHtml(contact.name || 'Unknown')}</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:1px;">${escHtml(contact.full_name || contact.name || t('msg.unknown'))}</div>
         <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:3px;">${escHtml(roleLabel)}</div>
         <div style="font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(preview)}</div>
       </div>
@@ -2048,12 +2238,12 @@ window.openMsgThread = async function(targetUserId, name, meta) {
   const token = session.access_token;
 
   const res = await fetch(`/api/messages/dm/${targetUserId}`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json());
-  if (res.error) { alert('Could not open conversation: ' + res.error); return; }
+  if (res.error) { alert(t('msg.openErr') + res.error); return; }
 
   msgConvId = res.conversation_id;
 
   document.getElementById('msg-thread-avatar').textContent = (name || '?').charAt(0).toUpperCase();
-  document.getElementById('msg-thread-name').textContent = name || 'Unknown';
+  document.getElementById('msg-thread-name').textContent = name || t('msg.unknown');
   document.getElementById('msg-thread-meta').textContent = meta || '';
   document.getElementById('msg-conv-list-view').style.display = 'none';
   document.getElementById('msg-thread-view').style.display = '';
@@ -2077,7 +2267,7 @@ async function loadMsgs(token) {
   const msgs = await fetch(`/api/messages/conversations/${msgConvId}`, { headers: { 'Authorization': 'Bearer ' + t } }).then(r => r.json());
   const el = document.getElementById('msg-thread');
   if (!Array.isArray(msgs) || !msgs.length) {
-    el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px;font-size:14px;">No messages yet — say hello!</div>';
+    el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px;font-size:14px;">' + t('msg.sayHello') + '</div>';
     el.scrollTop = el.scrollHeight;
     return;
   }

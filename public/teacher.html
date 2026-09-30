@@ -910,7 +910,7 @@ function renderHistory(history, token) {
         <div class="history-row" onclick="toggleDetail('${detailId}')">
           <div class="history-row-header">
             <div class="history-info">
-              ${item.lesson_id ? `<div class="history-lesson-id">Lesson ${item.lesson_id}</div>` : ''}
+              ${item.lesson_code ? `<div class="history-lesson-id">Lesson ${item.lesson_code}</div>` : ''}
               <div class="history-title">${item.lessons?.title || 'Lesson Attempt'}</div>
               <div class="history-summary">${item.call_summary || 'No summary.'}</div>
             </div>
