@@ -857,6 +857,8 @@
     'hero.lessonLine': ['Lesson {n} · {title}', 'Lezione {n} · {title}'],
     'hero.levelProgress': ['level progress', 'progresso del livello'],
     'hero.levelProgressOf': ['{level} progress', 'progresso {level}'],
+    'hero.lessonOf': ['{level} lesson', 'lezione {level}'],
+    'hero.lessonOfPct': ['{level} lesson · {pct}% of level passed', 'lezione {level} · {pct}% del livello superato'],
     'act.title': ['Choose your next activity', 'Scegli la prossima attività'],
     'act.lessons': ['My Lessons', 'Le mie lezioni'],
     'act.lessonsReady': ['Your next live lesson is ready.', 'La tua prossima lezione è pronta.'],
@@ -1083,7 +1085,7 @@
         <button class="btn-ink" id="hero-continue" onclick="showSection('lessons')" disabled data-i18n="hero.continue">Continue lesson →</button>
       </div>
       <div class="hero-progress">
-        <b id="hero-pct">0%</b>
+        <b id="hero-pct">–</b>
         <span id="hero-pct-label">level progress</span>
       </div>
     </div>
@@ -1753,8 +1755,13 @@ function updateUI(data) {
   const totalInLevel = (level && LEVEL_LESSON_COUNTS[level]) || 10;
   const done = Math.max(0, (lessonNo || 1) - 1);
   const levelPct = Math.min(100, Math.round((done / totalInLevel) * 100));
-  setText('hero-pct', levelPct + '%');
-  setText('hero-pct-label', level ? t('hero.levelProgressOf', { level }) : t('hero.levelProgress'));
+  // Show where the student is ("Lesson 3 of 11") rather than a bare 0% on day one;
+  // the percentage of the level already passed sits underneath once there is one.
+  const current = Math.min(totalInLevel, done + 1);
+  setText('hero-pct', current + '/' + totalInLevel);
+  setText('hero-pct-label', done > 0
+    ? t('hero.lessonOfPct', { level: level || '', pct: levelPct })
+    : t('hero.lessonOf', { level: level || '' }));
 
   // ---- HOME: weekly lesson time (same rule as the phone system) ----
   // Each week (Monday to Sunday, Rome time) a student has lessons-per-week x lesson-length
