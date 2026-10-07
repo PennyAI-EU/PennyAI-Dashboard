@@ -1377,6 +1377,22 @@ app.get("/api/next-call", async (req, res) => {
   }
 });
 
+// Weekly lesson time (minutes) for the signed-in student — same rule the phone system uses.
+app.get("/api/me/week", async (req, res) => {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) return res.status(401).json({ error: "Missing token" });
+  const { data: { user }, error: userError } = await getUserFromToken(token);
+  if (userError || !user) return res.status(401).json({ error: "Invalid token" });
+  const phone = user.user_metadata?.phone || user.phone;
+  if (!phone) return res.status(400).json({ error: "Phone not found" });
+  const { data, error } = await supabase.rpc("weekly_lesson_status", { p_phone: String(phone) });
+  if (error) {
+    console.error("[me/week]", error.message);
+    return res.status(500).json({ error: "Failed to load weekly time" });
+  }
+  res.json(data || { found: false });
+});
+
 app.get("/api/upcoming-calls", async (req, res) => {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Missing token" });

@@ -873,7 +873,11 @@
     'up.today': ['Today', 'Oggi'],
     'up.minutes': ['{n} minutes', '{n} minuti'],
     'up.levelLesson': ['{level} Lesson {n}', '{level} Lezione {n}'],
-    'goal.title': ['Weekly goal', 'Obiettivo settimanale'],
+    'goal.title': ['Lesson time this week', 'Tempo di lezione questa settimana'],
+    'goal.minLeft': ['{left} of {total} minutes left', '{left} di {total} minuti rimasti'],
+    'goal.minNote': ['Each lesson uses the minutes it actually lasts. Your time renews every Monday.', 'Ogni lezione usa i minuti che dura davvero. Il tuo tempo si rinnova ogni lunedì.'],
+    'goal.shortNext': ['Your next lesson this week will be a shorter one ({n} min).', 'La prossima lezione di questa settimana sarà più breve ({n} min).'],
+    'goal.minDone': ["You've used this week's lesson time. Well done! It renews on Monday.", 'Hai usato il tempo delle lezioni di questa settimana. Ottimo lavoro! Si rinnova lunedì.'],
     'goal.count': ['{done} of {target} lessons', '{done} di {target} lezioni'],
     'goal.count1': ['{done} of 1 lesson', '{done} di 1 lezione'],
     'goal.left': ['{n} more lessons to reach your goal.', 'Ancora {n} lezioni per raggiungere il tuo obiettivo.'],
@@ -1108,7 +1112,7 @@
         <button class="btn-accent" onclick="showSection('lessons')" data-i18n="up.view">View lesson →</button>
       </div>
       <div class="panel">
-        <h4 data-i18n="goal.title">Weekly goal</h4>
+        <h4 data-i18n="goal.title">Lesson time this week</h4>
         <div class="goal-count" id="goal-count">0 of 0 lessons</div>
         <div class="goal-track"><div class="goal-fill" id="goal-fill"></div></div>
         <div class="goal-note" id="goal-note">Set a weekly frequency to track your goal.</div>
@@ -1664,11 +1668,13 @@ async function getDashboardData(userId, userPhone, userEmail, authMeta) {
     // 3. Call History (merged with call_logs for recording/transcript)
     if (session) {
       try {
-        const [historyRes, upcomingRes, nextCallRes] = await Promise.all([
+        const [historyRes, upcomingRes, nextCallRes, weekRes] = await Promise.all([
           fetch('/api/history', { headers: { 'Authorization': 'Bearer ' + session.access_token } }),
           fetch('/api/upcoming-calls', { headers: { 'Authorization': 'Bearer ' + session.access_token } }),
           fetch('/api/next-call', { headers: { 'Authorization': 'Bearer ' + session.access_token } }),
+          fetch('/api/me/week', { headers: { 'Authorization': 'Bearer ' + session.access_token } }).catch(() => null),
         ]);
+        try { result.week = weekRes && weekRes.ok ? await weekRes.json() : null; } catch (_) { result.week = null; }
 
         const callHistory = await historyRes.json();
         if (Array.isArray(callHistory)) {
@@ -1750,29 +1756,26 @@ function updateUI(data) {
   setText('hero-pct', levelPct + '%');
   setText('hero-pct-label', level ? t('hero.levelProgressOf', { level }) : t('hero.levelProgress'));
 
-  // ---- HOME: weekly goal (target = lessons per week from preferences) ----
-  const target = Number(data.profile.preferences.frequency) || 0;
-  // Same rule as the phone system: the week runs Monday to Sunday (Rome time) and a
-  // lesson counts once it is passed or at least 60% complete.
-  const romeDay = d => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(d);
-  const todayRome = new Date(romeDay(new Date()) + 'T12:00:00Z');
-  const mondayRome = new Date(todayRome.getTime() - ((todayRome.getUTCDay() + 6) % 7) * 86400000);
-  const weekStart = mondayRome.toISOString().slice(0, 10);
-  const thisWeek = (data.history || []).filter(h => {
-    const t = new Date(h.attempt_time);
-    if (isNaN(t.getTime()) || romeDay(t) < weekStart) return false;
-    return h.pass_status === 'passed' || Number(h.completion_percentage) >= 60;
-  }).length;
-  if (target > 0) {
-    setText('goal-count', t(target === 1 ? 'goal.count1' : 'goal.count', { done: thisWeek, target }));
+  // ---- HOME: weekly lesson time (same rule as the phone system) ----
+  // Each week (Monday to Sunday, Rome time) a student has lessons-per-week x lesson-length
+  // minutes. Every lesson call uses the minutes it really lasted; under 5 minutes left
+  // means the next lesson waits until Monday.
+  const wk = data.week;
+  if (wk && wk.found && wk.allowed_minutes) {
+    const allowedM = Number(wk.allowed_minutes) || 0;
+    const leftM = Math.max(0, Math.floor(Number(wk.left_seconds || 0) / 60));
+    const usedM = Math.max(0, allowedM - leftM);
+    setText('goal-count', t('goal.minLeft', { left: leftM, total: allowedM }));
     const gf = document.getElementById('goal-fill');
-    if (gf) gf.style.width = Math.min(100, (thisWeek / target) * 100) + '%';
-    const left = target - thisWeek;
-    setText('goal-note', left > 0
-      ? t(left === 1 ? 'goal.left1' : 'goal.left', { n: left })
-      : t('goal.done'));
+    if (gf) gf.style.width = Math.min(100, allowedM ? (usedM / allowedM) * 100 : 0) + '%';
+    setText('goal-note', wk.can_start
+      ? (leftM < Number(wk.lesson_seconds || 600) / 60 ? t('goal.shortNext', { n: leftM }) : t('goal.minNote'))
+      : t('goal.minDone'));
   } else {
-    setText('goal-count', t('goal.thisWeek', { n: thisWeek }));
+    const target = Number(data.profile.preferences.frequency) || 0;
+    if (target > 0) {
+      setText('goal-count', t('goal.minLeft', { left: '–', total: '–' }));
+    }
     setText('goal-note', t('goal.set'));
   }
 
