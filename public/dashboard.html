@@ -925,6 +925,7 @@
     'hist.noFeedback': ['No feedback provided.', 'Nessun commento disponibile.'],
     'hist.passed': ['Passed', 'Superata'],
     'hist.notYet': ['Not yet passed', 'Non ancora superata'],
+    'hist.goodNotFinished': ['Good score, lesson not finished', 'Buon punteggio, lezione non completata'],
     'prof.title': ['Profile Settings', 'Il mio profilo'],
     'prof.sub': ['Manage your personal details and learning goals.', 'Gestisci i tuoi dati e i tuoi obiettivi.'],
     'prof.edit': ['Edit Profile', 'Modifica profilo'],
@@ -1859,7 +1860,14 @@ function updateUI(data) {
                 <div class="item-score ${scoreClass}">${score}%</div>
               </div>
               <div class="item-date-small">${d.toLocaleDateString(PennyI18N.locale(), { month: 'short', day: 'numeric' })}</div>
-              ${item.pass_status ? `<div class="item-date-small" style="font-weight:600; color:${item.pass_status === 'passed' ? 'var(--green)' : 'var(--muted)'};">${t(item.pass_status === 'passed' ? 'hist.passed' : 'hist.notYet')}</div>` : ''}
+              ${item.pass_status ? (() => {
+                // A good score only moves the student on if they also got through at least
+                // 60% of the lesson — say so instead of a plain "Passed".
+                const done = Number(item.completion_percentage) >= 60;
+                const key = item.pass_status === 'passed' ? (done ? 'hist.passed' : 'hist.goodNotFinished') : 'hist.notYet';
+                const colour = key === 'hist.passed' ? 'var(--green)' : key === 'hist.goodNotFinished' ? '#B7791F' : 'var(--muted)';
+                return `<div class="item-date-small" style="font-weight:600; color:${colour};">${t(key)}</div>`;
+              })() : ''}
             </div>
           </div>
 
