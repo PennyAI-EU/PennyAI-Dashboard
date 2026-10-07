@@ -803,11 +803,16 @@ app.get("/api/config", (req, res) => {
 
 // Register a new user: creates Supabase Auth account + inserts call_triggers row
 app.post("/api/register", async (req, res) => {
-  const { name, email, phone, password } = req.body;
+  const { name, email, phone, password, recording_consent, improve_consent } = req.body;
   console.log("Registration attempt:", { name, email, phone });
   if (!name || !email || !phone || !password) {
     return res.status(400).json({ error: "name, email, phone, and password are required" });
   }
+  // Lessons are recorded phone calls: sign-up needs the student's explicit consent.
+  if (recording_consent !== true) {
+    return res.status(400).json({ error: "Please agree to the Privacy Policy and lesson recording to create an account." });
+  }
+  const consentAt = new Date().toISOString();
 
   // Create auth user with email pre-confirmed so they can sign in immediately
   const { data: authData, error: authError } = await supabase.auth.admin.createUser({
@@ -816,7 +821,13 @@ app.post("/api/register", async (req, res) => {
     password,
     email_confirm: true,
     phone_confirm: true,
-    user_metadata: { name, phone },
+    user_metadata: {
+      name, phone,
+      consent_recording_at: consentAt,
+      consent_improve: improve_consent === true,
+      consent_improve_at: improve_consent === true ? consentAt : null,
+      privacy_version: "2026-10-07",
+    },
   });
 
   if (authError) {
@@ -834,6 +845,22 @@ app.post("/api/register", async (req, res) => {
     return res.status(400).json({ error: authError.message });
   }
 
+    const authUserId = authData.user.id;
+
+    // Insert into users table
+    console.log("Inserting into users with phone:", phone, "and id:", authUserId);
+    const { error: usersError } = await supabase.from("users").insert({
+      id: authUserId,
+      phone: phone,
+      name: name,
+      email: email,
+      consent_given: true,
+    });
+
+    if (usersError) {
+      console.error("users insert error:", usersError);
+    }
+
     console.log("Inserting into call_triggers with phone:", phone);
     const { error: triggerError } = await supabase.from("call_triggers").insert({
       phone_number: phone,
@@ -846,21 +873,6 @@ app.post("/api/register", async (req, res) => {
 
     if (triggerError) {
       console.error("call_triggers insert error:", triggerError);
-    }
-
-    const authUserId = authData.user.id;
-
-    // Insert into users table
-    console.log("Inserting into users with phone:", phone, "and id:", authUserId);
-    const { error: usersError } = await supabase.from("users").insert({
-      id: authUserId,
-      phone: phone,
-      name: name,
-      email: email,
-    });
-
-    if (usersError) {
-      console.error("users insert error:", usersError);
     }
 
   res.json({ success: true });

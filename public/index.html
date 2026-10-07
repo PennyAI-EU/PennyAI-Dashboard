@@ -474,6 +474,8 @@
   .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
   .footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; }
   .footer-links a:hover { color: var(--text); }
+  .pm-recording-note { font-size: 12px; color: var(--muted); margin: 8px 0 0; line-height: 1.45; }
+  .pm-recording-note a { color: var(--accent); }
   .footer-copy { font-size: 12px; color: var(--muted); width: 100%; }
 
   /* SVG icons inline */
@@ -1298,7 +1300,7 @@
     <a href="#" data-i18n="footer.dashboard">Dashboard</a>
     <a href="#" data-i18n="footer.contact">Contact</a>
     <a href="#" data-i18n="footer.terms">Terms</a>
-    <a href="#" data-i18n="footer.privacy">Privacy</a>
+    <a href="/privacy.html" data-i18n="footer.privacy">Privacy</a>
   </div>
   <div class="footer-copy" data-i18n="footer.copy">© 2025 Penny AI. All rights reserved.</div>
 </footer>
@@ -1400,6 +1402,7 @@
       <input id="t-consent" type="checkbox"/>
       <span data-i18n="details.consent">I'd like to receive occasional emails about Penny AI courses and offers. (Optional — you'll still get your free lesson either way.)</span>
     </label>
+    <p class="pm-recording-note"><span data-i18n="details.recording">The free lesson is a phone call with Penny, an AI teacher. Calls are recorded and transcribed.</span> <a href="/privacy.html" target="_blank" rel="noopener" data-i18n="footer.privacy">Privacy</a></p>
     <div class="pm-actions">
       <button class="pm-btn pm-btn-ghost" type="button" data-close data-i18n="trial.back">Back</button>
       <button class="pm-btn pm-btn-primary" type="button" id="detailsNext" data-i18n="details.send">Send my code →</button>
@@ -2401,6 +2404,7 @@
     "alert.enterPhone": { en: "Please enter your phone number.", it: "Inserisci il tuo numero di telefono." },
     "alert.genericError": { en: "Something went wrong. Please try again.", it: "Qualcosa \u00e8 andato storto. Riprova." },
     "alert.enterFullCode": { en: "Please enter the full six-digit code.", it: "Inserisci il codice completo di sei cifre." },
+    "details.recording": { en: "The free lesson is a phone call with Penny, an AI teacher. Calls are recorded and transcribed.", it: "La lezione gratuita \u00e8 una telefonata con Penny, un'insegnante IA. Le chiamate vengono registrate e trascritte." },
     "details.consent": { en: "I'd like to receive occasional emails about Penny AI courses and offers. (Optional \u2014 you'll still get your free lesson either way.)", it: "Vorrei ricevere occasionalmente email sui corsi e le offerte di Penny AI. (Facoltativo \u2014 riceverai comunque la tua lezione gratuita.)" },
     "details.sending": { en: "Sending\u2026", it: "Invio in corso\u2026" },
     "code.verifying": { en: "Verifying\u2026", it: "Verifica in corso\u2026" },

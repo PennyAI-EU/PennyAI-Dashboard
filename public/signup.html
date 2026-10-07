@@ -146,6 +146,11 @@
 
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .form-group { margin-bottom: 16px; }
+  .consent-box { margin: 4px 0 14px; display: grid; gap: 10px; }
+  .consent-row { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 1.45; color: var(--text); cursor: pointer; }
+  .consent-row input { margin-top: 3px; width: 16px; height: 16px; flex: 0 0 auto; accent-color: var(--accent); }
+  .consent-row em { display: block; font-style: normal; color: var(--muted); margin-top: 2px; }
+  .consent-row a { color: var(--accent); }
   .form-label {
     display: block; font-size: 13px; font-weight: 500;
     color: var(--text); margin-bottom: 7px;
@@ -401,12 +406,25 @@
           </button></span>
         </div>
 
+        <div class="consent-box">
+          <label class="consent-row">
+            <input type="checkbox" id="consent-recording" required/>
+            <span>I have read the <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and agree that my phone lessons with Penny are recorded and transcribed so my progress can be assessed. I am 18 or older.
+              <em>Ho letto l'<a href="/privacy.html?lang=it" target="_blank" rel="noopener">Informativa privacy</a> e acconsento alla registrazione e trascrizione delle mie lezioni telefoniche con Penny, necessarie per valutare i miei progressi. Ho almeno 18 anni.</em></span>
+          </label>
+          <label class="consent-row">
+            <input type="checkbox" id="consent-improve"/>
+            <span>Optional: my recordings may be used, anonymised, to improve Penny AI lessons.
+              <em>Facoltativo: acconsento all'uso anonimizzato delle mie registrazioni per migliorare le lezioni di Penny AI.</em></span>
+          </label>
+        </div>
+
         <div id="form-error" class="form-error"></div>
 
         <button class="btn-submit" type="submit" id="submit-btn">Create account →</button>
 
         <p class="auth-terms">
-          By creating an account you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+          Penny is an AI English teacher. Lessons are phone calls with Penny. <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
         </p>
       </form>
 
@@ -481,6 +499,11 @@
     if (password.length < 8) {
       return showError('Password must be at least 8 characters.');
     }
+    const recordingConsent = document.getElementById('consent-recording').checked;
+    const improveConsent = document.getElementById('consent-improve').checked;
+    if (!recordingConsent) {
+      return showError('Please tick the box to agree to the Privacy Policy and lesson recording. / Spunta la casella per accettare l\'informativa e la registrazione delle lezioni.');
+    }
 
     // Format: countrycode + digits (no + prefix, as per DB convention)
     const fullPhone = countryCode + localPhone;
@@ -493,7 +516,7 @@
       const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, phone: fullPhone, password }),
+        body: JSON.stringify({ name, email, phone: fullPhone, password, recording_consent: recordingConsent, improve_consent: improveConsent }),
       });
       const data = await res.json();
 
