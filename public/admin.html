@@ -1535,7 +1535,7 @@
     loadStudents(session.access_token);
     if (studentModalMode === 'add' && res.defaultPassword) {
       document.getElementById('account-created-title').textContent = 'Student created';
-      document.getElementById('account-created-subtitle').textContent = 'Share these login credentials with the student.';
+      document.getElementById('account-created-subtitle').textContent = 'We emailed them a link to choose their own password. If the email doesn\'t arrive, share this temporary password.';
       document.getElementById('account-created-email').textContent = res.email || payload.email;
       document.getElementById('account-created-password').textContent = res.defaultPassword;
       const emailRow = document.getElementById('email-status-row');
@@ -1644,7 +1644,7 @@
     renderTeachers();
     if (!id && result.defaultPassword) {
       document.getElementById('account-created-title').textContent = 'Teacher created';
-      document.getElementById('account-created-subtitle').textContent = 'Share these login credentials with the teacher.';
+      document.getElementById('account-created-subtitle').textContent = 'We emailed them a link to choose their own password. If the email doesn\'t arrive, share this temporary password.';
       document.getElementById('account-created-email').textContent = email;
       document.getElementById('account-created-password').textContent = result.defaultPassword;
       openModal('accountCreatedModal');

@@ -220,7 +220,23 @@ async function sendViaResendApi({ to, subject, html, text }) {
   return res.json();
 }
 
-async function sendWelcomeEmail(email, name, password) {
+// A one-time "set your password" link, so no password is ever sent by email.
+async function makeSetPasswordLink(email, loginUrl) {
+  try {
+    const { data, error } = await supabase.auth.admin.generateLink({
+      type: 'recovery',
+      email,
+      options: { redirectTo: `${loginUrl}/reset-password.html` },
+    });
+    if (error) throw error;
+    return data?.properties?.action_link || null;
+  } catch (err) {
+    console.error(`[email] could not create set-password link for ${email} — ${err.message}`);
+    return null;
+  }
+}
+
+async function sendWelcomeEmail(email, name) {
   console.log(`[email] attempting to send welcome email to ${email}`);
   console.log(`[email] SMTP config — host:${process.env.SMTP_HOST} port:${process.env.SMTP_PORT} secure:${process.env.SMTP_SECURE} user:${process.env.SMTP_USER} from:${process.env.SMTP_FROM}`);
   if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
@@ -228,6 +244,8 @@ async function sendWelcomeEmail(email, name, password) {
   }
   const loginUrl = process.env.APP_URL || 'https://www.pennyai.eu';
   const firstName = (name || 'there').split(' ')[0];
+  const setLink = await makeSetPasswordLink(email, loginUrl);
+  const buttonUrl = setLink || `${loginUrl}/forgot-password.html`;
   const html = `
 <!DOCTYPE html>
 <html>
@@ -253,19 +271,15 @@ async function sendWelcomeEmail(email, name, password) {
               Your Penny AI account has been created and you're all set to start your English learning journey.
             </p>
 
-            <!-- Credentials box -->
+            <!-- Login box (no password: the student chooses their own) -->
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;margin-bottom:28px;">
               <tr>
                 <td style="padding:20px 24px;">
-                  <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#2563eb;margin-bottom:14px;">Your Login Details</div>
+                  <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#2563eb;margin-bottom:14px;">Your Login</div>
                   <table cellpadding="0" cellspacing="0">
                     <tr>
-                      <td style="font-size:13px;color:#6b6b6b;padding-bottom:8px;width:90px;">Email</td>
-                      <td style="font-size:14px;font-weight:600;color:#1a1a1a;padding-bottom:8px;">${email}</td>
-                    </tr>
-                    <tr>
-                      <td style="font-size:13px;color:#6b6b6b;">Password</td>
-                      <td style="font-size:14px;font-weight:600;color:#1a1a1a;font-family:monospace;background:#dbeafe;padding:3px 8px;border-radius:4px;">${password}</td>
+                      <td style="font-size:13px;color:#6b6b6b;width:90px;">Email</td>
+                      <td style="font-size:14px;font-weight:600;color:#1a1a1a;">${email}</td>
                     </tr>
                   </table>
                 </td>
@@ -273,17 +287,20 @@ async function sendWelcomeEmail(email, name, password) {
             </table>
 
             <p style="font-size:14px;color:#555;line-height:1.6;margin:0 0 28px;">
-              We recommend changing your password after your first login. Your teacher will be in touch soon to guide your learning path.
+              To get started, click the button below and choose your own password. Then sign in at pennyai.eu with your email and your new password.
             </p>
 
             <!-- CTA Button -->
             <table cellpadding="0" cellspacing="0">
               <tr>
                 <td style="background:#2563eb;border-radius:8px;">
-                  <a href="${loginUrl}/signin.html" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">Sign In to Penny AI →</a>
+                  <a href="${buttonUrl}" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">Choose my password →</a>
                 </td>
               </tr>
             </table>
+            <p style="font-size:13px;color:#6b6b6b;line-height:1.6;margin:20px 0 0;">
+              If the button has expired, go to <a href="${loginUrl}/forgot-password.html" style="color:#2563eb;">${loginUrl.replace(/^https?:\/\//, '')}/forgot-password.html</a>, enter your email and we'll send you a new link.
+            </p>
           </td>
         </tr>
 
@@ -305,14 +322,14 @@ async function sendWelcomeEmail(email, name, password) {
 
   const text = `Welcome to Penny AI, ${firstName}!
 
-Your account is ready. Here are your login details:
+Your account is ready. Your login email is: ${email}
 
-Email: ${email}
-Password: ${password}
+Choose your own password here:
+${buttonUrl}
 
-Sign in: ${loginUrl}/signin.html
+Then sign in at ${loginUrl}/signin.html with your email and your new password.
 
-We recommend changing your password after your first login. Your teacher will be in touch soon to guide your learning path.
+If the link has expired, go to ${loginUrl}/forgot-password.html, enter your email and we'll send you a new link.
 
 — Penny AI`;
 
@@ -1840,7 +1857,7 @@ app.post("/api/admin/students", requireAdmin, async (req, res) => {
   let emailSent = false;
   try {
     await Promise.race([
-      sendWelcomeEmail(row.email, row.name, DEFAULT_PASSWORD),
+      sendWelcomeEmail(row.email, row.name),
       new Promise((_, reject) => setTimeout(() => reject(new Error('email timeout after 10s')), 10000)),
     ]);
     emailSent = true;
@@ -1961,7 +1978,17 @@ app.post("/api/admin/teachers", requireAdmin, async (req, res) => {
     await supabase.auth.admin.deleteUser(authData.user.id);
     return res.status(500).json({ error: error.message });
   }
-  res.json({ ...data, defaultPassword: DEFAULT_PASSWORD });
+  let emailSent = false;
+  try {
+    await Promise.race([
+      sendWelcomeEmail(email, name),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('email timeout after 10s')), 10000)),
+    ]);
+    emailSent = true;
+  } catch (err) {
+    console.error(`[teacher create] welcome email FAILED for ${email} — ${err.message}`);
+  }
+  res.json({ ...data, defaultPassword: DEFAULT_PASSWORD, emailSent });
 });
 
 app.put("/api/admin/teachers/:id", requireAdmin, async (req, res) => {
@@ -2190,6 +2217,17 @@ app.post("/api/admin/schedule-call", requireAdmin, async (req, res) => {
 
 // ─── MESSAGING ───────────────────────────────────────────────────────────────
 
+// The school's office for students and teachers to message: the school admin(s).
+// The platform owner (system_admin) is only shown when the school has no school admin,
+// so people don't see the same person listed twice.
+async function schoolAdminContacts(schoolId) {
+  const { data } = await supabase.from("users").select("id, name, full_name, role, email")
+    .eq("school_id", schoolId).in("role", ["school_admin", "system_admin"]);
+  const list = data || [];
+  const schoolAdmins = list.filter(u => u.role === "school_admin");
+  return schoolAdmins.length ? schoolAdmins : list;
+}
+
 // List of people the current user can DM
 app.get("/api/messages/contacts", requireAuth, async (req, res) => {
   const { id: userId, role, school_id } = req.dbUser;
@@ -2201,20 +2239,12 @@ app.get("/api/messages/contacts", requireAuth, async (req, res) => {
       const { data: teacher } = await supabase.from("users").select("id, name, full_name, role, email").eq("id", me.teacher_id).maybeSingle();
       if (teacher) contacts.push(teacher);
     }
-    if (me?.school_id) {
-      const { data: admins } = await supabase.from("users").select("id, name, full_name, role, email")
-        .eq("school_id", me.school_id).in("role", ["school_admin", "system_admin"]);
-      contacts.push(...(admins || []));
-    }
+    if (me?.school_id) contacts.push(...(await schoolAdminContacts(me.school_id)));
   } else if (role === "teacher") {
     const { data: students } = await supabase.from("users").select("id, name, full_name, role, email")
       .eq("teacher_id", userId).eq("role", "student");
     contacts.push(...(students || []));
-    if (school_id) {
-      const { data: admins } = await supabase.from("users").select("id, name, full_name, role, email")
-        .eq("school_id", school_id).in("role", ["school_admin", "system_admin"]);
-      contacts.push(...(admins || []));
-    }
+    if (school_id) contacts.push(...(await schoolAdminContacts(school_id)));
   } else {
     const scId = school_id || req.adminSchoolId;
     if (scId) {
