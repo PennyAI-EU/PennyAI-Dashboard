@@ -239,9 +239,7 @@ async function makeSetPasswordLink(email, loginUrl) {
 async function sendWelcomeEmail(email, name) {
   console.log(`[email] attempting to send welcome email to ${email}`);
   console.log(`[email] SMTP config — host:${process.env.SMTP_HOST} port:${process.env.SMTP_PORT} secure:${process.env.SMTP_SECURE} user:${process.env.SMTP_USER} from:${process.env.SMTP_FROM}`);
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
-    throw new Error('SMTP_HOST or SMTP_USER not set — email not sent');
-  }
+  // Sent through the Resend API (sendViaResendApi), which only needs the API key; no SMTP settings required.
   const loginUrl = process.env.APP_URL || 'https://www.pennyai.eu';
   const firstName = (name || 'there').split(' ')[0];
   const setLink = await makeSetPasswordLink(email, loginUrl);
@@ -347,9 +345,7 @@ If the link has expired, go to ${loginUrl}/forgot-password.html, enter your emai
 // flow. Mirrors sendWelcomeEmail's style/config but with its own simple template.
 async function sendTrialCodeEmail(email, code) {
   console.log(`[trial-email] attempting to send verification code to ${email}`);
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
-    throw new Error('SMTP_HOST or SMTP_USER not set — email not sent');
-  }
+  // Sent through the Resend API (sendViaResendApi), which only needs the API key; no SMTP settings required.
   const html = `
 <!DOCTYPE html>
 <html>
