@@ -569,7 +569,7 @@ async function init() {
   (function () {
     var setT = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
     var hour = new Date().getHours();
-    setT('greet-time', hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening'));
+    setT('greet-time', hour < 5 ? 'Good evening' : hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening'));
     setT('greet-name', String(name).split(' ')[0]);
     setT('topbar-name', name);
     var parts = String(name).trim().split(/\s+/).filter(Boolean);
@@ -626,8 +626,8 @@ const FLAG_ORDER = { red: 0, amber: 1, blue: 2, grey: 3 };
 function fmtWhen(iso) {
   if (!iso) return '';
   const d = new Date(iso);
-  return d.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' }) + ', ' +
-         d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + ', ' +
+         d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 }
 function parseDays(raw) {
   if (Array.isArray(raw)) return raw.map(d => String(d).trim().toLowerCase()).filter(Boolean);
@@ -882,7 +882,7 @@ function renderUpcoming(calls) {
       <div class="upcoming-item" style="padding: 12px 0; border-bottom: 1px solid var(--border);">
         <div class="upcoming-dot"></div>
         <div style="flex:1;">
-          <div style="font-size:14px; font-weight:600;">${d.toLocaleDateString([], { weekday:'short', month:'short', day:'numeric' })} at ${d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })}</div>
+          <div style="font-size:14px; font-weight:600;">${d.toLocaleDateString('en-GB', { weekday:'short', month:'short', day:'numeric' })} at ${d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' })}</div>
           <div style="font-size:12px; color:var(--muted);">AI English Lesson</div>
         </div>
         <span class="badge badge-blue">Scheduled</span>
@@ -919,7 +919,7 @@ function renderHistory(history, token) {
                 ${hasRecording ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16"/></svg>' : ''}
                 <span class="score-chip ${scoreClass}">${score}%</span>
               </div>
-              <div class="history-date-small">${d.toLocaleDateString([], { month:'short', day:'numeric' })}</div>
+              <div class="history-date-small">${d.toLocaleDateString('en-GB', { month:'short', day:'numeric' })}</div>
             </div>
           </div>
         </div>
@@ -1118,7 +1118,7 @@ async function loadMsgConvList() {
     const conv = convMap[contact.id];
     const lastMsg = conv?.last_message;
     const unread = conv?.unread_count || 0;
-    const time = lastMsg ? new Date(lastMsg.created_at).toLocaleDateString([], { month:'short', day:'numeric' }) : '';
+    const time = lastMsg ? new Date(lastMsg.created_at).toLocaleDateString('en-GB', { month:'short', day:'numeric' }) : '';
     const preview = lastMsg ? lastMsg.content.slice(0,60) + (lastMsg.content.length > 60 ? '…' : '') : 'No messages yet';
     const initials = (contact.full_name || contact.name || '?').charAt(0).toUpperCase();
     const roleLabel = contact.role === 'teacher' ? 'Teacher' : (contact.role === 'school_admin' || contact.role === 'system_admin') ? 'School Admin' : 'Student';
@@ -1180,8 +1180,8 @@ function renderMsgs(msgs) {
   }
   el.innerHTML = msgs.map(m => {
     const isOwn = m.sender.id === msgMyId;
-    const time = new Date(m.created_at).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-    const date = new Date(m.created_at).toLocaleDateString([], { month:'short', day:'numeric' });
+    const time = new Date(m.created_at).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+    const date = new Date(m.created_at).toLocaleDateString('en-GB', { month:'short', day:'numeric' });
     return `<div style="display:flex;flex-direction:column;align-items:${isOwn ? 'flex-end' : 'flex-start'};">
       ${!isOwn ? `<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:3px;padding-left:2px;">${escHtml(m.sender.name||'')}</div>` : ''}
       <div style="max-width:72%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.5;background:${isOwn ? 'var(--accent)' : 'var(--white)'};color:${isOwn ? 'white' : 'var(--text)'};border:${isOwn ? 'none' : '1px solid var(--border)'};border-bottom-${isOwn ? 'right' : 'left'}-radius:4px;">${escHtml(m.content)}</div>

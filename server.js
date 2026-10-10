@@ -1615,7 +1615,7 @@ app.get("/api/teacher/students", requireTeacher, async (req, res) => {
     const lastScore = last ? Number(last.final_score ?? last.overall_score ?? last.score) : null;
 
     const flags = [];
-    if (missed >= 1) flags.push({ level: missed >= 2 ? "red" : "amber", text: missed === 1 ? "Missed a lesson" : `Missed ${missed} lessons` });
+    if (missed >= 1) flags.push({ level: missed >= 2 ? "red" : "amber", text: missed === 1 ? "Missed a lesson (last 2 weeks)" : `Missed ${missed} lessons (last 2 weeks)` });
     if (last && last.pass_status && last.pass_status !== "passed") flags.push({ level: "amber", text: `Last lesson ${Number.isFinite(lastScore) ? Math.round(lastScore) + "%" : "not passed"}` });
     if (s.approved_for_outbound === false) flags.push({ level: "grey", text: "Lessons paused" });
     else if (!next) flags.push({ level: "red", text: "No lesson booked" });
