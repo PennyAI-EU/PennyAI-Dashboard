@@ -948,11 +948,11 @@ function renderHistory(history, token) {
 
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
             <div class="feedback-block ai">
-              <div class="feedback-label ai">AI Feedback</div>
+              <div class="feedback-label ai">Penny&#39;s feedback</div>
               <div class="feedback-text">${
                 typeof item.grading_rationale === 'string' && item.grading_rationale.startsWith('{')
                   ? (() => { try { const g = JSON.parse(item.grading_rationale); return (g.strengths ? '<strong>Strengths:</strong> ' + g.strengths + '<br><br>' : '') + (g.areas_for_improvement ? '<strong>Areas to improve:</strong> ' + g.areas_for_improvement : ''); } catch(e) { return item.grading_rationale; } })()
-                  : (item.grading_rationale || 'No AI feedback available.')
+                  : (item.grading_rationale || 'No feedback from Penny yet.')
               }</div>
             </div>
             <div class="feedback-block teacher">
@@ -1044,12 +1044,19 @@ function updatePlayBtn(id, playing) {
 
 function formatTranscript(raw) {
   if (!raw) return '';
-  return raw.split(/\\n|\n/).filter(l => l.trim()).map(line => {
+  // "Penny" / "Student" instead of Agent / User; lines the same person said in a row are joined.
+  const turns = [];
+  raw.split(/\\n|\n/).filter(l => l.trim()).forEach(line => {
     const m = line.match(/^(Agent|User):\s*(.*)/i);
-    if (!m) return `<div class="transcript-line"><span>${line}</span></div>`;
-    const role = m[1].toLowerCase();
-    return `<div class="transcript-line"><span class="transcript-speaker ${role}">${m[1]}:</span><span>${m[2]}</span></div>`;
-  }).join('');
+    const role = m ? m[1].toLowerCase() : null;
+    const text = m ? m[2] : line;
+    const prev = turns[turns.length - 1];
+    if (prev && role && prev.role === role) prev.text += ' ' + text;
+    else turns.push({ role, text });
+  });
+  return turns.map(tu => tu.role
+    ? `<div class="transcript-line"><span class="transcript-speaker ${tu.role}">${tu.role === 'agent' ? 'Penny' : 'Student'}:</span><span>${escHtml(tu.text)}</span></div>`
+    : `<div class="transcript-line"><span>${escHtml(tu.text)}</span></div>`).join('');
 }
 
 init();
