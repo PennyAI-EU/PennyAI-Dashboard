@@ -255,7 +255,7 @@ async function sendWelcomeEmail(email, name) {
 
         <!-- Header -->
         <tr>
-          <td style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 100%);padding:36px 40px;text-align:center;">
+          <td bgcolor="#1e3a8a" style="background-color:#1e3a8a;background-image:linear-gradient(135deg,#1e3a8a 0%,#2563eb 100%);padding:36px 40px;text-align:center;">
             <div style="font-size:24px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">Penny<span style="color:#93c5fd;">AI</span></div>
             <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-top:4px;">Your AI English Learning Platform</div>
           </td>
@@ -291,8 +291,8 @@ async function sendWelcomeEmail(email, name) {
             <!-- CTA Button -->
             <table cellpadding="0" cellspacing="0">
               <tr>
-                <td style="background:#2563eb;border-radius:8px;">
-                  <a href="${buttonUrl}" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">Choose my password →</a>
+                <td bgcolor="#2563eb" style="background-color:#2563eb;border-radius:8px;">
+                  <a href="${buttonUrl}" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;background-color:#2563eb;border:1px solid #2563eb;border-radius:8px;">Choose my password →</a>
                 </td>
               </tr>
             </table>
