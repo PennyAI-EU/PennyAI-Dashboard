@@ -1,0 +1,1643 @@
+{
+ "level": "B2",
+ "sets": [
+  {
+   "id": "b2-l01",
+   "kind": "lesson",
+   "lesson_number": 1,
+   "lesson_id": "B2.01",
+   "title": "Expressing nuanced opinions",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Which phrase gives an opinion but shows you're not 100% sure?",
+     "options": [
+      "I tend to think that…",
+      "It is a fact that…",
+      "Everyone knows that…"
+     ],
+     "answer": 0,
+     "explain": "“I tend to think” softens your opinion — useful for nuance."
+    },
+    {
+     "type": "mc",
+     "prompt": "I'm not ___ convinced that remote work suits everyone.",
+     "options": [
+      "entirely",
+      "entire",
+      "totally not"
+     ],
+     "answer": 0,
+     "explain": "“Not entirely convinced” = partly doubtful."
+    },
+    {
+     "type": "gap",
+     "prompt": "To some ___, I agree with you.",
+     "answers": [
+      "extent",
+      "degree"
+     ],
+     "explain": "“To some extent / degree” = partly."
+    },
+    {
+     "type": "gap",
+     "prompt": "From my ___, the price is the most important thing.",
+     "answers": [
+      "perspective",
+      "point of view"
+     ],
+     "explain": "“From my perspective” introduces your personal view."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its function.",
+     "pairs": [
+      [
+       "What matters most is…",
+       "highlighting a priority"
+      ],
+      [
+       "To some extent…",
+       "partial agreement"
+      ],
+      [
+       "I'm not entirely convinced…",
+       "polite doubt"
+      ],
+      [
+       "How do you see it?",
+       "inviting their view"
+      ]
+     ],
+     "explain": "Nuanced opinions use softeners, priorities and questions."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "see",
+      "how",
+      "it",
+      "do",
+      "you"
+     ],
+     "answers": [
+      "how do you see it"
+     ],
+     "explain": "How do you see it?"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which sentence sounds the most balanced?",
+     "options": [
+      "Social media is terrible.",
+      "Social media can be useful, although it depends on how you use it.",
+      "Social media is the best."
+     ],
+     "answer": 1,
+     "explain": "Concession (although…) makes an opinion sound balanced."
+    },
+    {
+     "type": "mc",
+     "prompt": "“It ___ on the situation.”",
+     "options": [
+      "depends",
+      "depend",
+      "is depending of"
+     ],
+     "answer": 0,
+     "explain": "It depends on… — note the preposition “on”."
+    }
+   ]
+  },
+  {
+   "id": "b2-l02",
+   "kind": "lesson",
+   "lesson_number": 2,
+   "lesson_id": "B2.02",
+   "title": "Agreeing and disagreeing diplomatically",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Which is the most diplomatic way to disagree?",
+     "options": [
+      "You're wrong.",
+      "I see your point, but I'd look at it differently.",
+      "No way."
+     ],
+     "answer": 1,
+     "explain": "Acknowledge first, then give your view."
+    },
+    {
+     "type": "mc",
+     "prompt": "That's a fair argument; ___, I think cost matters more.",
+     "options": [
+      "however",
+      "because",
+      "so"
+     ],
+     "answer": 0,
+     "explain": "“However” introduces a contrasting point."
+    },
+    {
+     "type": "gap",
+     "prompt": "I would look at it ___ because I've had a different experience.",
+     "answers": [
+      "differently"
+     ],
+     "explain": "Look at it differently = see it another way."
+    },
+    {
+     "type": "gap",
+     "prompt": "What ___ you to that view?",
+     "answers": [
+      "leads",
+      "led"
+     ],
+     "explain": "“What leads you to that view?” asks for their reasons politely."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its function.",
+     "pairs": [
+      [
+       "I see your point, but…",
+       "polite disagreement"
+      ],
+      [
+       "We may be agreeing more than it seems.",
+       "finding common ground"
+      ],
+      [
+       "Would it be reasonable to say…?",
+       "proposing a compromise"
+      ],
+      [
+       "What leads you to that view?",
+       "asking for reasons"
+      ]
+     ],
+     "explain": "Diplomatic language keeps a discussion friendly."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "point",
+      "see",
+      "your",
+      "I",
+      "but"
+     ],
+     "answers": [
+      "i see your point but"
+     ],
+     "explain": "I see your point, but…"
+    },
+    {
+     "type": "mc",
+     "prompt": "Your colleague says: “We should cancel the project.” A diplomatic reply?",
+     "options": [
+      "That's a fair argument; however, we've already invested a lot.",
+      "Terrible idea.",
+      "Whatever."
+     ],
+     "answer": 0,
+     "explain": "Acknowledge + however + your reason."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which phrase shows partial agreement?",
+     "options": [
+      "I agree up to a point.",
+      "I totally disagree.",
+      "Absolutely not."
+     ],
+     "answer": 0,
+     "explain": "“Up to a point” = partly."
+    }
+   ]
+  },
+  {
+   "id": "b2-l03",
+   "kind": "lesson",
+   "lesson_number": 3,
+   "lesson_id": "B2.03",
+   "title": "Speculating and evaluating possibilities",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "If the train ___ cancelled, we might take a taxi.",
+     "options": [
+      "were",
+      "will be",
+      "is being"
+     ],
+     "answer": 0,
+     "explain": "“If … were to happen / were” — imaginary future possibility."
+    },
+    {
+     "type": "mc",
+     "prompt": "I wouldn't ___ out the possibility of rain.",
+     "options": [
+      "rule",
+      "put",
+      "take"
+     ],
+     "answer": 0,
+     "explain": "Rule out = say something is impossible. “I wouldn't rule out…” = it's possible."
+    },
+    {
+     "type": "gap",
+     "prompt": "It's quite ___ that the meeting will move online.",
+     "answers": [
+      "possible",
+      "likely"
+     ],
+     "explain": "It's quite possible/likely that…"
+    },
+    {
+     "type": "gap",
+     "prompt": "One likely ___ is that the bus was late.",
+     "answers": [
+      "explanation",
+      "reason"
+     ],
+     "explain": "One likely explanation is… — speculating about causes."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to how certain it is.",
+     "pairs": [
+      [
+       "It must be…",
+       "almost certain"
+      ],
+      [
+       "It's quite possible that…",
+       "possible"
+      ],
+      [
+       "It might be…",
+       "not sure"
+      ],
+      [
+       "It can't be…",
+       "almost impossible"
+      ]
+     ],
+     "explain": "Modal verbs show how sure you are."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "is",
+      "how",
+      "likely",
+      "think",
+      "that",
+      "do",
+      "you"
+     ],
+     "answers": [
+      "how likely do you think that is"
+     ],
+     "explain": "How likely do you think that is?"
+    },
+    {
+     "type": "mc",
+     "prompt": "She isn't answering. She ___ be in a meeting.",
+     "options": [
+      "might",
+      "must to",
+      "can't"
+     ],
+     "answer": 0,
+     "explain": "Might = possible."
+    },
+    {
+     "type": "mc",
+     "prompt": "What could ___ the outcome?",
+     "options": [
+      "influence",
+      "influent",
+      "influential"
+     ],
+     "answer": 0,
+     "explain": "We need a verb: influence."
+    }
+   ]
+  },
+  {
+   "id": "b2-l04",
+   "kind": "lesson",
+   "lesson_number": 4,
+   "lesson_id": "B2.04",
+   "title": "Explaining causes effects and consequences",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "The delay may be ___ to bad weather.",
+     "options": [
+      "due",
+      "because",
+      "cause"
+     ],
+     "answer": 0,
+     "explain": "Due to = because of."
+    },
+    {
+     "type": "mc",
+     "prompt": "One ___ could be higher prices.",
+     "options": [
+      "consequence",
+      "consequent",
+      "consequently"
+     ],
+     "answer": 0,
+     "explain": "We need a noun: consequence."
+    },
+    {
+     "type": "gap",
+     "prompt": "That tends to ___ to more traffic.",
+     "answers": [
+      "lead"
+     ],
+     "explain": "Lead to = cause/result in."
+    },
+    {
+     "type": "gap",
+     "prompt": "The main ___ seems to be the cost.",
+     "answers": [
+      "factor",
+      "reason",
+      "cause"
+     ],
+     "explain": "The main factor = the most important cause."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each linker to its meaning.",
+     "pairs": [
+      [
+       "as a result",
+       "so (effect)"
+      ],
+      [
+       "due to",
+       "because of (cause)"
+      ],
+      [
+       "therefore",
+       "for this reason"
+      ],
+      [
+       "which means that",
+       "explaining a consequence"
+      ]
+     ],
+     "explain": "Linkers help you connect causes and effects."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "impact",
+      "would",
+      "what",
+      "have",
+      "that"
+     ],
+     "answers": [
+      "what impact would that have"
+     ],
+     "explain": "What impact would that have?"
+    },
+    {
+     "type": "mc",
+     "prompt": "More people work from home. ___, there is less traffic in the morning.",
+     "options": [
+      "As a result",
+      "Although",
+      "Despite"
+     ],
+     "answer": 0,
+     "explain": "As a result introduces an effect."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which sentence shows a cause?",
+     "options": [
+      "Prices rose because of higher energy costs.",
+      "Prices rose, so people bought less."
+     ],
+     "answer": 0,
+     "explain": "Because of + cause."
+    }
+   ]
+  },
+  {
+   "id": "b2-l05",
+   "kind": "lesson",
+   "lesson_number": 5,
+   "lesson_id": "B2.05",
+   "title": "Comparing approaches and making recommendations",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "The ___ of an online course is flexibility.",
+     "options": [
+      "advantage",
+      "advantageous",
+      "advance"
+     ],
+     "answer": 0,
+     "explain": "The advantage of X is…"
+    },
+    {
+     "type": "mc",
+     "prompt": "The ___ is that it can feel less social.",
+     "options": [
+      "drawback",
+      "draw",
+      "drawing"
+     ],
+     "answer": 0,
+     "explain": "Drawback = disadvantage."
+    },
+    {
+     "type": "gap",
+     "prompt": "In this situation, I would ___ taking the train.",
+     "answers": [
+      "recommend",
+      "suggest"
+     ],
+     "explain": "Recommend/suggest + -ing."
+    },
+    {
+     "type": "gap",
+     "prompt": "A more ___ option might be to share a car.",
+     "answers": [
+      "practical",
+      "realistic"
+     ],
+     "explain": "A more practical option = a more realistic choice."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its function.",
+     "pairs": [
+      [
+       "The advantage of … is that…",
+       "a positive point"
+      ],
+      [
+       "The drawback is…",
+       "a negative point"
+      ],
+      [
+       "I would recommend…",
+       "giving advice"
+      ],
+      [
+       "What criteria would you use?",
+       "asking how to decide"
+      ]
+     ],
+     "explain": "Use these to compare and recommend."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "approach",
+      "most",
+      "which",
+      "effective",
+      "seems"
+     ],
+     "answers": [
+      "which approach seems most effective"
+     ],
+     "explain": "Which approach seems most effective?"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "I recommend to take the bus.",
+      "I recommend taking the bus.",
+      "I recommend take the bus."
+     ],
+     "answer": 1,
+     "explain": "Recommend + -ing (or recommend that you take)."
+    },
+    {
+     "type": "mc",
+     "prompt": "“It's cheaper, but it's slower.” What's being compared?",
+     "options": [
+      "advantages and drawbacks",
+      "only advantages",
+      "only problems"
+     ],
+     "answer": 0,
+     "explain": "Cheaper = advantage, slower = drawback."
+    }
+   ]
+  },
+  {
+   "id": "b2-l06",
+   "kind": "lesson",
+   "lesson_number": 6,
+   "lesson_id": "B2.06",
+   "title": "Discussing change trends and future scenarios",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "There has been a noticeable ___ in how people shop.",
+     "options": [
+      "shift",
+      "shifting",
+      "shifted"
+     ],
+     "answer": 0,
+     "explain": "A shift = a change."
+    },
+    {
+     "type": "mc",
+     "prompt": "Online learning is becoming ___ common.",
+     "options": [
+      "increasingly",
+      "increase",
+      "increased"
+     ],
+     "answer": 0,
+     "explain": "Increasingly + adjective = more and more."
+    },
+    {
+     "type": "gap",
+     "prompt": "I expect this to continue ___ prices rise.",
+     "answers": [
+      "unless"
+     ],
+     "explain": "Unless = if not."
+    },
+    {
+     "type": "gap",
+     "prompt": "In the longer ___, cities may change a lot.",
+     "answers": [
+      "term",
+      "run"
+     ],
+     "explain": "In the longer term / in the long run = in the distant future."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its meaning.",
+     "pairs": [
+      [
+       "a noticeable shift",
+       "a clear change"
+      ],
+      [
+       "increasingly",
+       "more and more"
+      ],
+      [
+       "in the longer term",
+       "in the future, after some time"
+      ],
+      [
+       "unless",
+       "except if"
+      ]
+     ],
+     "explain": "Vocabulary for describing trends."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "have",
+      "trend",
+      "what",
+      "noticed",
+      "you"
+     ],
+     "answers": [
+      "what trend have you noticed"
+     ],
+     "explain": "What trend have you noticed?"
+    },
+    {
+     "type": "mc",
+     "prompt": "Fewer people buy newspapers. This trend is likely to ___.",
+     "options": [
+      "continue",
+      "continuing",
+      "continues to"
+     ],
+     "answer": 0,
+     "explain": "Likely to + verb."
+    },
+    {
+     "type": "mc",
+     "prompt": "“By 2030, most cars ___ electric.”",
+     "options": [
+      "will probably be",
+      "probably are being",
+      "are probably been"
+     ],
+     "answer": 0,
+     "explain": "Will probably + verb for predictions."
+    }
+   ]
+  },
+  {
+   "id": "b2-l07",
+   "kind": "lesson",
+   "lesson_number": 7,
+   "lesson_id": "B2.07",
+   "title": "Sustaining a structured discussion",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Before we move on, I'd like to ___ to your earlier point.",
+     "options": [
+      "return",
+      "come back on",
+      "go"
+     ],
+     "answer": 0,
+     "explain": "Return to = go back to a point."
+    },
+    {
+     "type": "mc",
+     "prompt": "That ___ to what you said about cost.",
+     "options": [
+      "relates",
+      "relation",
+      "relating"
+     ],
+     "answer": 0,
+     "explain": "Relate to = be connected with."
+    },
+    {
+     "type": "gap",
+     "prompt": "Could we look at this from another ___?",
+     "answers": [
+      "angle",
+      "perspective"
+     ],
+     "explain": "From another angle = from a different point of view."
+    },
+    {
+     "type": "gap",
+     "prompt": "The key ___, as I see it, is time.",
+     "answers": [
+      "issue",
+      "point",
+      "question"
+     ],
+     "explain": "The key issue = the most important problem."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its function.",
+     "pairs": [
+      [
+       "Before we move on…",
+       "going back to a point"
+      ],
+      [
+       "That relates to…",
+       "connecting ideas"
+      ],
+      [
+       "Could we look at this from another angle?",
+       "changing perspective"
+      ],
+      [
+       "Shall we consider … next?",
+       "moving the discussion forward"
+      ]
+     ],
+     "explain": "Structure phrases guide a discussion."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "view",
+      "fit",
+      "how",
+      "does",
+      "with",
+      "your",
+      "that"
+     ],
+     "answers": [
+      "how does that fit with your view"
+     ],
+     "explain": "How does that fit with your view?"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which phrase moves the discussion forward?",
+     "options": [
+      "Shall we consider the budget next?",
+      "I don't know.",
+      "Anyway."
+     ],
+     "answer": 0,
+     "explain": "A clear proposal for the next topic."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which phrase shows you're connecting to someone's earlier idea?",
+     "options": [
+      "Going back to what you said earlier…",
+      "By the way…",
+      "Never mind."
+     ],
+     "answer": 0,
+     "explain": "Going back to… links ideas."
+    }
+   ]
+  },
+  {
+   "id": "b2-l08",
+   "kind": "lesson",
+   "lesson_number": 8,
+   "lesson_id": "B2.08",
+   "title": "Clarifying challenging and reformulating ideas",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Could you ___ on what you mean by ‘flexible’?",
+     "options": [
+      "expand",
+      "expanding",
+      "extend to"
+     ],
+     "answer": 0,
+     "explain": "Expand on = give more detail about."
+    },
+    {
+     "type": "mc",
+     "prompt": "If I understand you ___, you're saying that…",
+     "options": [
+      "correctly",
+      "correct",
+      "correction"
+     ],
+     "answer": 0,
+     "explain": "We need an adverb: correctly."
+    },
+    {
+     "type": "gap",
+     "prompt": "I may not have ___ that clearly.",
+     "answers": [
+      "expressed",
+      "explained"
+     ],
+     "explain": "I may not have expressed that clearly = a polite way to rephrase."
+    },
+    {
+     "type": "gap",
+     "prompt": "What I ___ was that we need more time.",
+     "answers": [
+      "meant"
+     ],
+     "explain": "What I meant was… — past of mean."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its function.",
+     "pairs": [
+      [
+       "Could you expand on…?",
+       "asking for more detail"
+      ],
+      [
+       "If I understand you correctly…",
+       "checking meaning"
+      ],
+      [
+       "What I meant was…",
+       "rephrasing yourself"
+      ],
+      [
+       "Could we distinguish between X and Y?",
+       "separating two ideas"
+      ]
+     ],
+     "explain": "Clarifying language avoids misunderstandings."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "mean",
+      "you",
+      "do",
+      "this",
+      "in",
+      "context",
+      "that"
+     ],
+     "answers": [
+      "do you mean that in this context"
+     ],
+     "explain": "Do you mean that in this context?"
+    },
+    {
+     "type": "mc",
+     "prompt": "Someone misunderstood you. Best reply?",
+     "options": [
+      "Sorry, I may not have expressed that clearly. What I meant was…",
+      "You didn't listen.",
+      "Forget it."
+     ],
+     "answer": 0,
+     "explain": "Take responsibility, then rephrase."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which question challenges an idea politely?",
+     "options": [
+      "Could you explain why you think that?",
+      "That's stupid.",
+      "Why?!"
+     ],
+     "answer": 0,
+     "explain": "Polite challenge = ask for reasons."
+    }
+   ]
+  },
+  {
+   "id": "b2-l09",
+   "kind": "lesson",
+   "lesson_number": 9,
+   "lesson_id": "B2.09",
+   "title": "Persuading with evidence and examples",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "The ___ reason for this plan is cost.",
+     "options": [
+      "strongest",
+      "strong",
+      "strongly"
+     ],
+     "answer": 0,
+     "explain": "The strongest reason = the most convincing reason."
+    },
+    {
+     "type": "mc",
+     "prompt": "The evidence ___ that people work better in quiet rooms.",
+     "options": [
+      "suggests",
+      "suggest",
+      "suggesting"
+     ],
+     "answer": 0,
+     "explain": "The evidence suggests that… (singular subject)."
+    },
+    {
+     "type": "gap",
+     "prompt": "That ___, we should also consider the risks.",
+     "answers": [
+      "said"
+     ],
+     "explain": "That said = however / despite this."
+    },
+    {
+     "type": "gap",
+     "prompt": "For ___, a quiet area helps people concentrate.",
+     "answers": [
+      "example",
+      "instance"
+     ],
+     "explain": "For example / For instance introduces evidence."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its function.",
+     "pairs": [
+      [
+       "The strongest reason is…",
+       "main argument"
+      ],
+      [
+       "For example…",
+       "giving evidence"
+      ],
+      [
+       "That said…",
+       "acknowledging the other side"
+      ],
+      [
+       "What would persuade you?",
+       "asking what they need"
+      ]
+     ],
+     "explain": "A persuasive argument: reason, example, balance."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "support",
+      "you",
+      "how",
+      "would",
+      "claim",
+      "that"
+     ],
+     "answers": [
+      "how would you support that claim"
+     ],
+     "explain": "How would you support that claim?"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which sentence is the most persuasive?",
+     "options": [
+      "Studies show that short breaks improve focus, so we should add them.",
+      "I like breaks.",
+      "Breaks are nice."
+     ],
+     "answer": 0,
+     "explain": "Evidence + conclusion = persuasive."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which word introduces a concession?",
+     "options": [
+      "Admittedly",
+      "Therefore",
+      "Firstly"
+     ],
+     "answer": 0,
+     "explain": "Admittedly = I accept this point (before arguing)."
+    }
+   ]
+  },
+  {
+   "id": "b2-l10",
+   "kind": "lesson",
+   "lesson_number": 10,
+   "lesson_id": "B2.10",
+   "title": "Leading an engaged B2 conversation",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "___ on that, I think we should also look at timing.",
+     "options": [
+      "Building",
+      "Build",
+      "Built"
+     ],
+     "answer": 0,
+     "explain": "Building on that = adding to the previous idea."
+    },
+    {
+     "type": "mc",
+     "prompt": "On ___, I think the online option is better.",
+     "options": [
+      "balance",
+      "balanced",
+      "the balance of"
+     ],
+     "answer": 0,
+     "explain": "On balance = after considering everything."
+    },
+    {
+     "type": "gap",
+     "prompt": "I'd put it another ___: the problem is time, not money.",
+     "answers": [
+      "way"
+     ],
+     "explain": "I'd put it another way = let me rephrase."
+    },
+    {
+     "type": "gap",
+     "prompt": "One possible ___ would be to meet halfway.",
+     "answers": [
+      "compromise",
+      "solution"
+     ],
+     "explain": "Compromise = an agreement where both sides give something."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its function.",
+     "pairs": [
+      [
+       "Building on that…",
+       "adding to an idea"
+      ],
+      [
+       "On balance…",
+       "concluding"
+      ],
+      [
+       "One possible compromise…",
+       "finding a middle way"
+      ],
+      [
+       "Where do we agree?",
+       "finding common ground"
+      ]
+     ],
+     "explain": "Leading phrases help you guide a conversation."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "next",
+      "should",
+      "what",
+      "consider",
+      "we"
+     ],
+     "answers": [
+      "what should we consider next"
+     ],
+     "explain": "What should we consider next?"
+    },
+    {
+     "type": "mc",
+     "prompt": "Two people disagree about the meeting time. Best leading move?",
+     "options": [
+      "One possible compromise would be to meet at 3.",
+      "You decide.",
+      "I don't care."
+     ],
+     "answer": 0,
+     "explain": "Offer a compromise to move forward."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which phrase checks the strongest point?",
+     "options": [
+      "What is the most convincing point?",
+      "Is it?",
+      "Are we done?"
+     ],
+     "answer": 0,
+     "explain": "Asks the group to evaluate arguments."
+    }
+   ]
+  },
+  {
+   "id": "b2-l11",
+   "kind": "lesson",
+   "lesson_number": 11,
+   "lesson_id": "B2.R1",
+   "title": "B2 review: nuanced discussion and persuasion",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "I see your point, ___ I'd look at it differently.",
+     "options": [
+      "but",
+      "so",
+      "because"
+     ],
+     "answer": 0,
+     "explain": "Polite disagreement: I see your point, but…"
+    },
+    {
+     "type": "mc",
+     "prompt": "If the price ___ to rise, we might change supplier.",
+     "options": [
+      "were",
+      "will",
+      "is"
+     ],
+     "answer": 0,
+     "explain": "If … were to… — hypothetical."
+    },
+    {
+     "type": "gap",
+     "prompt": "The ___ of working from home is flexibility.",
+     "answers": [
+      "advantage",
+      "benefit"
+     ],
+     "explain": "The advantage/benefit of…"
+    },
+    {
+     "type": "gap",
+     "prompt": "On ___, I prefer the second plan.",
+     "answers": [
+      "balance"
+     ],
+     "explain": "On balance = overall."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to the lesson skill.",
+     "pairs": [
+      [
+       "From my perspective…",
+       "giving opinions"
+      ],
+      [
+       "I wouldn't rule out…",
+       "speculating"
+      ],
+      [
+       "That said…",
+       "balancing an argument"
+      ],
+      [
+       "Where do we agree?",
+       "leading a discussion"
+      ]
+     ],
+     "explain": "A tour of the main B2 skills."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "consider",
+      "also",
+      "should",
+      "we",
+      "said",
+      "that"
+     ],
+     "answers": [
+      "that said we should also consider"
+     ],
+     "explain": "That said, we should also consider…"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which sentence explains a consequence?",
+     "options": [
+      "As a result, fewer people drive to work.",
+      "From my perspective, it's fine.",
+      "Could you expand on that?"
+     ],
+     "answer": 0,
+     "explain": "As a result → consequence."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is the most diplomatic?",
+     "options": [
+      "That's a fair argument; however, I'm not entirely convinced.",
+      "You're wrong.",
+      "No."
+     ],
+     "answer": 0,
+     "explain": "Acknowledge + however + soft doubt."
+    }
+   ]
+  },
+  {
+   "id": "b2-t-cond",
+   "kind": "topic",
+   "topic": "Grammar",
+   "title": "Conditionals: real, unreal and past",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "If it rains tomorrow, we ___ inside.",
+     "options": [
+      "will stay",
+      "would stay",
+      "would have stayed"
+     ],
+     "answer": 0,
+     "explain": "First conditional (real future): if + present, will."
+    },
+    {
+     "type": "mc",
+     "prompt": "If I had more time, I ___ learn Japanese.",
+     "options": [
+      "would",
+      "will",
+      "would have"
+     ],
+     "answer": 0,
+     "explain": "Second conditional (unreal present): if + past, would."
+    },
+    {
+     "type": "mc",
+     "prompt": "If I had known, I ___ you.",
+     "options": [
+      "would have told",
+      "would tell",
+      "will tell"
+     ],
+     "answer": 0,
+     "explain": "Third conditional (past): if + had + pp, would have + pp."
+    },
+    {
+     "type": "gap",
+     "prompt": "If I ___ you, I'd accept the offer. (be)",
+     "answers": [
+      "were",
+      "was"
+     ],
+     "explain": "If I were you… (were is preferred)."
+    },
+    {
+     "type": "gap",
+     "prompt": "We would have caught the train if we ___ left earlier.",
+     "answers": [
+      "had"
+     ],
+     "explain": "Third conditional: if + had + past participle."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the sentence to its meaning.",
+     "pairs": [
+      [
+       "If I win, I'll travel.",
+       "a real possibility"
+      ],
+      [
+       "If I won, I'd travel.",
+       "an imaginary situation"
+      ],
+      [
+       "If I had won, I'd have travelled.",
+       "a past that didn't happen"
+      ],
+      [
+       "Unless you hurry, you'll be late.",
+       "if you don't hurry"
+      ]
+     ],
+     "explain": "The four most common conditional patterns."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "would",
+      "what",
+      "do",
+      "you",
+      "if",
+      "were",
+      "you",
+      "me"
+     ],
+     "answers": [
+      "what would you do if you were me"
+     ],
+     "explain": "What would you do if you were me?"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "If I would know, I would tell you.",
+      "If I knew, I would tell you."
+     ],
+     "answer": 1,
+     "explain": "No “would” in the if-clause: If I knew…"
+    }
+   ]
+  },
+  {
+   "id": "b2-t-contrast",
+   "kind": "topic",
+   "topic": "Linking words",
+   "title": "Although, despite, however",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "___ it was raining, we went for a walk.",
+     "options": [
+      "Although",
+      "Despite",
+      "However"
+     ],
+     "answer": 0,
+     "explain": "Although + clause (subject + verb)."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ the rain, we went for a walk.",
+     "options": [
+      "Although",
+      "Despite",
+      "However"
+     ],
+     "answer": 1,
+     "explain": "Despite + noun."
+    },
+    {
+     "type": "mc",
+     "prompt": "It was raining. ___, we went for a walk.",
+     "options": [
+      "Although",
+      "Despite",
+      "However"
+     ],
+     "answer": 2,
+     "explain": "However starts a new sentence, followed by a comma."
+    },
+    {
+     "type": "gap",
+     "prompt": "In spite ___ the traffic, we arrived on time.",
+     "answers": [
+      "of"
+     ],
+     "explain": "In spite of = despite."
+    },
+    {
+     "type": "gap",
+     "prompt": "Despite ___ (feel) tired, she finished the report.",
+     "answers": [
+      "feeling"
+     ],
+     "explain": "Despite + -ing."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each linker to how it's used.",
+     "pairs": [
+      [
+       "although",
+       "+ subject + verb"
+      ],
+      [
+       "despite",
+       "+ noun or -ing"
+      ],
+      [
+       "however",
+       "at the start of a new sentence"
+      ],
+      [
+       "whereas",
+       "comparing two different facts"
+      ]
+     ],
+     "explain": "Contrast linkers follow different patterns."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "despite",
+      "the",
+      "we",
+      "enjoyed",
+      "cold",
+      "it"
+     ],
+     "answers": [
+      "we enjoyed it despite the cold",
+      "despite the cold we enjoyed it"
+     ],
+     "explain": "We enjoyed it despite the cold."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which sentence is correct?",
+     "options": [
+      "Despite it was late, we stayed.",
+      "Although it was late, we stayed."
+     ],
+     "answer": 1,
+     "explain": "Although + clause; despite cannot be followed by a clause."
+    }
+   ]
+  },
+  {
+   "id": "b2-t-colloc",
+   "kind": "topic",
+   "topic": "Vocabulary",
+   "title": "Collocations for discussions",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Can we ___ a decision today?",
+     "options": [
+      "make",
+      "do",
+      "take on"
+     ],
+     "answer": 0,
+     "explain": "Make a decision (take a decision is also used in British English)."
+    },
+    {
+     "type": "mc",
+     "prompt": "I'd like to ___ a point.",
+     "options": [
+      "raise",
+      "rise",
+      "grow"
+     ],
+     "answer": 0,
+     "explain": "Raise a point = bring up an idea."
+    },
+    {
+     "type": "mc",
+     "prompt": "Let's ___ an agreement.",
+     "options": [
+      "reach",
+      "arrive",
+      "get to on"
+     ],
+     "answer": 0,
+     "explain": "Reach an agreement."
+    },
+    {
+     "type": "mc",
+     "prompt": "She ___ a good argument.",
+     "options": [
+      "made",
+      "did",
+      "said"
+     ],
+     "answer": 0,
+     "explain": "Make an argument."
+    },
+    {
+     "type": "gap",
+     "prompt": "We need to take this ___ account.",
+     "answers": [
+      "into"
+     ],
+     "explain": "Take into account = consider."
+    },
+    {
+     "type": "gap",
+     "prompt": "I see it from a different point of ___.",
+     "answers": [
+      "view"
+     ],
+     "explain": "Point of view = perspective."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the verb to its collocation.",
+     "pairs": [
+      [
+       "raise",
+       "a question"
+      ],
+      [
+       "reach",
+       "a conclusion"
+      ],
+      [
+       "draw",
+       "attention to"
+      ],
+      [
+       "play",
+       "a role"
+      ]
+     ],
+     "explain": "Strong collocations make your English sound natural."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which collocation is correct?",
+     "options": [
+      "do a mistake",
+      "make a mistake"
+     ],
+     "answer": 1,
+     "explain": "We make mistakes."
+    }
+   ]
+  },
+  {
+   "id": "b2-t-passive",
+   "kind": "topic",
+   "topic": "Grammar",
+   "title": "Passive and reporting phrases",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "The report ___ by the manager yesterday.",
+     "options": [
+      "was written",
+      "wrote",
+      "has writing"
+     ],
+     "answer": 0,
+     "explain": "Past passive: was/were + past participle."
+    },
+    {
+     "type": "mc",
+     "prompt": "A new office ___ next year.",
+     "options": [
+      "will be opened",
+      "will open by",
+      "opens"
+     ],
+     "answer": 0,
+     "explain": "Future passive: will be + past participle."
+    },
+    {
+     "type": "mc",
+     "prompt": "It ___ that prices will rise.",
+     "options": [
+      "is expected",
+      "expects",
+      "is expecting"
+     ],
+     "answer": 0,
+     "explain": "It is expected that… — reporting without naming who."
+    },
+    {
+     "type": "gap",
+     "prompt": "The decision has ___ made. (be)",
+     "answers": [
+      "been"
+     ],
+     "explain": "Present perfect passive: has been + pp."
+    },
+    {
+     "type": "gap",
+     "prompt": "He is said ___ be a great speaker.",
+     "answers": [
+      "to"
+     ],
+     "explain": "Be said to + verb."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the active to the passive.",
+     "pairs": [
+      [
+       "They built it in 1990.",
+       "It was built in 1990."
+      ],
+      [
+       "People say he's rich.",
+       "He is said to be rich."
+      ],
+      [
+       "They will announce it.",
+       "It will be announced."
+      ],
+      [
+       "Someone has stolen my bike!",
+       "My bike has been stolen!"
+      ]
+     ],
+     "explain": "Passive puts the focus on the action, not the person."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "been",
+      "the",
+      "has",
+      "meeting",
+      "cancelled"
+     ],
+     "answers": [
+      "the meeting has been cancelled"
+     ],
+     "explain": "The meeting has been cancelled."
+    },
+    {
+     "type": "mc",
+     "prompt": "When is the passive most useful?",
+     "options": [
+      "When who did it is unknown or unimportant",
+      "When you want to sound informal"
+     ],
+     "answer": 0,
+     "explain": "We use the passive when the action matters more than the person."
+    }
+   ]
+  }
+ ]
+}
