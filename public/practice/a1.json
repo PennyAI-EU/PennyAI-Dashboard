@@ -1,0 +1,413 @@
+{
+ "level": "A1",
+ "sets": [
+  {
+   "id": "a1-l01",
+   "kind": "lesson",
+   "lesson_number": 1,
+   "lesson_id": "A1.01",
+   "title": "Hello, goodbye and your first conversation",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "“Hello! My name is Anna.” Best reply?",
+     "options": [
+      "Hello, I'm Marco. Nice to meet you.",
+      "Goodbye.",
+      "Yes."
+     ],
+     "answer": 0,
+     "explain": "Say hello, say your name, and “Nice to meet you”. (Saluta e di' il tuo nome.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“Nice to meet you.” Best reply?",
+     "options": [
+      "Nice to meet you too.",
+      "Me name.",
+      "See you."
+     ],
+     "answer": 0,
+     "explain": "Reply: “Nice to meet you too.” (Piacere anche mio.)"
+    },
+    {
+     "type": "gap",
+     "prompt": "What ___ your name?",
+     "answers": [
+      "is",
+      "'s"
+     ],
+     "explain": "What is your name? (Come ti chiami?)"
+    },
+    {
+     "type": "gap",
+     "prompt": "My ___ is Luca.",
+     "answers": [
+      "name"
+     ],
+     "explain": "My name is… (Mi chiamo…)"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the English to the Italian.",
+     "pairs": [
+      [
+       "Hello",
+       "Ciao / Buongiorno"
+      ],
+      [
+       "Goodbye",
+       "Arrivederci"
+      ],
+      [
+       "See you later",
+       "A dopo"
+      ],
+      [
+       "Nice to meet you",
+       "Piacere"
+      ]
+     ],
+     "explain": "Four words for your first conversation."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "name",
+      "your",
+      "is",
+      "what"
+     ],
+     "answers": [
+      "what is your name"
+     ],
+     "explain": "What is your name?"
+    },
+    {
+     "type": "mc",
+     "prompt": "You are leaving. What do you say?",
+     "options": [
+      "Hello!",
+      "Goodbye! See you later.",
+      "Nice to meet you."
+     ],
+     "answer": 1,
+     "explain": "Goodbye / Bye / See you later. (Per salutare quando vai via.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "I'm Sara.",
+      "I Sara.",
+      "Me is Sara."
+     ],
+     "answer": 0,
+     "explain": "I'm = I am. (Io sono Sara.)"
+    }
+   ]
+  },
+  {
+   "id": "a1-l02",
+   "kind": "lesson",
+   "lesson_number": 2,
+   "lesson_id": "A1.02",
+   "title": "What do you do? Work and study",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "I'm ___ teacher.",
+     "options": [
+      "a",
+      "an"
+     ],
+     "answer": 0,
+     "explain": "“a” before a consonant sound: a teacher. (Davanti a consonante: a.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "I'm ___ engineer.",
+     "options": [
+      "a",
+      "an"
+     ],
+     "answer": 1,
+     "explain": "“an” before a vowel sound (a, e, i, o, u): an engineer. (Davanti a vocale: an.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“What do you do?” means…",
+     "options": [
+      "Che lavoro fai?",
+      "Cosa fai adesso?",
+      "Come stai?"
+     ],
+     "answer": 0,
+     "explain": "“What do you do?” asks about your job. (Che lavoro fai?)"
+    },
+    {
+     "type": "gap",
+     "prompt": "I work ___ an office.",
+     "answers": [
+      "in"
+     ],
+     "explain": "I work in an office. (Lavoro in un ufficio.)"
+    },
+    {
+     "type": "gap",
+     "prompt": "I'm a ___. I go to university.",
+     "answers": [
+      "student"
+     ],
+     "explain": "I'm a student. (Sono uno studente / una studentessa.)"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the job to the place.",
+     "pairs": [
+      [
+       "doctor",
+       "hospital"
+      ],
+      [
+       "teacher",
+       "school"
+      ],
+      [
+       "pilot",
+       "airport"
+      ],
+      [
+       "waiter",
+       "restaurant"
+      ]
+     ],
+     "explain": "Jobs and where people work. (Lavori e luoghi di lavoro.)"
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "do",
+      "what",
+      "you",
+      "do"
+     ],
+     "answers": [
+      "what do you do"
+     ],
+     "explain": "What do you do? (Che lavoro fai?)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“What do you do?” Best reply?",
+     "options": [
+      "I'm a nurse. I work in a hospital.",
+      "I'm fine, thanks.",
+      "I'm from Rome."
+     ],
+     "answer": 0,
+     "explain": "Answer with your job and where you work. (Rispondi con il tuo lavoro.)"
+    }
+   ]
+  },
+  {
+   "id": "a1-l03",
+   "kind": "lesson",
+   "lesson_number": 3,
+   "lesson_id": "A1.03",
+   "title": "Where are you from?",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Where ___ you from?",
+     "options": [
+      "are",
+      "is",
+      "do"
+     ],
+     "answer": 0,
+     "explain": "Where are you from? (Di dove sei?)"
+    },
+    {
+     "type": "mc",
+     "prompt": "I'm ___ Italy.",
+     "options": [
+      "from",
+      "in",
+      "of"
+     ],
+     "answer": 0,
+     "explain": "I'm from Italy. (Sono italiano/italiana.)"
+    },
+    {
+     "type": "gap",
+     "prompt": "I ___ in Rome.",
+     "answers": [
+      "live"
+     ],
+     "explain": "I live in Rome. (Abito a Roma.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“Do you live in Milan?” — “No, I ___.”",
+     "options": [
+      "don't",
+      "not",
+      "no live"
+     ],
+     "answer": 0,
+     "explain": "No, I don't. (No.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“Do you live in Rome?” — “Yes, I ___.”",
+     "options": [
+      "do",
+      "am",
+      "live"
+     ],
+     "answer": 0,
+     "explain": "Yes, I do. (Sì.)"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the question to the answer.",
+     "pairs": [
+      [
+       "Where are you from?",
+       "I'm from Spain."
+      ],
+      [
+       "Where do you live?",
+       "I live in Madrid."
+      ],
+      [
+       "Do you live in Rome?",
+       "No, I don't."
+      ],
+      [
+       "What is your name?",
+       "I'm Carlos."
+      ]
+     ],
+     "explain": "Questions and answers from this lesson."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "from",
+      "are",
+      "where",
+      "you"
+     ],
+     "answers": [
+      "where are you from"
+     ],
+     "explain": "Where are you from? (Di dove sei?)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "I'm from Naples, but I live in Turin.",
+      "I from Naples, I living Turin.",
+      "Me Naples."
+     ],
+     "answer": 0,
+     "explain": "I'm from… (origin) + I live in… (now). (Origine + dove abiti ora.)"
+    }
+   ]
+  },
+  {
+   "id": "a1-t-aan",
+   "kind": "topic",
+   "topic": "Grammar",
+   "title": "A or an?",
+   "minutes": 3,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "___ apple",
+     "options": [
+      "a",
+      "an"
+     ],
+     "answer": 1,
+     "explain": "an + vowel sound: an apple."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ dog",
+     "options": [
+      "a",
+      "an"
+     ],
+     "answer": 0,
+     "explain": "a + consonant sound: a dog."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ office",
+     "options": [
+      "a",
+      "an"
+     ],
+     "answer": 1,
+     "explain": "an office."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ pilot",
+     "options": [
+      "a",
+      "an"
+     ],
+     "answer": 0,
+     "explain": "a pilot."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ hour",
+     "options": [
+      "a",
+      "an"
+     ],
+     "answer": 1,
+     "explain": "“hour” starts with a vowel sound (the h is silent): an hour."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ university",
+     "options": [
+      "a",
+      "an"
+     ],
+     "answer": 0,
+     "explain": "“university” starts with a “you” sound: a university."
+    },
+    {
+     "type": "gap",
+     "prompt": "She's ___ artist.",
+     "answers": [
+      "an"
+     ],
+     "explain": "an artist."
+    },
+    {
+     "type": "gap",
+     "prompt": "He's ___ chef.",
+     "answers": [
+      "a"
+     ],
+     "explain": "a chef."
+    }
+   ]
+  }
+ ]
+}
