@@ -1,0 +1,1930 @@
+{
+ "level": "C1",
+ "sets": [
+  {
+   "id": "c1-l01",
+   "kind": "lesson",
+   "lesson_number": 1,
+   "lesson_id": "C1.01",
+   "title": "Framing a nuanced position",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "I would frame the issue ___ terms of long-term cost.",
+     "options": [
+      "in",
+      "on",
+      "by"
+     ],
+     "answer": 0,
+     "explain": "Frame something in terms of… = present it from this angle."
+    },
+    {
+     "type": "mc",
+     "prompt": "My position is ___ that remote work helps, although it depends on the team.",
+     "options": [
+      "broadly",
+      "broad",
+      "broaden"
+     ],
+     "answer": 0,
+     "explain": "Broadly = in general terms — signals a nuanced view."
+    },
+    {
+     "type": "gap",
+     "prompt": "The key ___ is between flexibility and isolation.",
+     "answers": [
+      "distinction"
+     ],
+     "explain": "The key distinction is between X and Y."
+    },
+    {
+     "type": "gap",
+     "prompt": "That conclusion ___ on the assumption that everyone has fast internet.",
+     "answers": [
+      "rests",
+      "depends",
+      "relies"
+     ],
+     "explain": "Rest on an assumption = depend on it."
+    },
+    {
+     "type": "mc",
+     "prompt": "A more ___ claim would be that it suits some roles better than others.",
+     "options": [
+      "defensible",
+      "defended",
+      "defending"
+     ],
+     "answer": 0,
+     "explain": "Defensible = easier to justify."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its function.",
+     "pairs": [
+      [
+       "I would frame the issue in terms of…",
+       "setting the angle"
+      ],
+      [
+       "The key distinction is…",
+       "separating two ideas"
+      ],
+      [
+       "That rests on the assumption…",
+       "exposing a premise"
+      ],
+      [
+       "What would qualify your view?",
+       "inviting limits to a claim"
+      ]
+     ],
+     "explain": "Framing language makes your position precise."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "would",
+      "far",
+      "how",
+      "take",
+      "you",
+      "argument",
+      "that"
+     ],
+     "answers": [
+      "how far would you take that argument"
+     ],
+     "explain": "How far would you take that argument?"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which sentence is the most nuanced?",
+     "options": [
+      "Remote work is broadly positive, although its benefits depend heavily on the type of job.",
+      "Remote work is good.",
+      "Remote work is the future, full stop."
+     ],
+     "answer": 0,
+     "explain": "Broad position + qualification."
+    }
+   ]
+  },
+  {
+   "id": "c1-l02",
+   "kind": "lesson",
+   "lesson_number": 2,
+   "lesson_id": "C1.02",
+   "title": "Evaluating evidence and source reliability",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "The strength of that evidence ___ on the sample size.",
+     "options": [
+      "depends",
+      "relies of",
+      "is depending"
+     ],
+     "answer": 0,
+     "explain": "Depends on."
+    },
+    {
+     "type": "mc",
+     "prompt": "That source may be credible, but it does not ___ show causation.",
+     "options": [
+      "necessarily",
+      "necessary",
+      "needfully"
+     ],
+     "answer": 0,
+     "explain": "Not necessarily = not always/automatically."
+    },
+    {
+     "type": "gap",
+     "prompt": "The sample may not be ___ of the population.",
+     "answers": [
+      "representative"
+     ],
+     "explain": "Representative of = typical of."
+    },
+    {
+     "type": "gap",
+     "prompt": "I would treat that as an indication rather than ___.",
+     "answers": [
+      "proof"
+     ],
+     "explain": "An indication, not proof."
+    },
+    {
+     "type": "mc",
+     "prompt": "A study funded by the company selling the product may be…",
+     "options": [
+      "biased",
+      "biassed by nature always",
+      "bias"
+     ],
+     "answer": 0,
+     "explain": "Biased = unfairly influenced."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each term to its meaning.",
+     "pairs": [
+      [
+       "anecdotal",
+       "based on personal stories"
+      ],
+      [
+       "peer-reviewed",
+       "checked by other experts"
+      ],
+      [
+       "correlation",
+       "two things happening together"
+      ],
+      [
+       "causation",
+       "one thing causing another"
+      ]
+     ],
+     "explain": "Key words for judging evidence."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "count",
+      "would",
+      "what",
+      "as",
+      "evidence",
+      "stronger"
+     ],
+     "answers": [
+      "what would count as stronger evidence"
+     ],
+     "explain": "What would count as stronger evidence?"
+    },
+    {
+     "type": "mc",
+     "prompt": "“Ice-cream sales and sunburn rise together, so ice-cream causes sunburn.” What's wrong?",
+     "options": [
+      "It confuses correlation with causation.",
+      "The sample is too large.",
+      "Nothing — it's proven."
+     ],
+     "answer": 0,
+     "explain": "Both are caused by a third factor: hot weather."
+    }
+   ]
+  },
+  {
+   "id": "c1-l03",
+   "kind": "lesson",
+   "lesson_number": 3,
+   "lesson_id": "C1.03",
+   "title": "Qualifying claims and acknowledging complexity",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "It would be ___ to suggest that technology solves every problem.",
+     "options": [
+      "misleading",
+      "misled",
+      "mislead"
+     ],
+     "answer": 0,
+     "explain": "Misleading = giving a false impression."
+    },
+    {
+     "type": "mc",
+     "prompt": "Even if prices fall, it does not necessarily ___ that demand will rise.",
+     "options": [
+      "follow",
+      "follows to",
+      "following"
+     ],
+     "answer": 0,
+     "explain": "It doesn't follow that… = it isn't a logical consequence."
+    },
+    {
+     "type": "gap",
+     "prompt": "The picture is more ___ than that.",
+     "answers": [
+      "complicated",
+      "complex",
+      "nuanced"
+     ],
+     "explain": "Signals complexity."
+    },
+    {
+     "type": "gap",
+     "prompt": "I would be cautious ___ generalising from one example.",
+     "answers": [
+      "about"
+     ],
+     "explain": "Cautious about + -ing."
+    },
+    {
+     "type": "mc",
+     "prompt": "There is a tendency to ___ the cost of maintenance.",
+     "options": [
+      "overlook",
+      "overview",
+      "oversee"
+     ],
+     "answer": 0,
+     "explain": "Overlook = fail to notice."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its function.",
+     "pairs": [
+      [
+       "That is true in some contexts…",
+       "limiting a claim"
+      ],
+      [
+       "It does not necessarily follow…",
+       "questioning logic"
+      ],
+      [
+       "There is a tendency to overlook…",
+       "highlighting a blind spot"
+      ],
+      [
+       "What is the strongest exception?",
+       "inviting counter-evidence"
+      ]
+     ],
+     "explain": "Qualifying language makes claims more accurate."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "picture",
+      "the",
+      "more",
+      "is",
+      "complicated",
+      "that",
+      "than"
+     ],
+     "answers": [
+      "the picture is more complicated than that"
+     ],
+     "explain": "The picture is more complicated than that."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is a qualified claim?",
+     "options": [
+      "Exercise tends to improve mood, particularly when done outdoors.",
+      "Exercise always makes everyone happy.",
+      "Exercise is good."
+     ],
+     "answer": 0,
+     "explain": "Tends to + particularly when = qualified."
+    }
+   ]
+  },
+  {
+   "id": "c1-l04",
+   "kind": "lesson",
+   "lesson_number": 4,
+   "lesson_id": "C1.04",
+   "title": "Challenging ideas constructively",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "I can see the logic, but I would challenge the ___ that cheaper is always better.",
+     "options": [
+      "premise",
+      "promise",
+      "premises of"
+     ],
+     "answer": 0,
+     "explain": "Premise = basic assumption."
+    },
+    {
+     "type": "mc",
+     "prompt": "That interpretation ___ out the role of training.",
+     "options": [
+      "leaves",
+      "lets",
+      "takes"
+     ],
+     "answer": 0,
+     "explain": "Leave out = omit."
+    },
+    {
+     "type": "gap",
+     "prompt": "A ___ might be a company that succeeded without advertising.",
+     "answers": [
+      "counterexample"
+     ],
+     "explain": "A counterexample disproves a general claim."
+    },
+    {
+     "type": "gap",
+     "prompt": "I'm not sure the comparison ___ because the markets are different.",
+     "answers": [
+      "holds"
+     ],
+     "explain": "The comparison holds = is valid."
+    },
+    {
+     "type": "mc",
+     "prompt": "I take your ___; my concern is the timing.",
+     "options": [
+      "point",
+      "idea",
+      "view of"
+     ],
+     "answer": 0,
+     "explain": "I take your point = I accept it."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its function.",
+     "pairs": [
+      [
+       "I would challenge the premise…",
+       "questioning an assumption"
+      ],
+      [
+       "That leaves out…",
+       "pointing to an omission"
+      ],
+      [
+       "A counterexample might be…",
+       "offering evidence against"
+      ],
+      [
+       "Could we separate X from Y?",
+       "untangling ideas"
+      ]
+     ],
+     "explain": "Constructive challenges target ideas, not people."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "the",
+      "think",
+      "where",
+      "you",
+      "do",
+      "reasoning",
+      "strongest",
+      "is"
+     ],
+     "answers": [
+      "where do you think the reasoning is strongest"
+     ],
+     "explain": "Where do you think the reasoning is strongest?"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is the most constructive challenge?",
+     "options": [
+      "I take your point; my concern is that it may not scale.",
+      "That's nonsense.",
+      "You clearly haven't thought about it."
+     ],
+     "answer": 0,
+     "explain": "Acknowledge + specific concern."
+    }
+   ]
+  },
+  {
+   "id": "c1-l05",
+   "kind": "lesson",
+   "lesson_number": 5,
+   "lesson_id": "C1.05",
+   "title": "Hypothesizing and exploring implications",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "If this trend ___ to continue, cities would change dramatically.",
+     "options": [
+      "were",
+      "was being",
+      "will"
+     ],
+     "answer": 0,
+     "explain": "If … were to continue — formal hypothesis."
+    },
+    {
+     "type": "mc",
+     "prompt": "That could have a ___ effect on local businesses.",
+     "options": [
+      "knock-on",
+      "knock-out",
+      "knock-off"
+     ],
+     "answer": 0,
+     "explain": "Knock-on effect = indirect consequence."
+    },
+    {
+     "type": "gap",
+     "prompt": "Much would ___ on whether the government invests.",
+     "answers": [
+      "depend"
+     ],
+     "explain": "Much would depend on whether…"
+    },
+    {
+     "type": "gap",
+     "prompt": "One ___ consequence could be higher rents.",
+     "answers": [
+      "unintended",
+      "unforeseen",
+      "unexpected"
+     ],
+     "explain": "Unintended consequence = a result nobody planned."
+    },
+    {
+     "type": "mc",
+     "prompt": "The immediate effect might be positive, ___ in the longer term it could be harmful.",
+     "options": [
+      "whereas",
+      "because",
+      "so that"
+     ],
+     "answer": 0,
+     "explain": "Whereas contrasts two situations."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its meaning.",
+     "pairs": [
+      [
+       "knock-on effect",
+       "indirect result"
+      ],
+      [
+       "inevitable",
+       "certain to happen"
+      ],
+      [
+       "in the longer term",
+       "over a long period"
+      ],
+      [
+       "unintended consequence",
+       "unplanned result"
+      ]
+     ],
+     "explain": "Language for exploring implications."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "matters",
+      "which",
+      "consequence",
+      "most",
+      "view",
+      "your",
+      "in"
+     ],
+     "answers": [
+      "which consequence matters most in your view"
+     ],
+     "explain": "Which consequence matters most in your view?"
+    },
+    {
+     "type": "mc",
+     "prompt": "“I would not assume that this is ___.”",
+     "options": [
+      "inevitable",
+      "inevitably",
+      "inevitability"
+     ],
+     "answer": 0,
+     "explain": "Adjective needed: inevitable."
+    }
+   ]
+  },
+  {
+   "id": "c1-l06",
+   "kind": "lesson",
+   "lesson_number": 6,
+   "lesson_id": "C1.06",
+   "title": "Comparing complex alternatives",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "On balance, I would ___ the first option over the second.",
+     "options": [
+      "favour",
+      "favourite",
+      "favourable"
+     ],
+     "answer": 0,
+     "explain": "Favour X over Y = prefer."
+    },
+    {
+     "type": "mc",
+     "prompt": "The trade-___ is between speed and quality.",
+     "options": [
+      "off",
+      "out",
+      "in"
+     ],
+     "answer": 0,
+     "explain": "Trade-off = a balance between two things you can't have together."
+    },
+    {
+     "type": "gap",
+     "prompt": "The decisive ___ for me would be cost.",
+     "answers": [
+      "criterion",
+      "factor"
+     ],
+     "explain": "Criterion (plural: criteria) = standard for judging."
+    },
+    {
+     "type": "gap",
+     "prompt": "It depends on how much ___ we give to safety.",
+     "answers": [
+      "weight",
+      "importance"
+     ],
+     "explain": "Give weight to = consider important."
+    },
+    {
+     "type": "mc",
+     "prompt": "If the budget were smaller, I would ___.",
+     "options": [
+      "reconsider",
+      "reconsidering",
+      "reconsidered"
+     ],
+     "answer": 0,
+     "explain": "Second conditional: would + base verb."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its function.",
+     "pairs": [
+      [
+       "On balance…",
+       "overall judgement"
+      ],
+      [
+       "The trade-off is…",
+       "naming the compromise"
+      ],
+      [
+       "The decisive criterion…",
+       "what matters most"
+      ],
+      [
+       "If the constraint were…",
+       "testing a condition"
+      ]
+     ],
+     "explain": "Comparing alternatives clearly."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "criterion",
+      "should",
+      "which",
+      "most",
+      "carry",
+      "the",
+      "weight"
+     ],
+     "answers": [
+      "which criterion should carry the most weight"
+     ],
+     "explain": "Which criterion should carry the most weight?"
+    },
+    {
+     "type": "mc",
+     "prompt": "What is the plural of “criterion”?",
+     "options": [
+      "criteria",
+      "criterions",
+      "criterias"
+     ],
+     "answer": 0,
+     "explain": "criterion → criteria."
+    }
+   ]
+  },
+  {
+   "id": "c1-l07",
+   "kind": "lesson",
+   "lesson_number": 7,
+   "lesson_id": "C1.07",
+   "title": "Synthesizing multiple viewpoints",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "There are two ___ to that argument.",
+     "options": [
+      "strands",
+      "strings",
+      "stripes"
+     ],
+     "answer": 0,
+     "explain": "Strands = separate parts of an argument."
+    },
+    {
+     "type": "mc",
+     "prompt": "The real point of ___ seems to be cost.",
+     "options": [
+      "disagreement",
+      "disagreeing",
+      "disagree"
+     ],
+     "answer": 0,
+     "explain": "Point of disagreement."
+    },
+    {
+     "type": "gap",
+     "prompt": "We may be able to ___ them if we focus on shared goals.",
+     "answers": [
+      "reconcile"
+     ],
+     "explain": "Reconcile = make compatible."
+    },
+    {
+     "type": "gap",
+     "prompt": "A useful ___ would be a pilot scheme.",
+     "answers": [
+      "synthesis",
+      "compromise"
+     ],
+     "explain": "Synthesis = combination of ideas."
+    },
+    {
+     "type": "mc",
+     "prompt": "That still ___ the question of funding.",
+     "options": [
+      "leaves",
+      "lets",
+      "makes"
+     ],
+     "answer": 0,
+     "explain": "That still leaves the question of… = an issue remains."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its function.",
+     "pairs": [
+      [
+       "Both perspectives are responding to…",
+       "finding common ground"
+      ],
+      [
+       "The real point of disagreement…",
+       "isolating the conflict"
+      ],
+      [
+       "We may be able to reconcile them if…",
+       "proposing a bridge"
+      ],
+      [
+       "Have I represented both views fairly?",
+       "checking fairness"
+      ]
+     ],
+     "explain": "Synthesis combines views rather than choosing one."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "both",
+      "fairly",
+      "have",
+      "represented",
+      "I",
+      "views"
+     ],
+     "answers": [
+      "have i represented both views fairly"
+     ],
+     "explain": "Have I represented both views fairly?"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which sentence synthesises two views?",
+     "options": [
+      "Both sides want safer streets; they differ only on whether cameras or more officers achieve it.",
+      "Side A is right.",
+      "They disagree."
+     ],
+     "answer": 0,
+     "explain": "Names the shared goal and the real difference."
+    }
+   ]
+  },
+  {
+   "id": "c1-l08",
+   "kind": "lesson",
+   "lesson_number": 8,
+   "lesson_id": "C1.08",
+   "title": "Clarifying abstract ideas and ambiguity",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "It depends what we ___ by ‘success’.",
+     "options": [
+      "mean",
+      "say",
+      "define of"
+     ],
+     "answer": 0,
+     "explain": "It depends what we mean by…"
+    },
+    {
+     "type": "mc",
+     "prompt": "Could you be more ___ about ‘quality’?",
+     "options": [
+      "specific",
+      "specifically",
+      "specify"
+     ],
+     "answer": 0,
+     "explain": "Be specific about."
+    },
+    {
+     "type": "gap",
+     "prompt": "There are at least two ways of ___ that.",
+     "answers": [
+      "understanding",
+      "interpreting",
+      "reading"
+     ],
+     "explain": "Ways of understanding/interpreting."
+    },
+    {
+     "type": "gap",
+     "prompt": "I may be ___ the term differently.",
+     "answers": [
+      "using"
+     ],
+     "explain": "Using a term differently."
+    },
+    {
+     "type": "mc",
+     "prompt": "If by ‘freedom’ you ___ freedom of choice, then I agree.",
+     "options": [
+      "mean",
+      "meant to",
+      "are meaning"
+     ],
+     "answer": 0,
+     "explain": "If by X you mean Y, then…"
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its function.",
+     "pairs": [
+      [
+       "It depends what we mean by…",
+       "flagging a vague term"
+      ],
+      [
+       "There are two ways of understanding that.",
+       "exposing ambiguity"
+      ],
+      [
+       "Let me put that another way.",
+       "rephrasing"
+      ],
+      [
+       "Are we talking about X or Y?",
+       "forcing a distinction"
+      ]
+     ],
+     "explain": "Clarifying abstract terms avoids talking past each other."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "put",
+      "that",
+      "let",
+      "another",
+      "me",
+      "way"
+     ],
+     "answers": [
+      "let me put that another way"
+     ],
+     "explain": "Let me put that another way."
+    },
+    {
+     "type": "mc",
+     "prompt": "“Ambiguous” means…",
+     "options": [
+      "open to more than one meaning",
+      "completely clear",
+      "very ambitious"
+     ],
+     "answer": 0,
+     "explain": "Ambiguous = it can be understood in different ways."
+    }
+   ]
+  },
+  {
+   "id": "c1-l09",
+   "kind": "lesson",
+   "lesson_number": 9,
+   "lesson_id": "C1.09",
+   "title": "Persuading through calibrated reasoning",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "The most ___ case is that it saves time.",
+     "options": [
+      "compelling",
+      "compelled",
+      "compulsive"
+     ],
+     "answer": 0,
+     "explain": "Compelling = very convincing."
+    },
+    {
+     "type": "mc",
+     "prompt": "The evidence is not ___, but it points towards a benefit.",
+     "options": [
+      "conclusive",
+      "concluded",
+      "conclusion"
+     ],
+     "answer": 0,
+     "explain": "Conclusive = proving something definitely."
+    },
+    {
+     "type": "gap",
+     "prompt": "A reasonable ___ would be the initial cost.",
+     "answers": [
+      "objection"
+     ],
+     "explain": "Objection = argument against."
+    },
+    {
+     "type": "gap",
+     "prompt": "That objection carries weight; ___, the long-term savings are greater.",
+     "answers": [
+      "nevertheless",
+      "nonetheless",
+      "however"
+     ],
+     "explain": "Nevertheless = despite that."
+    },
+    {
+     "type": "mc",
+     "prompt": "If we ___ that premise, then the conclusion follows.",
+     "options": [
+      "accept",
+      "except",
+      "expect"
+     ],
+     "answer": 0,
+     "explain": "Accept a premise (except = apart from!)."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its function.",
+     "pairs": [
+      [
+       "The most compelling case is…",
+       "main argument"
+      ],
+      [
+       "The evidence points towards…",
+       "calibrated claim"
+      ],
+      [
+       "A reasonable objection would be…",
+       "anticipating opposition"
+      ],
+      [
+       "The practical implication is…",
+       "what to do"
+      ]
+     ],
+     "explain": "Calibrated reasoning = not overclaiming."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "recommendation",
+      "would",
+      "convincing",
+      "what",
+      "make",
+      "more",
+      "the"
+     ],
+     "answers": [
+      "what would make the recommendation more convincing"
+     ],
+     "explain": "What would make the recommendation more convincing?"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which claim is well-calibrated?",
+     "options": [
+      "The data suggest a modest improvement, though more research is needed.",
+      "This will definitely change everything.",
+      "Nothing works."
+     ],
+     "answer": 0,
+     "explain": "Suggest + modest + caveat."
+    }
+   ]
+  },
+  {
+   "id": "c1-l10",
+   "kind": "lesson",
+   "lesson_number": 10,
+   "lesson_id": "C1.10",
+   "title": "Leading a sustained C1 discussion",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Let me bring those points ___.",
+     "options": [
+      "together",
+      "along",
+      "about"
+     ],
+     "answer": 0,
+     "explain": "Bring points together = summarise."
+    },
+    {
+     "type": "mc",
+     "prompt": "There seems to be a ___ between cost and quality.",
+     "options": [
+      "tension",
+      "tense",
+      "tensing"
+     ],
+     "answer": 0,
+     "explain": "Tension = conflict between two things."
+    },
+    {
+     "type": "gap",
+     "prompt": "A ___ conclusion might be that we need a trial.",
+     "answers": [
+      "provisional",
+      "tentative"
+     ],
+     "explain": "Provisional = temporary, may change."
+    },
+    {
+     "type": "gap",
+     "prompt": "That ___ with what you said about training.",
+     "answers": [
+      "connects",
+      "links",
+      "ties in"
+     ],
+     "explain": "That connects with…"
+    },
+    {
+     "type": "mc",
+     "prompt": "Shall we ___ that against a concrete example?",
+     "options": [
+      "test",
+      "testing",
+      "tested"
+     ],
+     "answer": 0,
+     "explain": "Test an idea against an example."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its function.",
+     "pairs": [
+      [
+       "Let me bring those points together.",
+       "summarising"
+      ],
+      [
+       "There seems to be a tension…",
+       "naming a conflict"
+      ],
+      [
+       "What perspective have we not considered?",
+       "widening the discussion"
+      ],
+      [
+       "Where does that leave us?",
+       "moving to a conclusion"
+      ]
+     ],
+     "explain": "Leading phrases structure a long discussion."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "leave",
+      "that",
+      "where",
+      "us",
+      "does"
+     ],
+     "answers": [
+      "where does that leave us"
+     ],
+     "explain": "Where does that leave us?"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which move widens the discussion?",
+     "options": [
+      "What perspective have we not considered yet?",
+      "Let's stop.",
+      "I agree."
+     ],
+     "answer": 0,
+     "explain": "Invites new angles."
+    }
+   ]
+  },
+  {
+   "id": "c1-l11",
+   "kind": "lesson",
+   "lesson_number": 11,
+   "lesson_id": "C1.R1",
+   "title": "C1 review: advanced argument and interaction",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "That conclusion ___ on the assumption that costs stay low.",
+     "options": [
+      "rests",
+      "sits",
+      "stands"
+     ],
+     "answer": 0,
+     "explain": "Rests on an assumption."
+    },
+    {
+     "type": "mc",
+     "prompt": "The strength of that evidence ___ on how it was collected.",
+     "options": [
+      "depends",
+      "relies of",
+      "hangs"
+     ],
+     "answer": 0,
+     "explain": "Depends on."
+    },
+    {
+     "type": "gap",
+     "prompt": "The real point of ___ seems to be timing.",
+     "answers": [
+      "disagreement"
+     ],
+     "explain": "Point of disagreement."
+    },
+    {
+     "type": "gap",
+     "prompt": "It depends what we ___ by ‘fair’.",
+     "answers": [
+      "mean"
+     ],
+     "explain": "Clarifying a vague term."
+    },
+    {
+     "type": "mc",
+     "prompt": "A reasonable objection would be the cost; ___, the benefits are long-term.",
+     "options": [
+      "nevertheless",
+      "therefore",
+      "because"
+     ],
+     "answer": 0,
+     "explain": "Concede, then continue: nevertheless."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to the C1 skill.",
+     "pairs": [
+      [
+       "I would frame the issue in terms of…",
+       "framing a position"
+      ],
+      [
+       "I'd treat that as an indication rather than proof.",
+       "evaluating evidence"
+      ],
+      [
+       "We may be able to reconcile them if…",
+       "synthesising views"
+      ],
+      [
+       "A provisional conclusion might be…",
+       "leading a discussion"
+      ]
+     ],
+     "explain": "A tour of the C1 skills."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "conclusion",
+      "might",
+      "a",
+      "be",
+      "provisional"
+     ],
+     "answers": [
+      "a provisional conclusion might be"
+     ],
+     "explain": "A provisional conclusion might be…"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is the most C1-like response?",
+     "options": [
+      "I take your point, though I'd question whether the comparison really holds.",
+      "OK, you're right.",
+      "No."
+     ],
+     "answer": 0,
+     "explain": "Acknowledge + precise challenge."
+    }
+   ]
+  },
+  {
+   "id": "c1-t-inversion",
+   "kind": "topic",
+   "topic": "Grammar",
+   "title": "Inversion for emphasis",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Never ___ such a beautiful view.",
+     "options": [
+      "have I seen",
+      "I have seen",
+      "I saw"
+     ],
+     "answer": 0,
+     "explain": "Negative adverb at the start → question word order."
+    },
+    {
+     "type": "mc",
+     "prompt": "Not only ___ late, but he also forgot the tickets.",
+     "options": [
+      "was he",
+      "he was",
+      "he is"
+     ],
+     "answer": 0,
+     "explain": "Not only + inversion."
+    },
+    {
+     "type": "mc",
+     "prompt": "Rarely ___ such dedication.",
+     "options": [
+      "do we see",
+      "we see",
+      "we do see"
+     ],
+     "answer": 0,
+     "explain": "Rarely + do/does + subject + verb."
+    },
+    {
+     "type": "mc",
+     "prompt": "Had I known, I ___ earlier.",
+     "options": [
+      "would have left",
+      "would leave",
+      "had left"
+     ],
+     "answer": 0,
+     "explain": "Had I known = If I had known (formal)."
+    },
+    {
+     "type": "mc",
+     "prompt": "Should you need help, ___ me.",
+     "options": [
+      "call",
+      "you call",
+      "calling"
+     ],
+     "answer": 0,
+     "explain": "Should you need = If you need (formal)."
+    },
+    {
+     "type": "gap",
+     "prompt": "No sooner had we arrived ___ it started to rain.",
+     "answers": [
+      "than"
+     ],
+     "explain": "No sooner… than."
+    },
+    {
+     "type": "gap",
+     "prompt": "Under no ___ should you open this door.",
+     "answers": [
+      "circumstances"
+     ],
+     "explain": "Under no circumstances = absolutely not."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "Little did she know what would happen.",
+      "Little she knew what would happen did.",
+      "Little knew she what would happen."
+     ],
+     "answer": 0,
+     "explain": "Little did + subject + base verb."
+    }
+   ]
+  },
+  {
+   "id": "c1-t-cleft",
+   "kind": "topic",
+   "topic": "Grammar",
+   "title": "Cleft sentences",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "___ I need is more time.",
+     "options": [
+      "What",
+      "That",
+      "Which"
+     ],
+     "answer": 0,
+     "explain": "What-clefts focus on the important part."
+    },
+    {
+     "type": "mc",
+     "prompt": "It was Maria ___ found the solution.",
+     "options": [
+      "who",
+      "what",
+      "which of"
+     ],
+     "answer": 0,
+     "explain": "It-cleft: It was X who/that…"
+    },
+    {
+     "type": "mc",
+     "prompt": "What surprised me ___ the price.",
+     "options": [
+      "was",
+      "were",
+      "is being"
+     ],
+     "answer": 0,
+     "explain": "What… + was."
+    },
+    {
+     "type": "gap",
+     "prompt": "All I want ___ a quiet weekend.",
+     "answers": [
+      "is"
+     ],
+     "explain": "All I want is… = the only thing."
+    },
+    {
+     "type": "gap",
+     "prompt": "The reason ___ I left was the commute.",
+     "answers": [
+      "why",
+      "that"
+     ],
+     "explain": "The reason why/that…"
+    },
+    {
+     "type": "mc",
+     "prompt": "“It's the noise that bothers me.” What is emphasised?",
+     "options": [
+      "the noise",
+      "me",
+      "bothers"
+     ],
+     "answer": 0,
+     "explain": "It-clefts emphasise the item after “It's”."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "need",
+      "what",
+      "is",
+      "we",
+      "plan",
+      "a",
+      "clear"
+     ],
+     "answers": [
+      "what we need is a clear plan"
+     ],
+     "explain": "What we need is a clear plan."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which sentence emphasises “on Monday”?",
+     "options": [
+      "It was on Monday that we decided.",
+      "We decided on Monday.",
+      "Monday we decided it was."
+     ],
+     "answer": 0,
+     "explain": "It was + focus + that…"
+    }
+   ]
+  },
+  {
+   "id": "c1-t-hedging",
+   "kind": "topic",
+   "topic": "Style",
+   "title": "Hedging and softening",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Which sentence is hedged?",
+     "options": [
+      "It would appear that sales are slowing.",
+      "Sales are slowing.",
+      "Sales are collapsing!"
+     ],
+     "answer": 0,
+     "explain": "It would appear that… softens the claim."
+    },
+    {
+     "type": "mc",
+     "prompt": "The results ___ that the policy works.",
+     "options": [
+      "seem to suggest",
+      "prove totally",
+      "show definitely"
+     ],
+     "answer": 0,
+     "explain": "Seem to suggest = cautious."
+    },
+    {
+     "type": "gap",
+     "prompt": "This is, to a certain ___, true.",
+     "answers": [
+      "extent",
+      "degree"
+     ],
+     "explain": "To a certain extent = partly."
+    },
+    {
+     "type": "gap",
+     "prompt": "There is a ___ that costs will rise. (possibility)",
+     "answers": [
+      "possibility",
+      "chance",
+      "likelihood"
+     ],
+     "explain": "There is a possibility that…"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which word is a hedge?",
+     "options": [
+      "arguably",
+      "definitely",
+      "obviously"
+     ],
+     "answer": 0,
+     "explain": "Arguably = it could be argued."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the hedge to its strength.",
+     "pairs": [
+      [
+       "It is likely that…",
+       "fairly confident"
+      ],
+      [
+       "It may be that…",
+       "unsure"
+      ],
+      [
+       "It is almost certain that…",
+       "very confident"
+      ],
+      [
+       "It is conceivable that…",
+       "only just possible"
+      ]
+     ],
+     "explain": "Hedges show how sure you are."
+    },
+    {
+     "type": "mc",
+     "prompt": "Why do academics and professionals hedge?",
+     "options": [
+      "To avoid overclaiming",
+      "To sound unsure of everything",
+      "Because it's shorter"
+     ],
+     "answer": 0,
+     "explain": "Hedging = precise, honest claims."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "would",
+      "it",
+      "appear",
+      "that"
+     ],
+     "answers": [
+      "it would appear that"
+     ],
+     "explain": "It would appear that…"
+    }
+   ]
+  },
+  {
+   "id": "c1-t-linkers",
+   "kind": "topic",
+   "topic": "Linking words",
+   "title": "Advanced linkers",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "___ the bad weather, the event was a success.",
+     "options": [
+      "Notwithstanding",
+      "Nevertheless",
+      "Whereas"
+     ],
+     "answer": 0,
+     "explain": "Notwithstanding + noun = despite."
+    },
+    {
+     "type": "mc",
+     "prompt": "The plan is good; ___, it is expensive.",
+     "options": [
+      "nonetheless",
+      "whereas",
+      "despite"
+     ],
+     "answer": 0,
+     "explain": "Nonetheless = however/despite this."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ as I know, the meeting is still on.",
+     "options": [
+      "As far",
+      "So long",
+      "Insofar"
+     ],
+     "answer": 0,
+     "explain": "As far as I know = based on my knowledge."
+    },
+    {
+     "type": "mc",
+     "prompt": "We'll go ahead ___ everyone agrees.",
+     "options": [
+      "provided that",
+      "in case of",
+      "despite"
+     ],
+     "answer": 0,
+     "explain": "Provided that = only if."
+    },
+    {
+     "type": "mc",
+     "prompt": "Bring an umbrella ___ it rains.",
+     "options": [
+      "in case",
+      "provided",
+      "unless when"
+     ],
+     "answer": 0,
+     "explain": "In case = as a precaution."
+    },
+    {
+     "type": "gap",
+     "prompt": "___ to popular belief, bats are not blind.",
+     "answers": [
+      "Contrary"
+     ],
+     "explain": "Contrary to popular belief…"
+    },
+    {
+     "type": "gap",
+     "prompt": "The project failed, ___ to a lack of funding.",
+     "answers": [
+      "owing",
+      "due"
+     ],
+     "explain": "Owing to / due to = because of."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the linker to its meaning.",
+     "pairs": [
+      [
+       "hence",
+       "therefore"
+      ],
+      [
+       "whereby",
+       "by which"
+      ],
+      [
+       "albeit",
+       "although"
+      ],
+      [
+       "thereby",
+       "as a result of this"
+      ]
+     ],
+     "explain": "Formal linkers for advanced writing and speaking."
+    }
+   ]
+  },
+  {
+   "id": "c1-t-reporting",
+   "kind": "topic",
+   "topic": "Vocabulary",
+   "title": "Reporting verbs",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "She ___ that she had made a mistake.",
+     "options": [
+      "admitted",
+      "denied to",
+      "refused"
+     ],
+     "answer": 0,
+     "explain": "Admit = say something is true (unwillingly)."
+    },
+    {
+     "type": "mc",
+     "prompt": "He ___ taking the money.",
+     "options": [
+      "denied",
+      "refused",
+      "rejected to"
+     ],
+     "answer": 0,
+     "explain": "Deny + -ing."
+    },
+    {
+     "type": "mc",
+     "prompt": "They ___ me to apply for the job.",
+     "options": [
+      "encouraged",
+      "suggested",
+      "insisted"
+     ],
+     "answer": 0,
+     "explain": "Encourage + someone + to."
+    },
+    {
+     "type": "mc",
+     "prompt": "She ___ that we leave early.",
+     "options": [
+      "suggested",
+      "told",
+      "said us"
+     ],
+     "answer": 0,
+     "explain": "Suggest that + subject + (should) verb."
+    },
+    {
+     "type": "mc",
+     "prompt": "He ___ on paying for dinner.",
+     "options": [
+      "insisted",
+      "persisted to",
+      "claimed"
+     ],
+     "answer": 0,
+     "explain": "Insist on + -ing."
+    },
+    {
+     "type": "gap",
+     "prompt": "The manager ___ (warn) us not to be late.",
+     "answers": [
+      "warned"
+     ],
+     "explain": "Warn someone not to…"
+    },
+    {
+     "type": "gap",
+     "prompt": "She accused him ___ lying.",
+     "answers": [
+      "of"
+     ],
+     "explain": "Accuse someone of + -ing."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the verb to its pattern.",
+     "pairs": [
+      [
+       "refuse",
+       "+ to do"
+      ],
+      [
+       "deny",
+       "+ -ing"
+      ],
+      [
+       "blame",
+       "+ someone for"
+      ],
+      [
+       "remind",
+       "+ someone to do"
+      ]
+     ],
+     "explain": "Reporting verb patterns."
+    }
+   ]
+  },
+  {
+   "id": "c1-t-idioms",
+   "kind": "topic",
+   "topic": "Vocabulary",
+   "title": "Idioms for discussions",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Let's not ___ around the bush — what's the real problem?",
+     "options": [
+      "beat",
+      "hit",
+      "walk"
+     ],
+     "answer": 0,
+     "explain": "Beat around the bush = avoid the main point."
+    },
+    {
+     "type": "mc",
+     "prompt": "That's just the ___ of the iceberg.",
+     "options": [
+      "tip",
+      "top",
+      "peak"
+     ],
+     "answer": 0,
+     "explain": "The tip of the iceberg = a small visible part of a big problem."
+    },
+    {
+     "type": "mc",
+     "prompt": "We're on the same ___.",
+     "options": [
+      "page",
+      "line",
+      "book"
+     ],
+     "answer": 0,
+     "explain": "On the same page = in agreement."
+    },
+    {
+     "type": "mc",
+     "prompt": "Let's play devil's ___ for a moment.",
+     "options": [
+      "advocate",
+      "lawyer",
+      "friend"
+     ],
+     "answer": 0,
+     "explain": "Play devil's advocate = argue the opposite side to test an idea."
+    },
+    {
+     "type": "mc",
+     "prompt": "That argument doesn't hold ___.",
+     "options": [
+      "water",
+      "air",
+      "weight up"
+     ],
+     "answer": 0,
+     "explain": "Doesn't hold water = isn't convincing."
+    },
+    {
+     "type": "gap",
+     "prompt": "Let's get to the ___ of the matter.",
+     "answers": [
+      "heart",
+      "core",
+      "crux"
+     ],
+     "explain": "The heart of the matter = the central issue."
+    },
+    {
+     "type": "gap",
+     "prompt": "It's a grey ___ — not clearly right or wrong.",
+     "answers": [
+      "area"
+     ],
+     "explain": "Grey area = unclear situation."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the idiom to its meaning.",
+     "pairs": [
+      [
+       "a double-edged sword",
+       "has advantages and disadvantages"
+      ],
+      [
+       "back to square one",
+       "start again"
+      ],
+      [
+       "the bottom line",
+       "the most important point"
+      ],
+      [
+       "food for thought",
+       "something to think about"
+      ]
+     ],
+     "explain": "Common idioms in professional discussions."
+    }
+   ]
+  },
+  {
+   "id": "c1-t-mixedcond",
+   "kind": "topic",
+   "topic": "Grammar",
+   "title": "Mixed conditionals and wishes",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "If I had studied medicine, I ___ a doctor now.",
+     "options": [
+      "would be",
+      "would have been",
+      "will be"
+     ],
+     "answer": 0,
+     "explain": "Past condition → present result: would + verb."
+    },
+    {
+     "type": "mc",
+     "prompt": "If she weren't so busy, she ___ the party yesterday.",
+     "options": [
+      "would have come to",
+      "would come to",
+      "came to"
+     ],
+     "answer": 0,
+     "explain": "Present condition → past result: would have + pp."
+    },
+    {
+     "type": "mc",
+     "prompt": "I wish I ___ more time now.",
+     "options": [
+      "had",
+      "have",
+      "would have"
+     ],
+     "answer": 0,
+     "explain": "Wish + past = present regret."
+    },
+    {
+     "type": "mc",
+     "prompt": "I wish I ___ that email yesterday.",
+     "options": [
+      "hadn't sent",
+      "didn't send",
+      "wouldn't send"
+     ],
+     "answer": 0,
+     "explain": "Wish + past perfect = past regret."
+    },
+    {
+     "type": "mc",
+     "prompt": "If only you ___ listen to me!",
+     "options": [
+      "would",
+      "will",
+      "did would"
+     ],
+     "answer": 0,
+     "explain": "If only + would = annoyance about someone's behaviour."
+    },
+    {
+     "type": "gap",
+     "prompt": "It's high time we ___ (leave).",
+     "answers": [
+      "left"
+     ],
+     "explain": "It's (high) time + past simple."
+    },
+    {
+     "type": "gap",
+     "prompt": "I'd rather you ___ (not tell) anyone.",
+     "answers": [
+      "didn't tell"
+     ],
+     "explain": "I'd rather + someone + past simple."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "wish",
+      "I",
+      "known",
+      "had",
+      "I"
+     ],
+     "answers": [
+      "i wish i had known"
+     ],
+     "explain": "I wish I had known."
+    }
+   ]
+  }
+ ]
+}
