@@ -822,7 +822,12 @@
       </div>
       <div class="form-group" style="margin-bottom:0">
         <label class="form-label">Lesson Frequency <small style="color:var(--muted)">(per week)</small></label>
-        <input type="number" id="edit-lesson-frequency" class="form-input" min="0" />
+        <select id="edit-lesson-frequency" class="form-input">
+          <option value="">— Not set —</option>
+          <option value="1">1 lesson a week</option>
+          <option value="2">2 lessons a week</option>
+          <option value="3">3 lessons a week</option>
+        </select>
         <div class="field-error" id="err-lesson-frequency">This field is required.</div>
       </div>
       <div class="form-group" style="margin-bottom:0">
