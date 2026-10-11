@@ -2518,7 +2518,9 @@ window.PennyPractice = (function () {
     if (qn.passage) body += `<div class="pr-passage">${esc(qn.passage)}</div>`;
     body += `<div class="pr-prompt">${esc(qn.prompt).replace('___', '<span style="display:inline-block;border-bottom:2px solid #e0735f;width:48px;margin:0 4px;"></span>')}</div>`;
     if (qn.type === 'mc') {
-      body += `<div class="pr-opts">${qn.options.map((o, i) => `<button class="pr-opt" data-i="${i}" onclick="PennyPractice.pick(${i})">${esc(o)}</button>`).join('')}</div>`;
+      // Options appear in a random order each time, so the right answer isn't always in the same place.
+      const order = shuffle(qn.options.map((_, i) => i));
+      body += `<div class="pr-opts">${order.map(i => `<button class="pr-opt" data-i="${i}" onclick="PennyPractice.pick(${i})">${esc(qn.options[i])}</button>`).join('')}</div>`;
     } else if (qn.type === 'gap') {
       body += `<input class="pr-input" id="pr-gap" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type the missing word" oninput="PennyPractice.ready(this.value.trim().length>0)" onkeydown="if(event.key==='Enter'&&this.value.trim()){PennyPractice.check()}">`;
     } else if (qn.type === 'match') {

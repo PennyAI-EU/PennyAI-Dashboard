@@ -325,6 +325,1041 @@
    ]
   },
   {
+   "id": "a1-l04",
+   "kind": "lesson",
+   "lesson_number": 4,
+   "lesson_id": "A1.04",
+   "title": "Nice to meet you: introducing people",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "You introduce your friend Laura. What do you say?",
+     "options": [
+      "This is Laura.",
+      "She Laura.",
+      "Here Laura is name."
+     ],
+     "answer": 0,
+     "explain": "This is + name. (Ti presento Laura / Questa è Laura.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“This is Marco.” — Marco says: “Hello!” — You say:",
+     "options": [
+      "Nice to meet you.",
+      "Goodbye.",
+      "I'm fine."
+     ],
+     "answer": 0,
+     "explain": "Nice to meet you. (Piacere.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“Nice to meet you.” — Reply:",
+     "options": [
+      "Nice to meet you too.",
+      "Thank you, goodbye.",
+      "Yes, I am."
+     ],
+     "answer": 0,
+     "explain": "Nice to meet you too. (Piacere mio.)"
+    },
+    {
+     "type": "gap",
+     "prompt": "Let me ___ my colleague, Paolo.",
+     "answers": [
+      "introduce"
+     ],
+     "explain": "Let me introduce… (Lascia che ti presenti…)"
+    },
+    {
+     "type": "gap",
+     "prompt": "This ___ my friend Sara.",
+     "answers": [
+      "is"
+     ],
+     "explain": "This is… (Questa è…)"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the English to the Italian.",
+     "pairs": [
+      [
+       "This is…",
+       "Questo è / Questa è…"
+      ],
+      [
+       "Let me introduce…",
+       "Ti presento…"
+      ],
+      [
+       "Nice to meet you too.",
+       "Piacere mio."
+      ],
+      [
+       "Hello, Anna.",
+       "Ciao, Anna."
+      ]
+     ],
+     "explain": "Phrases for introducing people. (Frasi per presentare qualcuno.)"
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "is",
+      "this",
+      "my",
+      "friend",
+      "Tom"
+     ],
+     "answers": [
+      "this is my friend tom"
+     ],
+     "explain": "This is my friend Tom. (Questo è il mio amico Tom.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "This is my teacher.",
+      "This my teacher.",
+      "Is this my teacher is."
+     ],
+     "answer": 0,
+     "explain": "This is + person. (Non dimenticare “is”.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "At the end of the meeting, you say:",
+     "options": [
+      "Goodbye! Nice to meet you.",
+      "Hello!",
+      "This is Laura."
+     ],
+     "answer": 0,
+     "explain": "Goodbye + Nice to meet you — a polite ending. (Arrivederci, piacere.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“Anna, this is Luca.” Who is Luca?",
+     "options": [
+      "the new person",
+      "Anna",
+      "you"
+     ],
+     "answer": 0,
+     "explain": "“This is Luca” introduces Luca. (Ti presento Luca.)"
+    }
+   ]
+  },
+  {
+   "id": "a1-l05",
+   "kind": "lesson",
+   "lesson_number": 5,
+   "lesson_id": "A1.05",
+   "title": "How are you?",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "“How are you?” — Best reply:",
+     "options": [
+      "I'm fine, thank you. And you?",
+      "I'm Sara.",
+      "I'm from Rome."
+     ],
+     "answer": 0,
+     "explain": "I'm fine, thank you. And you? (Bene, grazie. E tu?)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“How are you?” means…",
+     "options": [
+      "Come stai?",
+      "Come ti chiami?",
+      "Di dove sei?"
+     ],
+     "answer": 0,
+     "explain": "How are you? = Come stai?"
+    },
+    {
+     "type": "gap",
+     "prompt": "I'm very ___, thanks.",
+     "answers": [
+      "well",
+      "good"
+     ],
+     "explain": "I'm very well. (Sto molto bene.)"
+    },
+    {
+     "type": "gap",
+     "prompt": "I'm fine, thank you. And ___?",
+     "answers": [
+      "you"
+     ],
+     "explain": "And you? (E tu?)"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the feeling to the Italian.",
+     "pairs": [
+      [
+       "happy",
+       "felice"
+      ],
+      [
+       "tired",
+       "stanco / stanca"
+      ],
+      [
+       "okay",
+       "così così / bene"
+      ],
+      [
+       "fine",
+       "bene"
+      ]
+     ],
+     "explain": "Words for how you feel. (Come ti senti.)"
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "are",
+      "how",
+      "you"
+     ],
+     "answers": [
+      "how are you"
+     ],
+     "explain": "How are you? (Come stai?)"
+    },
+    {
+     "type": "mc",
+     "prompt": "You worked all day. You say:",
+     "options": [
+      "I'm tired.",
+      "I'm happy birthday.",
+      "I'm a teacher."
+     ],
+     "answer": 0,
+     "explain": "I'm tired. (Sono stanco/stanca.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "I'm fine.",
+      "I fine.",
+      "I am fines."
+     ],
+     "answer": 0,
+     "explain": "I'm = I am. (Io sto bene.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Your friend says: “I'm tired.” Kind reply:",
+     "options": [
+      "Oh, I'm sorry. Have a rest!",
+      "Great!",
+      "Goodbye."
+     ],
+     "answer": 0,
+     "explain": "Show you care. (Mostra interesse.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“And you?” What does it ask?",
+     "options": [
+      "How are you?",
+      "What's your name?",
+      "Where are you from?"
+     ],
+     "answer": 0,
+     "explain": "“And you?” repeats the same question. (E tu?)"
+    }
+   ]
+  },
+  {
+   "id": "a1-l06",
+   "kind": "lesson",
+   "lesson_number": 6,
+   "lesson_id": "A1.06",
+   "title": "The alphabet and spelling a name",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "How do you say the letter J in English?",
+     "options": [
+      "jay",
+      "gee",
+      "ji"
+     ],
+     "answer": 0,
+     "explain": "J = /dʒeɪ/ like “jay”. (Attenzione: in italiano è “i lunga”.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "How do you say the letter G in English?",
+     "options": [
+      "gee",
+      "jay",
+      "gi"
+     ],
+     "answer": 0,
+     "explain": "G = /dʒiː/ like “gee”."
+    },
+    {
+     "type": "mc",
+     "prompt": "How do you say the letter I in English?",
+     "options": [
+      "eye",
+      "ee",
+      "ai-ee"
+     ],
+     "answer": 0,
+     "explain": "I = /aɪ/ like “eye”. (Suona come “ai”.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "How do you say the letter E in English?",
+     "options": [
+      "ee",
+      "eh",
+      "ay"
+     ],
+     "answer": 0,
+     "explain": "E = /iː/ like “ee”. (Suona come la “i” italiana.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "How do you say the letter A in English?",
+     "options": [
+      "ay",
+      "ah",
+      "ee"
+     ],
+     "answer": 0,
+     "explain": "A = /eɪ/ like “ay”. (Suona come “ei”.)"
+    },
+    {
+     "type": "gap",
+     "prompt": "How do you ___ your name?",
+     "answers": [
+      "spell"
+     ],
+     "explain": "How do you spell it? (Come si scrive?)"
+    },
+    {
+     "type": "gap",
+     "prompt": "Could you spell that, ___?",
+     "answers": [
+      "please"
+     ],
+     "explain": "Could you spell that, please? (Puoi fare lo spelling, per favore?)"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the letter to its English sound.",
+     "pairs": [
+      [
+       "H",
+       "aitch"
+      ],
+      [
+       "W",
+       "double-u"
+      ],
+      [
+       "Y",
+       "why"
+      ],
+      [
+       "R",
+       "ar"
+      ]
+     ],
+     "explain": "Tricky English letters. (Lettere difficili.)"
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "you",
+      "how",
+      "spell",
+      "do",
+      "it"
+     ],
+     "answers": [
+      "how do you spell it"
+     ],
+     "explain": "How do you spell it? (Come si scrive?)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“My name is Anna. A-N-N-A.” How many N's?",
+     "options": [
+      "two",
+      "one",
+      "three"
+     ],
+     "answer": 0,
+     "explain": "A-N-N-A has two N's. (Due N — in inglese: double N.)"
+    }
+   ]
+  },
+  {
+   "id": "a1-l07",
+   "kind": "lesson",
+   "lesson_number": 7,
+   "lesson_id": "A1.07",
+   "title": "Numbers 1 to 20",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "12 is…",
+     "options": [
+      "twelve",
+      "twenty",
+      "two"
+     ],
+     "answer": 0,
+     "explain": "12 = twelve."
+    },
+    {
+     "type": "mc",
+     "prompt": "13 is…",
+     "options": [
+      "thirteen",
+      "thirty",
+      "three"
+     ],
+     "answer": 0,
+     "explain": "13 = thirteen (-teen = 13–19)."
+    },
+    {
+     "type": "mc",
+     "prompt": "20 is…",
+     "options": [
+      "twenty",
+      "twelve",
+      "two"
+     ],
+     "answer": 0,
+     "explain": "20 = twenty."
+    },
+    {
+     "type": "gap",
+     "prompt": "seven + one = ___ (write the word)",
+     "answers": [
+      "eight"
+     ],
+     "explain": "7 + 1 = eight."
+    },
+    {
+     "type": "gap",
+     "prompt": "ten + five = ___ (write the word)",
+     "answers": [
+      "fifteen"
+     ],
+     "explain": "10 + 5 = fifteen."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the number to the word.",
+     "pairs": [
+      [
+       "11",
+       "eleven"
+      ],
+      [
+       "14",
+       "fourteen"
+      ],
+      [
+       "16",
+       "sixteen"
+      ],
+      [
+       "19",
+       "nineteen"
+      ]
+     ],
+     "explain": "Numbers 11–19."
+    },
+    {
+     "type": "mc",
+     "prompt": "“What number is it?” 9 — Reply:",
+     "options": [
+      "It's nine.",
+      "It nine.",
+      "Is nine it."
+     ],
+     "answer": 0,
+     "explain": "It's + number. (È il nove.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“Is it six?” (It's seven.) Reply:",
+     "options": [
+      "No, it's seven.",
+      "Yes, that's right.",
+      "No, it six."
+     ],
+     "answer": 0,
+     "explain": "No, it's seven. (No, è il sette.)"
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "number",
+      "it",
+      "what",
+      "is"
+     ],
+     "answers": [
+      "what number is it"
+     ],
+     "explain": "What number is it? (Che numero è?)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is spelled correctly?",
+     "options": [
+      "eighteen",
+      "eigthteen",
+      "eitheen"
+     ],
+     "answer": 0,
+     "explain": "18 = eighteen."
+    }
+   ]
+  },
+  {
+   "id": "a1-l08",
+   "kind": "lesson",
+   "lesson_number": 8,
+   "lesson_id": "A1.08",
+   "title": "Please, thank you, and sorry",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "“Thank you!” — Reply:",
+     "options": [
+      "You're welcome.",
+      "Sorry.",
+      "Please."
+     ],
+     "answer": 0,
+     "explain": "You're welcome. (Prego.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "You want the menu. You say:",
+     "options": [
+      "The menu, please.",
+      "Menu now.",
+      "Sorry menu."
+     ],
+     "answer": 0,
+     "explain": "Add “please” to be polite. (Per favore.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "You want to pass someone in the street. You say:",
+     "options": [
+      "Excuse me.",
+      "You're welcome.",
+      "Thank you."
+     ],
+     "answer": 0,
+     "explain": "Excuse me. (Mi scusi / Permesso.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "You step on someone's foot. You say:",
+     "options": [
+      "Sorry!",
+      "Please!",
+      "You're welcome!"
+     ],
+     "answer": 0,
+     "explain": "Sorry! (Scusa!)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“Sorry!” — Reply:",
+     "options": [
+      "That's okay.",
+      "Thank you.",
+      "Excuse me."
+     ],
+     "answer": 0,
+     "explain": "That's okay. (Non fa niente.)"
+    },
+    {
+     "type": "gap",
+     "prompt": "Can I have a coffee, ___?",
+     "answers": [
+      "please"
+     ],
+     "explain": "Please = per favore."
+    },
+    {
+     "type": "gap",
+     "prompt": "Thanks! — You're ___.",
+     "answers": [
+      "welcome"
+     ],
+     "explain": "You're welcome. (Prego.)"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the English to the Italian.",
+     "pairs": [
+      [
+       "Please",
+       "Per favore"
+      ],
+      [
+       "Thank you",
+       "Grazie"
+      ],
+      [
+       "Sorry",
+       "Scusa"
+      ],
+      [
+       "Excuse me",
+       "Mi scusi / Permesso"
+      ]
+     ],
+     "explain": "Polite words. (Parole di cortesia.)"
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "you",
+      "thank",
+      "very",
+      "much"
+     ],
+     "answers": [
+      "thank you very much"
+     ],
+     "explain": "Thank you very much. (Grazie mille.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is more polite?",
+     "options": [
+      "Can I have a glass of water, please?",
+      "Water!",
+      "Give water."
+     ],
+     "answer": 0,
+     "explain": "Can I have…, please? (Posso avere…, per favore?)"
+    }
+   ]
+  },
+  {
+   "id": "a1-l09",
+   "kind": "lesson",
+   "lesson_number": 9,
+   "lesson_id": "A1.09",
+   "title": "Yes, no, and asking for help",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "You don't understand. You say:",
+     "options": [
+      "I don't understand.",
+      "I'm understand not.",
+      "No understand I."
+     ],
+     "answer": 0,
+     "explain": "I don't understand. (Non capisco.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "The person speaks very fast. You say:",
+     "options": [
+      "Can you speak slowly, please?",
+      "Speak fast!",
+      "Goodbye."
+     ],
+     "answer": 0,
+     "explain": "Can you speak slowly, please? (Puoi parlare lentamente, per favore?)"
+    },
+    {
+     "type": "mc",
+     "prompt": "You want to hear it again. You say:",
+     "options": [
+      "Could you say that again, please?",
+      "Say no.",
+      "Again you."
+     ],
+     "answer": 0,
+     "explain": "Could you say that again, please? (Puoi ripetere, per favore?)"
+    },
+    {
+     "type": "gap",
+     "prompt": "What does “tired” ___?",
+     "answers": [
+      "mean"
+     ],
+     "explain": "What does … mean? (Cosa significa…?)"
+    },
+    {
+     "type": "gap",
+     "prompt": "I ___ help, please.",
+     "answers": [
+      "need"
+     ],
+     "explain": "I need help. (Ho bisogno di aiuto.)"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the English to the Italian.",
+     "pairs": [
+      [
+       "I don't understand.",
+       "Non capisco."
+      ],
+      [
+       "Can you speak slowly?",
+       "Puoi parlare lentamente?"
+      ],
+      [
+       "What does it mean?",
+       "Cosa significa?"
+      ],
+      [
+       "I need help.",
+       "Ho bisogno di aiuto."
+      ]
+     ],
+     "explain": "Phrases to ask for help. (Frasi per chiedere aiuto.)"
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "does",
+      "what",
+      "mean",
+      "it"
+     ],
+     "answers": [
+      "what does it mean"
+     ],
+     "explain": "What does it mean? (Cosa significa?)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“Are you Italian?” (You are.) Reply:",
+     "options": [
+      "Yes, I am.",
+      "Yes, I do.",
+      "Yes, I'm."
+     ],
+     "answer": 0,
+     "explain": "Yes, I am. (Sì.) — We don't say “Yes, I'm.”"
+    },
+    {
+     "type": "mc",
+     "prompt": "“Do you speak English?” (A little.) Reply:",
+     "options": [
+      "Yes, a little.",
+      "No, I am.",
+      "Yes, I am English."
+     ],
+     "answer": 0,
+     "explain": "Yes, a little. (Sì, un po'.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which question asks for help politely?",
+     "options": [
+      "Excuse me, can you help me, please?",
+      "Help!",
+      "You help."
+     ],
+     "answer": 0,
+     "explain": "Excuse me + can you help me, please? (Mi scusi, può aiutarmi?)"
+    }
+   ]
+  },
+  {
+   "id": "a1-l10",
+   "kind": "lesson",
+   "lesson_number": 10,
+   "lesson_id": "A1.10",
+   "title": "Good morning, good afternoon, and good evening",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "It's 9 o'clock in the morning. You say:",
+     "options": [
+      "Good morning!",
+      "Good evening!",
+      "Good night!"
+     ],
+     "answer": 0,
+     "explain": "Good morning = until about 12. (Buongiorno.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "It's 3 o'clock in the afternoon. You say:",
+     "options": [
+      "Good afternoon!",
+      "Good morning!",
+      "Good night!"
+     ],
+     "answer": 0,
+     "explain": "Good afternoon = about 12 to 6. (Buon pomeriggio.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "It's 8 o'clock in the evening. You arrive at a restaurant. You say:",
+     "options": [
+      "Good evening!",
+      "Good night!",
+      "Good morning!"
+     ],
+     "answer": 0,
+     "explain": "Good evening = arriving in the evening. (Buonasera.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "You go to bed. You say:",
+     "options": [
+      "Good night!",
+      "Good evening!",
+      "Good afternoon!"
+     ],
+     "answer": 0,
+     "explain": "Good night = goodbye at night / going to bed. (Buonanotte.)"
+    },
+    {
+     "type": "gap",
+     "prompt": "Good ___! Have a nice day!",
+     "answers": [
+      "morning"
+     ],
+     "explain": "Good morning. (Buongiorno.)"
+    },
+    {
+     "type": "gap",
+     "prompt": "See you ___!",
+     "answers": [
+      "later",
+      "tomorrow",
+      "soon"
+     ],
+     "explain": "See you later/tomorrow/soon. (A dopo / a domani / a presto.)"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the English to the Italian.",
+     "pairs": [
+      [
+       "Good morning",
+       "Buongiorno"
+      ],
+      [
+       "Good afternoon",
+       "Buon pomeriggio"
+      ],
+      [
+       "Good evening",
+       "Buonasera"
+      ],
+      [
+       "Good night",
+       "Buonanotte"
+      ]
+     ],
+     "explain": "Greetings for every time of day."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which one do we use to say goodbye at night?",
+     "options": [
+      "Good night",
+      "Good evening",
+      "Good afternoon"
+     ],
+     "answer": 0,
+     "explain": "Good night = goodbye (not hello). (Buonanotte.)"
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "see",
+      "later",
+      "you"
+     ],
+     "answers": [
+      "see you later"
+     ],
+     "explain": "See you later. (A dopo.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Informal greeting for a friend at any time:",
+     "options": [
+      "Hi!",
+      "Good night!",
+      "Excuse me!"
+     ],
+     "answer": 0,
+     "explain": "Hi! / Hello! (Ciao!)"
+    }
+   ]
+  },
+  {
+   "id": "a1-l11",
+   "kind": "lesson",
+   "lesson_number": 11,
+   "lesson_id": "A1.R1",
+   "title": "A1 review: first conversations and everyday confidence",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "“Hello, I'm Anna.” Best reply:",
+     "options": [
+      "Hi Anna, I'm Luca. Nice to meet you.",
+      "Goodbye Anna.",
+      "I'm fine."
+     ],
+     "answer": 0,
+     "explain": "Name + Nice to meet you."
+    },
+    {
+     "type": "mc",
+     "prompt": "“Where are you from?” — Reply:",
+     "options": [
+      "I'm from Italy.",
+      "I'm fine.",
+      "I'm a student."
+     ],
+     "answer": 0,
+     "explain": "I'm from… (Sono di…)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“What do you do?” — Reply:",
+     "options": [
+      "I'm a nurse.",
+      "I'm tired.",
+      "I'm from Rome."
+     ],
+     "answer": 0,
+     "explain": "Your job. (Il tuo lavoro.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“How are you?” — Reply:",
+     "options": [
+      "Very well, thanks. And you?",
+      "I live in Milan.",
+      "It's nine."
+     ],
+     "answer": 0,
+     "explain": "Very well, thanks. And you?"
+    },
+    {
+     "type": "gap",
+     "prompt": "Could you say that ___, please?",
+     "answers": [
+      "again"
+     ],
+     "explain": "Could you say that again? (Puoi ripetere?)"
+    },
+    {
+     "type": "gap",
+     "prompt": "I ___ in Naples.",
+     "answers": [
+      "live"
+     ],
+     "explain": "I live in… (Abito a…)"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the question to the answer.",
+     "pairs": [
+      [
+       "What's your name?",
+       "I'm Sara."
+      ],
+      [
+       "How do you spell it?",
+       "S-A-R-A."
+      ],
+      [
+       "Where do you live?",
+       "In Turin."
+      ],
+      [
+       "What number is it?",
+       "It's fifteen."
+      ]
+     ],
+     "explain": "Questions and answers from A1."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "meet",
+      "nice",
+      "to",
+      "you"
+     ],
+     "answers": [
+      "nice to meet you"
+     ],
+     "explain": "Nice to meet you. (Piacere.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "You arrive at a hotel at 7 p.m. You say:",
+     "options": [
+      "Good evening.",
+      "Good night.",
+      "Good morning."
+     ],
+     "answer": 0,
+     "explain": "Good evening when you arrive in the evening."
+    },
+    {
+     "type": "mc",
+     "prompt": "Someone helps you. You say:",
+     "options": [
+      "Thank you very much!",
+      "Sorry!",
+      "Excuse me!"
+     ],
+     "answer": 0,
+     "explain": "Thank you very much! (Grazie mille!)"
+    }
+   ]
+  },
+  {
    "id": "a1-t-aan",
    "kind": "topic",
    "topic": "Grammar",
@@ -406,6 +1441,861 @@
       "a"
      ],
      "explain": "a chef."
+    }
+   ]
+  },
+  {
+   "id": "a1-t-be",
+   "kind": "topic",
+   "topic": "Grammar",
+   "title": "Am, is, are",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "I ___ a student.",
+     "options": [
+      "am",
+      "is",
+      "are"
+     ],
+     "answer": 0,
+     "explain": "I am. (Io sono.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "She ___ from Spain.",
+     "options": [
+      "is",
+      "am",
+      "are"
+     ],
+     "answer": 0,
+     "explain": "He/She/It is. (Lei è.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "They ___ teachers.",
+     "options": [
+      "are",
+      "is",
+      "am"
+     ],
+     "answer": 0,
+     "explain": "We/You/They are. (Loro sono.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "You ___ my friend.",
+     "options": [
+      "are",
+      "is",
+      "am"
+     ],
+     "answer": 0,
+     "explain": "You are. (Tu sei.)"
+    },
+    {
+     "type": "gap",
+     "prompt": "He ___ a doctor.",
+     "answers": [
+      "is",
+      "'s"
+     ],
+     "explain": "He is. (Lui è.)"
+    },
+    {
+     "type": "gap",
+     "prompt": "We ___ from Italy.",
+     "answers": [
+      "are",
+      "'re"
+     ],
+     "explain": "We are. (Noi siamo.)"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the short form.",
+     "pairs": [
+      [
+       "I am",
+       "I'm"
+      ],
+      [
+       "you are",
+       "you're"
+      ],
+      [
+       "he is",
+       "he's"
+      ],
+      [
+       "they are",
+       "they're"
+      ]
+     ],
+     "explain": "Short forms. (Forme contratte.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "She is happy.",
+      "She are happy.",
+      "She am happy."
+     ],
+     "answer": 0,
+     "explain": "She is. (Lei è felice.)"
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "not",
+      "I",
+      "tired",
+      "am"
+     ],
+     "answers": [
+      "i am not tired"
+     ],
+     "explain": "I am not tired. (Non sono stanco.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Question: ___ you Italian?",
+     "options": [
+      "Are",
+      "Is",
+      "Am"
+     ],
+     "answer": 0,
+     "explain": "Are you…? (Sei…?)"
+    }
+   ]
+  },
+  {
+   "id": "a1-t-days",
+   "kind": "topic",
+   "topic": "Vocabulary",
+   "title": "Days of the week",
+   "minutes": 4,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Lunedì =",
+     "options": [
+      "Monday",
+      "Sunday",
+      "Friday"
+     ],
+     "answer": 0,
+     "explain": "Monday = lunedì."
+    },
+    {
+     "type": "mc",
+     "prompt": "Mercoledì =",
+     "options": [
+      "Wednesday",
+      "Tuesday",
+      "Thursday"
+     ],
+     "answer": 0,
+     "explain": "Wednesday = mercoledì. (Si pronuncia “wenz-dei”.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "The day after Friday is…",
+     "options": [
+      "Saturday",
+      "Thursday",
+      "Sunday"
+     ],
+     "answer": 0,
+     "explain": "Friday → Saturday."
+    },
+    {
+     "type": "mc",
+     "prompt": "The day before Monday is…",
+     "options": [
+      "Sunday",
+      "Tuesday",
+      "Saturday"
+     ],
+     "answer": 0,
+     "explain": "Sunday → Monday."
+    },
+    {
+     "type": "gap",
+     "prompt": "Martedì = T___ (write the full word)",
+     "answers": [
+      "Tuesday"
+     ],
+     "explain": "Tuesday = martedì."
+    },
+    {
+     "type": "gap",
+     "prompt": "Giovedì = T___ (write the full word)",
+     "answers": [
+      "Thursday"
+     ],
+     "explain": "Thursday = giovedì."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the English to the Italian.",
+     "pairs": [
+      [
+       "Friday",
+       "venerdì"
+      ],
+      [
+       "Saturday",
+       "sabato"
+      ],
+      [
+       "Sunday",
+       "domenica"
+      ],
+      [
+       "Monday",
+       "lunedì"
+      ]
+     ],
+     "explain": "Days in English start with a CAPITAL letter."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "See you on Monday!",
+      "See you in Monday!",
+      "See you at Monday!"
+     ],
+     "answer": 0,
+     "explain": "on + day: on Monday. (Lunedì.)"
+    }
+   ]
+  },
+  {
+   "id": "a1-t-family",
+   "kind": "topic",
+   "topic": "Vocabulary",
+   "title": "Family",
+   "minutes": 4,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Mother =",
+     "options": [
+      "madre",
+      "padre",
+      "sorella"
+     ],
+     "answer": 0,
+     "explain": "mother = madre."
+    },
+    {
+     "type": "mc",
+     "prompt": "Brother =",
+     "options": [
+      "fratello",
+      "sorella",
+      "figlio"
+     ],
+     "answer": 0,
+     "explain": "brother = fratello."
+    },
+    {
+     "type": "mc",
+     "prompt": "My father's mother is my…",
+     "options": [
+      "grandmother",
+      "aunt",
+      "sister"
+     ],
+     "answer": 0,
+     "explain": "grandmother = nonna."
+    },
+    {
+     "type": "gap",
+     "prompt": "My mother's sister is my ___.",
+     "answers": [
+      "aunt"
+     ],
+     "explain": "aunt = zia."
+    },
+    {
+     "type": "gap",
+     "prompt": "My parents are my mother and my ___.",
+     "answers": [
+      "father"
+     ],
+     "explain": "parents = genitori. (Attenzione: parents NON significa parenti!)"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the English to the Italian.",
+     "pairs": [
+      [
+       "son",
+       "figlio"
+      ],
+      [
+       "daughter",
+       "figlia"
+      ],
+      [
+       "husband",
+       "marito"
+      ],
+      [
+       "wife",
+       "moglie"
+      ]
+     ],
+     "explain": "Family words. (La famiglia.)"
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "have",
+      "I",
+      "brothers",
+      "two"
+     ],
+     "answers": [
+      "i have two brothers"
+     ],
+     "explain": "I have two brothers. (Ho due fratelli.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“Relatives” in Italian is…",
+     "options": [
+      "parenti",
+      "genitori",
+      "nonni"
+     ],
+     "answer": 0,
+     "explain": "relatives = parenti; parents = genitori. (Un falso amico!)"
+    }
+   ]
+  },
+  {
+   "id": "a1-t-myyour",
+   "kind": "topic",
+   "topic": "Grammar",
+   "title": "My, your, his, her",
+   "minutes": 4,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "I have a car. It's ___ car.",
+     "options": [
+      "my",
+      "your",
+      "her"
+     ],
+     "answer": 0,
+     "explain": "I → my. (mio/mia)"
+    },
+    {
+     "type": "mc",
+     "prompt": "You have a dog. It's ___ dog.",
+     "options": [
+      "your",
+      "my",
+      "his"
+     ],
+     "answer": 0,
+     "explain": "you → your. (tuo/tua)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Marco has a bike. It's ___ bike.",
+     "options": [
+      "his",
+      "her",
+      "my"
+     ],
+     "answer": 0,
+     "explain": "he → his. (suo — di lui)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Anna has a phone. It's ___ phone.",
+     "options": [
+      "her",
+      "his",
+      "your"
+     ],
+     "answer": 0,
+     "explain": "she → her. (suo — di lei)"
+    },
+    {
+     "type": "gap",
+     "prompt": "What's ___ name? (to a person you are talking to)",
+     "answers": [
+      "your"
+     ],
+     "explain": "What's your name? (Come ti chiami?)"
+    },
+    {
+     "type": "gap",
+     "prompt": "___ name is Anna. (I'm talking about me)",
+     "answers": [
+      "my",
+      "My"
+     ],
+     "explain": "My name is… (Mi chiamo…)"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the pronoun.",
+     "pairs": [
+      [
+       "I",
+       "my"
+      ],
+      [
+       "you",
+       "your"
+      ],
+      [
+       "he",
+       "his"
+      ],
+      [
+       "she",
+       "her"
+      ]
+     ],
+     "explain": "In English, his/her depends on the OWNER, not the object. (Dipende da chi possiede.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Luca and his sister. Which is correct?",
+     "options": [
+      "This is Luca and his sister.",
+      "This is Luca and her sister."
+     ],
+     "answer": 0,
+     "explain": "Luca is a man → his. (Di lui → his.)"
+    }
+   ]
+  },
+  {
+   "id": "a1-t-plural",
+   "kind": "topic",
+   "topic": "Grammar",
+   "title": "Plurals: one book, two books",
+   "minutes": 4,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "one book, two ___",
+     "options": [
+      "books",
+      "book",
+      "bookes"
+     ],
+     "answer": 0,
+     "explain": "Most words: add -s."
+    },
+    {
+     "type": "mc",
+     "prompt": "one bus, two ___",
+     "options": [
+      "buses",
+      "buss",
+      "bus"
+     ],
+     "answer": 0,
+     "explain": "Words ending in -s, -sh, -ch, -x: add -es."
+    },
+    {
+     "type": "mc",
+     "prompt": "one city, two ___",
+     "options": [
+      "cities",
+      "citys",
+      "cityes"
+     ],
+     "answer": 0,
+     "explain": "Consonant + y → -ies."
+    },
+    {
+     "type": "mc",
+     "prompt": "one man, two ___",
+     "options": [
+      "men",
+      "mans",
+      "mens"
+     ],
+     "answer": 0,
+     "explain": "Irregular: man → men."
+    },
+    {
+     "type": "mc",
+     "prompt": "one child, two ___",
+     "options": [
+      "children",
+      "childs",
+      "childrens"
+     ],
+     "answer": 0,
+     "explain": "Irregular: child → children."
+    },
+    {
+     "type": "gap",
+     "prompt": "one woman, two ___",
+     "answers": [
+      "women"
+     ],
+     "explain": "Irregular: woman → women."
+    },
+    {
+     "type": "gap",
+     "prompt": "one box, two ___",
+     "answers": [
+      "boxes"
+     ],
+     "explain": "-x → add -es."
+    },
+    {
+     "type": "match",
+     "prompt": "Match singular and plural.",
+     "pairs": [
+      [
+       "person",
+       "people"
+      ],
+      [
+       "foot",
+       "feet"
+      ],
+      [
+       "tooth",
+       "teeth"
+      ],
+      [
+       "mouse",
+       "mice"
+      ]
+     ],
+     "explain": "Common irregular plurals."
+    }
+   ]
+  },
+  {
+   "id": "a1-t-objects",
+   "kind": "topic",
+   "topic": "Vocabulary",
+   "title": "Everyday objects",
+   "minutes": 4,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "You write with a…",
+     "options": [
+      "pen",
+      "plate",
+      "key"
+     ],
+     "answer": 0,
+     "explain": "pen = penna."
+    },
+    {
+     "type": "mc",
+     "prompt": "You open a door with a…",
+     "options": [
+      "key",
+      "cup",
+      "chair"
+     ],
+     "answer": 0,
+     "explain": "key = chiave."
+    },
+    {
+     "type": "mc",
+     "prompt": "You drink coffee from a…",
+     "options": [
+      "cup",
+      "book",
+      "bag"
+     ],
+     "answer": 0,
+     "explain": "cup = tazza."
+    },
+    {
+     "type": "mc",
+     "prompt": "You sit on a…",
+     "options": [
+      "chair",
+      "window",
+      "phone"
+     ],
+     "answer": 0,
+     "explain": "chair = sedia."
+    },
+    {
+     "type": "gap",
+     "prompt": "You read a ___.",
+     "answers": [
+      "book"
+     ],
+     "explain": "book = libro."
+    },
+    {
+     "type": "gap",
+     "prompt": "You put your things in a ___. (borsa)",
+     "answers": [
+      "bag"
+     ],
+     "explain": "bag = borsa."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the English to the Italian.",
+     "pairs": [
+      [
+       "table",
+       "tavolo"
+      ],
+      [
+       "door",
+       "porta"
+      ],
+      [
+       "window",
+       "finestra"
+      ],
+      [
+       "glass",
+       "bicchiere"
+      ]
+     ],
+     "explain": "Objects at home."
+    },
+    {
+     "type": "mc",
+     "prompt": "“Excuse me, can I have a ___, please?” (at a restaurant)",
+     "options": [
+      "fork",
+      "pillow",
+      "wall"
+     ],
+     "answer": 0,
+     "explain": "fork = forchetta."
+    }
+   ]
+  },
+  {
+   "id": "a1-t-colours",
+   "kind": "topic",
+   "topic": "Vocabulary",
+   "title": "Colours",
+   "minutes": 4,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Rosso =",
+     "options": [
+      "red",
+      "green",
+      "blue"
+     ],
+     "answer": 0,
+     "explain": "red = rosso."
+    },
+    {
+     "type": "mc",
+     "prompt": "Giallo =",
+     "options": [
+      "yellow",
+      "white",
+      "grey"
+     ],
+     "answer": 0,
+     "explain": "yellow = giallo."
+    },
+    {
+     "type": "mc",
+     "prompt": "The sky is…",
+     "options": [
+      "blue",
+      "black",
+      "orange"
+     ],
+     "answer": 0,
+     "explain": "blue = blu/azzurro."
+    },
+    {
+     "type": "mc",
+     "prompt": "Grass is…",
+     "options": [
+      "green",
+      "purple",
+      "pink"
+     ],
+     "answer": 0,
+     "explain": "green = verde."
+    },
+    {
+     "type": "gap",
+     "prompt": "Snow is ___.",
+     "answers": [
+      "white"
+     ],
+     "explain": "white = bianco."
+    },
+    {
+     "type": "gap",
+     "prompt": "Night is ___.",
+     "answers": [
+      "black",
+      "dark"
+     ],
+     "explain": "black = nero."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the English to the Italian.",
+     "pairs": [
+      [
+       "brown",
+       "marrone"
+      ],
+      [
+       "grey",
+       "grigio"
+      ],
+      [
+       "pink",
+       "rosa"
+      ],
+      [
+       "purple",
+       "viola"
+      ]
+     ],
+     "explain": "More colours."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "a red car",
+      "a car red",
+      "a cars red"
+     ],
+     "answer": 0,
+     "explain": "In English the colour comes BEFORE the noun: a red car. (Una macchina rossa.)"
+    }
+   ]
+  },
+  {
+   "id": "a1-t-numbers100",
+   "kind": "topic",
+   "topic": "Vocabulary",
+   "title": "Numbers 20 to 100",
+   "minutes": 4,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "30 is…",
+     "options": [
+      "thirty",
+      "thirteen",
+      "three"
+     ],
+     "answer": 0,
+     "explain": "30 = thirty (13 = thirteen)."
+    },
+    {
+     "type": "mc",
+     "prompt": "50 is…",
+     "options": [
+      "fifty",
+      "fifteen",
+      "five"
+     ],
+     "answer": 0,
+     "explain": "50 = fifty."
+    },
+    {
+     "type": "mc",
+     "prompt": "45 is…",
+     "options": [
+      "forty-five",
+      "fourty-five",
+      "fifty-four"
+     ],
+     "answer": 0,
+     "explain": "40 = forty (no u!). 45 = forty-five."
+    },
+    {
+     "type": "mc",
+     "prompt": "100 is…",
+     "options": [
+      "a hundred",
+      "ten ten",
+      "a thousand"
+     ],
+     "answer": 0,
+     "explain": "100 = a hundred / one hundred."
+    },
+    {
+     "type": "gap",
+     "prompt": "20 + 10 = ___ (write the word)",
+     "answers": [
+      "thirty"
+     ],
+     "explain": "thirty = 30."
+    },
+    {
+     "type": "gap",
+     "prompt": "80 = ___ (write the word)",
+     "answers": [
+      "eighty"
+     ],
+     "explain": "eighty = 80."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the number to the word.",
+     "pairs": [
+      [
+       "60",
+       "sixty"
+      ],
+      [
+       "70",
+       "seventy"
+      ],
+      [
+       "90",
+       "ninety"
+      ],
+      [
+       "22",
+       "twenty-two"
+      ]
+     ],
+     "explain": "Tens: -ty."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is spelled correctly?",
+     "options": [
+      "forty",
+      "fourty",
+      "fortee"
+     ],
+     "answer": 0,
+     "explain": "forty — no “u”."
     }
    ]
   }
