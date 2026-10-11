@@ -1,0 +1,2250 @@
+{
+ "level": "A2",
+ "sets": [
+  {
+   "id": "a2-l01",
+   "kind": "lesson",
+   "lesson_number": 1,
+   "lesson_id": "A2.01",
+   "title": "Longer introductions",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "I'm from Naples, ___ I live in Milan.",
+     "options": [
+      "but",
+      "because",
+      "so"
+     ],
+     "answer": 0,
+     "explain": "But shows a contrast. (Ma.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "I work ___ a nurse.",
+     "options": [
+      "as",
+      "like",
+      "for"
+     ],
+     "answer": 0,
+     "explain": "I work as a… (Lavoro come…) — not “like”."
+    },
+    {
+     "type": "mc",
+     "prompt": "I'm ___ economics at university.",
+     "options": [
+      "studying",
+      "study",
+      "studied"
+     ],
+     "answer": 0,
+     "explain": "I'm studying… = right now in my life. (Sto studiando.)"
+    },
+    {
+     "type": "gap",
+     "prompt": "In my free time, I like ___ (cook).",
+     "answers": [
+      "cooking"
+     ],
+     "explain": "Like + -ing: I like cooking."
+    },
+    {
+     "type": "gap",
+     "prompt": "What ___ you? (asking the same question back)",
+     "answers": [
+      "about"
+     ],
+     "explain": "What about you? (E tu?)"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the sentence to the topic.",
+     "pairs": [
+      [
+       "I'm from Bari.",
+       "origin"
+      ],
+      [
+       "I live in Rome.",
+       "home now"
+      ],
+      [
+       "I work as an engineer.",
+       "job"
+      ],
+      [
+       "I like swimming.",
+       "free time"
+      ]
+     ],
+     "explain": "A longer introduction has 4 parts."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "live",
+      "but",
+      "I",
+      "I'm",
+      "from",
+      "Turin",
+      "Rome",
+      "in"
+     ],
+     "answers": [
+      "i'm from turin but i live in rome",
+      "i'm from rome but i live in turin"
+     ],
+     "explain": "I'm from Turin, but I live in Rome."
+    },
+    {
+     "type": "mc",
+     "prompt": "“It's nice to meet you.” Reply:",
+     "options": [
+      "It's nice to meet you, too.",
+      "Yes, it is nice.",
+      "You too meet."
+     ],
+     "answer": 0,
+     "explain": "…, too. (Anche per me.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which introduction is the most complete?",
+     "options": [
+      "Hi, I'm Paolo. I'm from Genoa, I work as a teacher and I love football.",
+      "Paolo.",
+      "Hello, teacher."
+     ],
+     "answer": 0,
+     "explain": "Name + origin + job + interest."
+    },
+    {
+     "type": "mc",
+     "prompt": "I work ___ a bank.",
+     "options": [
+      "in",
+      "at in",
+      "on"
+     ],
+     "answer": 0,
+     "explain": "I work in a bank / in an office. (Lavoro in una banca.)"
+    }
+   ]
+  },
+  {
+   "id": "a2-l02",
+   "kind": "lesson",
+   "lesson_number": 2,
+   "lesson_id": "A2.02",
+   "title": "Daily routines",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "I usually ___ up at seven.",
+     "options": [
+      "get",
+      "gets",
+      "getting"
+     ],
+     "answer": 0,
+     "explain": "I get up. (Mi alzo.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "She ___ breakfast at eight.",
+     "options": [
+      "has",
+      "have",
+      "haves"
+     ],
+     "answer": 0,
+     "explain": "He/She has. (Lei fa colazione.) — have breakfast = fare colazione."
+    },
+    {
+     "type": "mc",
+     "prompt": "He ___ work at nine.",
+     "options": [
+      "starts",
+      "start",
+      "starting"
+     ],
+     "answer": 0,
+     "explain": "He/She/It + -s: starts."
+    },
+    {
+     "type": "gap",
+     "prompt": "___, I have a shower. (dopo — to continue the sequence)",
+     "answers": [
+      "Then",
+      "then"
+     ],
+     "explain": "Then = poi."
+    },
+    {
+     "type": "gap",
+     "prompt": "What time ___ you usually finish work?",
+     "answers": [
+      "do"
+     ],
+     "explain": "What time do you…? (A che ora…?)"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the routine to the time of day.",
+     "pairs": [
+      [
+       "get up",
+       "in the morning"
+      ],
+      [
+       "have lunch",
+       "at midday"
+      ],
+      [
+       "go home",
+       "in the afternoon/evening"
+      ],
+      [
+       "go to bed",
+       "at night"
+      ]
+     ],
+     "explain": "A typical day."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "you",
+      "what",
+      "usually",
+      "do",
+      "do"
+     ],
+     "answers": [
+      "what do you usually do"
+     ],
+     "explain": "What do you usually do?"
+    },
+    {
+     "type": "mc",
+     "prompt": "In the evening, I ___ TV.",
+     "options": [
+      "watch",
+      "watches",
+      "am watch"
+     ],
+     "answer": 0,
+     "explain": "I watch. (Guardo la TV.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "She goes to work by bus.",
+      "She go to work by bus.",
+      "She going to work by bus."
+     ],
+     "answer": 0,
+     "explain": "She goes — add -es to go."
+    },
+    {
+     "type": "mc",
+     "prompt": "“Have breakfast” in Italian is…",
+     "options": [
+      "fare colazione",
+      "avere colazione",
+      "prendere pranzo"
+     ],
+     "answer": 0,
+     "explain": "have breakfast/lunch/dinner = fare colazione/pranzare/cenare."
+    }
+   ]
+  },
+  {
+   "id": "a2-l03",
+   "kind": "lesson",
+   "lesson_number": 3,
+   "lesson_id": "A2.03",
+   "title": "Time days and frequency",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "I have English class ___ Monday.",
+     "options": [
+      "on",
+      "in",
+      "at"
+     ],
+     "answer": 0,
+     "explain": "on + day: on Monday."
+    },
+    {
+     "type": "mc",
+     "prompt": "I study ___ seven o'clock.",
+     "options": [
+      "at",
+      "on",
+      "in"
+     ],
+     "answer": 0,
+     "explain": "at + time: at seven."
+    },
+    {
+     "type": "mc",
+     "prompt": "I go swimming every ___.",
+     "options": [
+      "week",
+      "weeks",
+      "weekly"
+     ],
+     "answer": 0,
+     "explain": "every + singular: every week."
+    },
+    {
+     "type": "mc",
+     "prompt": "How ___ do you go to the gym?",
+     "options": [
+      "often",
+      "many",
+      "much"
+     ],
+     "answer": 0,
+     "explain": "How often…? (Quanto spesso?)"
+    },
+    {
+     "type": "gap",
+     "prompt": "I ___ eat fast food. (0% — mai)",
+     "answers": [
+      "never"
+     ],
+     "explain": "never = mai."
+    },
+    {
+     "type": "gap",
+     "prompt": "I ___ go to the cinema. (50% — a volte)",
+     "answers": [
+      "sometimes"
+     ],
+     "explain": "sometimes = a volte."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the word to the frequency.",
+     "pairs": [
+      [
+       "always",
+       "100%"
+      ],
+      [
+       "usually",
+       "80%"
+      ],
+      [
+       "sometimes",
+       "50%"
+      ],
+      [
+       "never",
+       "0%"
+      ]
+     ],
+     "explain": "Adverbs of frequency."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "always",
+      "I",
+      "coffee",
+      "drink",
+      "morning",
+      "the",
+      "in"
+     ],
+     "answers": [
+      "i always drink coffee in the morning"
+     ],
+     "explain": "I always drink coffee in the morning. (Always goes before the verb.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "I usually walk to work.",
+      "I walk usually to work.",
+      "Usually I walk work."
+     ],
+     "answer": 0,
+     "explain": "Frequency word BEFORE the main verb."
+    },
+    {
+     "type": "mc",
+     "prompt": "“What day do you play tennis?” Reply:",
+     "options": [
+      "On Saturdays.",
+      "At five.",
+      "Every."
+     ],
+     "answer": 0,
+     "explain": "Day → on Saturday(s)."
+    }
+   ]
+  },
+  {
+   "id": "a2-l04",
+   "kind": "lesson",
+   "lesson_number": 4,
+   "lesson_id": "A2.04",
+   "title": "Likes dislikes and reasons",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "I like coffee ___ it's tasty.",
+     "options": [
+      "because",
+      "but",
+      "so"
+     ],
+     "answer": 0,
+     "explain": "because gives a reason. (Perché.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "I don't really ___ horror films.",
+     "options": [
+      "like",
+      "likes",
+      "liking"
+     ],
+     "answer": 0,
+     "explain": "I don't like… (Non mi piace…)"
+    },
+    {
+     "type": "gap",
+     "prompt": "My favourite ___ is pizza. (food)",
+     "answers": [
+      "food"
+     ],
+     "explain": "My favourite food is… (Il mio cibo preferito…)"
+    },
+    {
+     "type": "gap",
+     "prompt": "Why ___ you like it?",
+     "answers": [
+      "do"
+     ],
+     "explain": "Why do you like it? (Perché ti piace?)"
+    },
+    {
+     "type": "mc",
+     "prompt": "She ___ chocolate.",
+     "options": [
+      "loves",
+      "love",
+      "is love"
+     ],
+     "answer": 0,
+     "explain": "He/She + -s: loves."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the phrase to how much you like it.",
+     "pairs": [
+      [
+       "I love…",
+       "very much"
+      ],
+      [
+       "I really like…",
+       "a lot"
+      ],
+      [
+       "I don't really like…",
+       "not much"
+      ],
+      [
+       "I hate…",
+       "not at all"
+      ]
+     ],
+     "explain": "From positive to negative."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "like",
+      "what",
+      "you",
+      "do"
+     ],
+     "answers": [
+      "what do you like"
+     ],
+     "explain": "What do you like?"
+    },
+    {
+     "type": "mc",
+     "prompt": "Your friend says: “I love cooking.” Best reply:",
+     "options": [
+      "That sounds nice! What do you cook?",
+      "I'm cooking.",
+      "Cooking is a verb."
+     ],
+     "answer": 0,
+     "explain": "React + ask a question."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "I like it.",
+      "I like.",
+      "Me like it."
+     ],
+     "answer": 0,
+     "explain": "Like needs an object: I like it. (Mi piace.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“Mi piace” in English — which is correct?",
+     "options": [
+      "I like it.",
+      "It likes me.",
+      "Me pleases it."
+     ],
+     "answer": 0,
+     "explain": "Mi piace = I like it. The person is the subject in English!"
+    }
+   ]
+  },
+  {
+   "id": "a2-l05",
+   "kind": "lesson",
+   "lesson_number": 5,
+   "lesson_id": "A2.05",
+   "title": "Hobbies and free time",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "I like ___ in my free time.",
+     "options": [
+      "reading",
+      "read",
+      "to reading"
+     ],
+     "answer": 0,
+     "explain": "like + -ing: reading."
+    },
+    {
+     "type": "mc",
+     "prompt": "I enjoy ___ to music.",
+     "options": [
+      "listening",
+      "listen",
+      "to listen"
+     ],
+     "answer": 0,
+     "explain": "enjoy + -ing (always!)."
+    },
+    {
+     "type": "mc",
+     "prompt": "We ___ football on Sundays.",
+     "options": [
+      "play",
+      "go",
+      "do"
+     ],
+     "answer": 0,
+     "explain": "play + sports with a ball: play football."
+    },
+    {
+     "type": "mc",
+     "prompt": "She ___ swimming twice a week.",
+     "options": [
+      "goes",
+      "plays",
+      "does"
+     ],
+     "answer": 0,
+     "explain": "go + -ing activities: go swimming."
+    },
+    {
+     "type": "mc",
+     "prompt": "I ___ yoga every morning.",
+     "options": [
+      "do",
+      "play",
+      "go"
+     ],
+     "answer": 0,
+     "explain": "do + yoga, exercise, karate."
+    },
+    {
+     "type": "gap",
+     "prompt": "What do you like ___ in your free time? (do)",
+     "answers": [
+      "doing"
+     ],
+     "explain": "What do you like doing…?"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the verb to the activity.",
+     "pairs": [
+      [
+       "play",
+       "tennis"
+      ],
+      [
+       "go",
+       "running"
+      ],
+      [
+       "do",
+       "yoga"
+      ],
+      [
+       "play",
+       "the guitar"
+      ]
+     ],
+     "explain": "play / go / do — common hobby verbs."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "fun",
+      "sounds",
+      "that"
+     ],
+     "answers": [
+      "that sounds fun"
+     ],
+     "explain": "That sounds fun! (Sembra divertente!)"
+    },
+    {
+     "type": "mc",
+     "prompt": "“How often do you do that?” Best reply:",
+     "options": [
+      "About twice a week.",
+      "Yes, I do.",
+      "At the park."
+     ],
+     "answer": 0,
+     "explain": "How often → a frequency."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "I enjoy cooking.",
+      "I enjoy to cook.",
+      "I enjoy cook."
+     ],
+     "answer": 0,
+     "explain": "enjoy + -ing."
+    }
+   ]
+  },
+  {
+   "id": "a2-l06",
+   "kind": "lesson",
+   "lesson_number": 6,
+   "lesson_id": "A2.06",
+   "title": "Family friends and relationships",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "I have a ___ family: just my parents and me.",
+     "options": [
+      "small",
+      "short",
+      "little of"
+     ],
+     "answer": 0,
+     "explain": "a small / big family."
+    },
+    {
+     "type": "mc",
+     "prompt": "This is my sister. ___ is a doctor.",
+     "options": [
+      "She",
+      "He",
+      "It"
+     ],
+     "answer": 0,
+     "explain": "sister → she."
+    },
+    {
+     "type": "gap",
+     "prompt": "We often go out ___. (insieme)",
+     "answers": [
+      "together"
+     ],
+     "explain": "together = insieme."
+    },
+    {
+     "type": "gap",
+     "prompt": "Do you have a big family ___ a small family?",
+     "answers": [
+      "or"
+     ],
+     "explain": "or = o/oppure."
+    },
+    {
+     "type": "mc",
+     "prompt": "My brother's wife is my ___.",
+     "options": [
+      "sister-in-law",
+      "cousin",
+      "niece"
+     ],
+     "answer": 0,
+     "explain": "sister-in-law = cognata."
+    },
+    {
+     "type": "mc",
+     "prompt": "My aunt's son is my ___.",
+     "options": [
+      "cousin",
+      "nephew",
+      "uncle"
+     ],
+     "answer": 0,
+     "explain": "cousin = cugino/cugina."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the English to the Italian.",
+     "pairs": [
+      [
+       "nephew",
+       "nipote (di zio)"
+      ],
+      [
+       "grandson",
+       "nipote (di nonno)"
+      ],
+      [
+       "best friend",
+       "migliore amico/a"
+      ],
+      [
+       "colleague",
+       "collega"
+      ]
+     ],
+     "explain": "Italian “nipote” has two English words!"
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "my",
+      "is",
+      "this",
+      "friend",
+      "best"
+     ],
+     "answers": [
+      "this is my best friend"
+     ],
+     "explain": "This is my best friend."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "My friend is very kind.",
+      "My friend very kind.",
+      "My friend is very kindly."
+     ],
+     "answer": 0,
+     "explain": "is + adjective."
+    },
+    {
+     "type": "mc",
+     "prompt": "I ___ two brothers.",
+     "options": [
+      "have",
+      "has",
+      "am"
+     ],
+     "answer": 0,
+     "explain": "I have. (Ho.)"
+    }
+   ]
+  },
+  {
+   "id": "a2-l07",
+   "kind": "lesson",
+   "lesson_number": 7,
+   "lesson_id": "A2.07",
+   "title": "Describing people and personality",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "“What is she like?” asks about…",
+     "options": [
+      "her personality",
+      "what she likes",
+      "her job"
+     ],
+     "answer": 0,
+     "explain": "What is she like? = Com'è (di carattere)?"
+    },
+    {
+     "type": "mc",
+     "prompt": "“What does she like?” asks about…",
+     "options": [
+      "things she enjoys",
+      "her personality",
+      "her appearance"
+     ],
+     "answer": 0,
+     "explain": "What does she like? = Cosa le piace?"
+    },
+    {
+     "type": "mc",
+     "prompt": "He talks a lot. He's very ___.",
+     "options": [
+      "talkative",
+      "quiet",
+      "shy"
+     ],
+     "answer": 0,
+     "explain": "talkative = chiacchierone."
+    },
+    {
+     "type": "mc",
+     "prompt": "She always helps people. She's ___.",
+     "options": [
+      "helpful",
+      "lazy",
+      "rude"
+     ],
+     "answer": 0,
+     "explain": "helpful = disponibile."
+    },
+    {
+     "type": "gap",
+     "prompt": "They make everyone laugh. They're ___.",
+     "answers": [
+      "funny"
+     ],
+     "explain": "funny = divertente/simpatico."
+    },
+    {
+     "type": "gap",
+     "prompt": "He ___ short, dark hair.",
+     "answers": [
+      "has"
+     ],
+     "explain": "He has short hair. (Ha i capelli corti.) — have, not be!"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the opposites.",
+     "pairs": [
+      [
+       "friendly",
+       "unfriendly"
+      ],
+      [
+       "quiet",
+       "talkative"
+      ],
+      [
+       "tall",
+       "short"
+      ],
+      [
+       "kind",
+       "unkind"
+      ]
+     ],
+     "explain": "Opposite adjectives."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "is",
+      "what",
+      "he",
+      "like"
+     ],
+     "answers": [
+      "what is he like"
+     ],
+     "explain": "What is he like? (Com'è?)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "She has long hair.",
+      "She is long hair.",
+      "She have long hairs."
+     ],
+     "answer": 0,
+     "explain": "have + hair (hair is uncountable: no -s)."
+    },
+    {
+     "type": "mc",
+     "prompt": "“Sympathetic” in English means…",
+     "options": [
+      "understanding someone's problems",
+      "simpatico",
+      "funny"
+     ],
+     "answer": 0,
+     "explain": "False friend! simpatico = nice/friendly; sympathetic = comprensivo."
+    }
+   ]
+  },
+  {
+   "id": "a2-l08",
+   "kind": "lesson",
+   "lesson_number": 8,
+   "lesson_id": "A2.08",
+   "title": "Home rooms and furniture",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "There ___ a table in the kitchen.",
+     "options": [
+      "is",
+      "are",
+      "be"
+     ],
+     "answer": 0,
+     "explain": "There is + singular."
+    },
+    {
+     "type": "mc",
+     "prompt": "There ___ two chairs in the room.",
+     "options": [
+      "are",
+      "is",
+      "have"
+     ],
+     "answer": 0,
+     "explain": "There are + plural."
+    },
+    {
+     "type": "mc",
+     "prompt": "The book is ___ the table.",
+     "options": [
+      "on",
+      "in",
+      "at"
+     ],
+     "answer": 0,
+     "explain": "on = sopra (touching)."
+    },
+    {
+     "type": "mc",
+     "prompt": "The lamp is ___ to the sofa.",
+     "options": [
+      "next",
+      "near of",
+      "beside of"
+     ],
+     "answer": 0,
+     "explain": "next to = accanto a."
+    },
+    {
+     "type": "gap",
+     "prompt": "___ is the bathroom?",
+     "answers": [
+      "Where"
+     ],
+     "explain": "Where is…? (Dov'è…?)"
+    },
+    {
+     "type": "gap",
+     "prompt": "My favourite ___ is the living room.",
+     "answers": [
+      "room"
+     ],
+     "explain": "room = stanza."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the furniture to the room.",
+     "pairs": [
+      [
+       "bed",
+       "bedroom"
+      ],
+      [
+       "sofa",
+       "living room"
+      ],
+      [
+       "fridge",
+       "kitchen"
+      ],
+      [
+       "shower",
+       "bathroom"
+      ]
+     ],
+     "explain": "Rooms and furniture."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "there",
+      "in",
+      "bedroom",
+      "a",
+      "is",
+      "the",
+      "bed"
+     ],
+     "answers": [
+      "there is a bed in the bedroom"
+     ],
+     "explain": "There is a bed in the bedroom."
+    },
+    {
+     "type": "mc",
+     "prompt": "The cat is ___ the bed. (sotto)",
+     "options": [
+      "under",
+      "on",
+      "next to"
+     ],
+     "answer": 0,
+     "explain": "under = sotto."
+    },
+    {
+     "type": "mc",
+     "prompt": "“Camera” (room) in English is…",
+     "options": [
+      "room / bedroom",
+      "camera",
+      "chamber"
+     ],
+     "answer": 0,
+     "explain": "camera (Italian) = room/bedroom; camera (English) = macchina fotografica!"
+    }
+   ]
+  },
+  {
+   "id": "a2-l09",
+   "kind": "lesson",
+   "lesson_number": 9,
+   "lesson_id": "A2.09",
+   "title": "Neighborhood and local places",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Is there a pharmacy ___ here?",
+     "options": [
+      "near",
+      "next",
+      "close of"
+     ],
+     "answer": 0,
+     "explain": "near here = qui vicino."
+    },
+    {
+     "type": "mc",
+     "prompt": "There's a café ___ my home.",
+     "options": [
+      "near",
+      "near to of",
+      "next"
+     ],
+     "answer": 0,
+     "explain": "near my home."
+    },
+    {
+     "type": "gap",
+     "prompt": "I usually ___ to the supermarket on Saturday.",
+     "answers": [
+      "go"
+     ],
+     "explain": "go to the supermarket."
+    },
+    {
+     "type": "gap",
+     "prompt": "It's next ___ the bank.",
+     "answers": [
+      "to"
+     ],
+     "explain": "next to = accanto a."
+    },
+    {
+     "type": "mc",
+     "prompt": "You buy bread at the…",
+     "options": [
+      "bakery",
+      "library",
+      "post office"
+     ],
+     "answer": 0,
+     "explain": "bakery = panetteria/forno."
+    },
+    {
+     "type": "mc",
+     "prompt": "You borrow books from the…",
+     "options": [
+      "library",
+      "bookshop",
+      "pharmacy"
+     ],
+     "answer": 0,
+     "explain": "library = biblioteca (bookshop = libreria!)."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the place to what you do there.",
+     "pairs": [
+      [
+       "post office",
+       "send a letter"
+      ],
+      [
+       "pharmacy",
+       "buy medicine"
+      ],
+      [
+       "bank",
+       "get money"
+      ],
+      [
+       "park",
+       "go for a walk"
+      ]
+     ],
+     "explain": "Local places."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "here",
+      "is",
+      "a",
+      "there",
+      "near",
+      "bank"
+     ],
+     "answers": [
+      "is there a bank near here"
+     ],
+     "explain": "Is there a bank near here?"
+    },
+    {
+     "type": "mc",
+     "prompt": "“Libreria” in English is…",
+     "options": [
+      "bookshop",
+      "library",
+      "bookcase only"
+     ],
+     "answer": 0,
+     "explain": "libreria = bookshop; library = biblioteca. False friend!"
+    },
+    {
+     "type": "mc",
+     "prompt": "Where do you usually go on Sunday? — Best reply:",
+     "options": [
+      "I usually go to the park.",
+      "I usually Sunday.",
+      "Yes, I go."
+     ],
+     "answer": 0,
+     "explain": "I usually go to the…"
+    }
+   ]
+  },
+  {
+   "id": "a2-l10",
+   "kind": "lesson",
+   "lesson_number": 10,
+   "lesson_id": "A2.10",
+   "title": "Keeping a conversation going",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Your friend says: “I went to London.” Best short reply:",
+     "options": [
+      "Really? How was it?",
+      "OK.",
+      "London is a city."
+     ],
+     "answer": 0,
+     "explain": "Really? + question shows interest."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which question asks about frequency?",
+     "options": [
+      "How often?",
+      "Where?",
+      "Why?"
+     ],
+     "answer": 0,
+     "explain": "How often? = quanto spesso?"
+    },
+    {
+     "type": "gap",
+     "prompt": "Tell me ___.",
+     "answers": [
+      "more"
+     ],
+     "explain": "Tell me more. (Raccontami di più.)"
+    },
+    {
+     "type": "gap",
+     "prompt": "That ___ nice!",
+     "answers": [
+      "sounds"
+     ],
+     "explain": "That sounds nice! (Sembra bello!)"
+    },
+    {
+     "type": "mc",
+     "prompt": "To ask the same question back, you say:",
+     "options": [
+      "What about you?",
+      "What you?",
+      "And about?"
+     ],
+     "answer": 0,
+     "explain": "What about you? / And you?"
+    },
+    {
+     "type": "match",
+     "prompt": "Match the reaction to the situation.",
+     "pairs": [
+      [
+       "That sounds nice!",
+       "good news"
+      ],
+      [
+       "Oh no!",
+       "bad news"
+      ],
+      [
+       "Really?",
+       "surprising news"
+      ],
+      [
+       "Why?",
+       "you want a reason"
+      ]
+     ],
+     "explain": "Short reactions keep a conversation alive."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "about",
+      "what",
+      "you"
+     ],
+     "answers": [
+      "what about you"
+     ],
+     "explain": "What about you?"
+    },
+    {
+     "type": "mc",
+     "prompt": "“I play the piano.” Best follow-up:",
+     "options": [
+      "How often do you play?",
+      "Piano.",
+      "I don't."
+     ],
+     "answer": 0,
+     "explain": "Ask a follow-up question."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which response keeps the conversation going?",
+     "options": [
+      "Really? Why do you like it?",
+      "OK.",
+      "Yes."
+     ],
+     "answer": 0,
+     "explain": "Reaction + open question."
+    },
+    {
+     "type": "mc",
+     "prompt": "“I live near the sea.” Best reply:",
+     "options": [
+      "That sounds lovely! Do you swim a lot?",
+      "Sea is water.",
+      "Me too no."
+     ],
+     "answer": 0,
+     "explain": "React, then ask."
+    }
+   ]
+  },
+  {
+   "id": "a2-l11",
+   "kind": "lesson",
+   "lesson_number": 11,
+   "lesson_id": "A2.R1",
+   "title": "A2 review: personal life and everyday conversations",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "I'm from Sicily, ___ I live in Bologna.",
+     "options": [
+      "but",
+      "because",
+      "and so"
+     ],
+     "answer": 0,
+     "explain": "Contrast → but."
+    },
+    {
+     "type": "mc",
+     "prompt": "She usually ___ up at 6.",
+     "options": [
+      "gets",
+      "get",
+      "getting"
+     ],
+     "answer": 0,
+     "explain": "she + gets."
+    },
+    {
+     "type": "mc",
+     "prompt": "I like tennis ___ it's fun.",
+     "options": [
+      "because",
+      "but",
+      "or"
+     ],
+     "answer": 0,
+     "explain": "Reason → because."
+    },
+    {
+     "type": "gap",
+     "prompt": "What do you like ___ in your free time? (do)",
+     "answers": [
+      "doing"
+     ],
+     "explain": "like + -ing."
+    },
+    {
+     "type": "gap",
+     "prompt": "There ___ two parks near my home.",
+     "answers": [
+      "are"
+     ],
+     "explain": "There are + plural."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the question to the answer.",
+     "pairs": [
+      [
+       "What is she like?",
+       "She's very kind."
+      ],
+      [
+       "How often do you go?",
+       "Twice a week."
+      ],
+      [
+       "Is there a café near here?",
+       "Yes, next to the bank."
+      ],
+      [
+       "What do you do?",
+       "I work as a chef."
+      ]
+     ],
+     "explain": "A2 questions and answers."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "time",
+      "you",
+      "what",
+      "get",
+      "do",
+      "up"
+     ],
+     "answers": [
+      "what time do you get up"
+     ],
+     "explain": "What time do you get up?"
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "I never eat meat.",
+      "I eat never meat.",
+      "Never I eat meat."
+     ],
+     "answer": 0,
+     "explain": "never before the verb."
+    },
+    {
+     "type": "mc",
+     "prompt": "“I've just moved to Rome.” Best reply:",
+     "options": [
+      "Really? How do you like it?",
+      "Rome.",
+      "OK bye."
+     ],
+     "answer": 0,
+     "explain": "React + question."
+    },
+    {
+     "type": "mc",
+     "prompt": "He ___ short hair.",
+     "options": [
+      "has",
+      "is",
+      "have"
+     ],
+     "answer": 0,
+     "explain": "He has… hair."
+    }
+   ]
+  },
+  {
+   "id": "a2-t-ps",
+   "kind": "topic",
+   "topic": "Grammar",
+   "title": "Present simple: he, she, it",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "He ___ in a hospital.",
+     "options": [
+      "works",
+      "work",
+      "working"
+     ],
+     "answer": 0,
+     "explain": "He/She/It + -s."
+    },
+    {
+     "type": "mc",
+     "prompt": "She ___ TV every evening.",
+     "options": [
+      "watches",
+      "watchs",
+      "watch"
+     ],
+     "answer": 0,
+     "explain": "-ch → -es: watches."
+    },
+    {
+     "type": "mc",
+     "prompt": "My brother ___ two languages.",
+     "options": [
+      "studies",
+      "studys",
+      "study"
+     ],
+     "answer": 0,
+     "explain": "consonant + y → -ies."
+    },
+    {
+     "type": "mc",
+     "prompt": "She ___ (not) like coffee.",
+     "options": [
+      "doesn't",
+      "don't",
+      "isn't"
+     ],
+     "answer": 0,
+     "explain": "Negative: doesn't + base verb."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ he live in Rome?",
+     "options": [
+      "Does",
+      "Do",
+      "Is"
+     ],
+     "answer": 0,
+     "explain": "Question: Does he…?"
+    },
+    {
+     "type": "gap",
+     "prompt": "She ___ (go) to the gym on Mondays.",
+     "answers": [
+      "goes"
+     ],
+     "explain": "go → goes."
+    },
+    {
+     "type": "gap",
+     "prompt": "He ___ (have) a big dog.",
+     "answers": [
+      "has"
+     ],
+     "explain": "have → has."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the verb to the he/she form.",
+     "pairs": [
+      [
+       "do",
+       "does"
+      ],
+      [
+       "fly",
+       "flies"
+      ],
+      [
+       "wash",
+       "washes"
+      ],
+      [
+       "play",
+       "plays"
+      ]
+     ],
+     "explain": "Spelling of -s."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "doesn't",
+      "she",
+      "meat",
+      "eat"
+     ],
+     "answers": [
+      "she doesn't eat meat"
+     ],
+     "explain": "She doesn't eat meat."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "Does she likes music?",
+      "Does she like music?"
+     ],
+     "answer": 1,
+     "explain": "After does → base verb (no -s)."
+    }
+   ]
+  },
+  {
+   "id": "a2-t-inonat",
+   "kind": "topic",
+   "topic": "Grammar",
+   "title": "In, on, at (time)",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "___ Monday",
+     "options": [
+      "on",
+      "in",
+      "at"
+     ],
+     "answer": 0,
+     "explain": "on + days."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ July",
+     "options": [
+      "in",
+      "on",
+      "at"
+     ],
+     "answer": 0,
+     "explain": "in + months."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ 9 o'clock",
+     "options": [
+      "at",
+      "in",
+      "on"
+     ],
+     "answer": 0,
+     "explain": "at + clock times."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ the morning",
+     "options": [
+      "in",
+      "on",
+      "at"
+     ],
+     "answer": 0,
+     "explain": "in the morning/afternoon/evening."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ night",
+     "options": [
+      "at",
+      "in",
+      "on"
+     ],
+     "answer": 0,
+     "explain": "at night (exception!)."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ 2020",
+     "options": [
+      "in",
+      "on",
+      "at"
+     ],
+     "answer": 0,
+     "explain": "in + years."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ my birthday",
+     "options": [
+      "on",
+      "in",
+      "at"
+     ],
+     "answer": 0,
+     "explain": "on + special days/dates."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ the weekend (British English)",
+     "options": [
+      "at",
+      "in",
+      "on"
+     ],
+     "answer": 0,
+     "explain": "at the weekend (UK) / on the weekend (US)."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the preposition to its use.",
+     "pairs": [
+      [
+       "at",
+       "times"
+      ],
+      [
+       "on",
+       "days and dates"
+      ],
+      [
+       "in",
+       "months and years"
+      ],
+      [
+       "in",
+       "parts of the day"
+      ]
+     ],
+     "explain": "A simple rule: at → on → in, from small to big."
+    }
+   ]
+  },
+  {
+   "id": "a2-t-place",
+   "kind": "topic",
+   "topic": "Grammar",
+   "title": "Prepositions of place",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "The keys are ___ the table.",
+     "options": [
+      "on",
+      "in",
+      "at"
+     ],
+     "answer": 0,
+     "explain": "on = sopra (touching)."
+    },
+    {
+     "type": "mc",
+     "prompt": "The milk is ___ the fridge.",
+     "options": [
+      "in",
+      "on",
+      "at"
+     ],
+     "answer": 0,
+     "explain": "in = dentro."
+    },
+    {
+     "type": "mc",
+     "prompt": "The cat is ___ the chair.",
+     "options": [
+      "under",
+      "over",
+      "in front"
+     ],
+     "answer": 0,
+     "explain": "under = sotto."
+    },
+    {
+     "type": "mc",
+     "prompt": "The bank is ___ the café and the pharmacy.",
+     "options": [
+      "between",
+      "next",
+      "under"
+     ],
+     "answer": 0,
+     "explain": "between = tra (two things)."
+    },
+    {
+     "type": "mc",
+     "prompt": "The car is ___ the house.",
+     "options": [
+      "in front of",
+      "in front",
+      "front of"
+     ],
+     "answer": 0,
+     "explain": "in front of = davanti a."
+    },
+    {
+     "type": "mc",
+     "prompt": "The garden is ___ the house.",
+     "options": [
+      "behind",
+      "behind of",
+      "back"
+     ],
+     "answer": 0,
+     "explain": "behind = dietro (no “of”)."
+    },
+    {
+     "type": "gap",
+     "prompt": "The school is ___ to the park.",
+     "answers": [
+      "next"
+     ],
+     "explain": "next to = accanto a."
+    },
+    {
+     "type": "gap",
+     "prompt": "The supermarket is opposite ___ station.",
+     "answers": [
+      "the"
+     ],
+     "explain": "opposite the station = di fronte alla stazione."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the English to the Italian.",
+     "pairs": [
+      [
+       "opposite",
+       "di fronte"
+      ],
+      [
+       "between",
+       "tra"
+      ],
+      [
+       "behind",
+       "dietro"
+      ],
+      [
+       "above",
+       "sopra (senza toccare)"
+      ]
+     ],
+     "explain": "Place words."
+    }
+   ]
+  },
+  {
+   "id": "a2-t-pastreg",
+   "kind": "topic",
+   "topic": "Grammar",
+   "title": "Past simple: regular verbs",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Yesterday I ___ football.",
+     "options": [
+      "played",
+      "play",
+      "plaied"
+     ],
+     "answer": 0,
+     "explain": "Regular past: + -ed."
+    },
+    {
+     "type": "mc",
+     "prompt": "We ___ in Milan for two years.",
+     "options": [
+      "lived",
+      "liveed",
+      "live"
+     ],
+     "answer": 0,
+     "explain": "-e → just add -d: lived."
+    },
+    {
+     "type": "mc",
+     "prompt": "She ___ for the bus.",
+     "options": [
+      "waited",
+      "waitted",
+      "wait"
+     ],
+     "answer": 0,
+     "explain": "wait → waited."
+    },
+    {
+     "type": "mc",
+     "prompt": "He ___ the door.",
+     "options": [
+      "stopped",
+      "stoped",
+      "stop"
+     ],
+     "answer": 0,
+     "explain": "Short verb (consonant-vowel-consonant): double the last letter: stopped."
+    },
+    {
+     "type": "mc",
+     "prompt": "They ___ English last year.",
+     "options": [
+      "studied",
+      "studyed",
+      "studid"
+     ],
+     "answer": 0,
+     "explain": "consonant + y → -ied."
+    },
+    {
+     "type": "mc",
+     "prompt": "I ___ (not) watch TV last night.",
+     "options": [
+      "didn't",
+      "don't",
+      "wasn't"
+     ],
+     "answer": 0,
+     "explain": "Negative: didn't + base verb."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ you call your mum yesterday?",
+     "options": [
+      "Did",
+      "Do",
+      "Were"
+     ],
+     "answer": 0,
+     "explain": "Question: Did you…?"
+    },
+    {
+     "type": "gap",
+     "prompt": "I ___ (work) late on Friday.",
+     "answers": [
+      "worked"
+     ],
+     "explain": "work → worked."
+    },
+    {
+     "type": "gap",
+     "prompt": "She ___ (cry) at the film.",
+     "answers": [
+      "cried"
+     ],
+     "explain": "cry → cried."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "Did you watched the match?",
+      "Did you watch the match?"
+     ],
+     "answer": 1,
+     "explain": "After did → base verb."
+    }
+   ]
+  },
+  {
+   "id": "a2-t-pastirr",
+   "kind": "topic",
+   "topic": "Grammar",
+   "title": "Past simple: irregular verbs",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "go →",
+     "options": [
+      "went",
+      "goed",
+      "gone"
+     ],
+     "answer": 0,
+     "explain": "go → went."
+    },
+    {
+     "type": "mc",
+     "prompt": "have →",
+     "options": [
+      "had",
+      "haved",
+      "has"
+     ],
+     "answer": 0,
+     "explain": "have → had."
+    },
+    {
+     "type": "mc",
+     "prompt": "see →",
+     "options": [
+      "saw",
+      "seed",
+      "seen"
+     ],
+     "answer": 0,
+     "explain": "see → saw."
+    },
+    {
+     "type": "mc",
+     "prompt": "buy →",
+     "options": [
+      "bought",
+      "buyed",
+      "brought"
+     ],
+     "answer": 0,
+     "explain": "buy → bought (brought = past of bring)."
+    },
+    {
+     "type": "mc",
+     "prompt": "eat →",
+     "options": [
+      "ate",
+      "eated",
+      "eaten"
+     ],
+     "answer": 0,
+     "explain": "eat → ate."
+    },
+    {
+     "type": "gap",
+     "prompt": "make → ___",
+     "answers": [
+      "made"
+     ],
+     "explain": "make → made."
+    },
+    {
+     "type": "gap",
+     "prompt": "take → ___",
+     "answers": [
+      "took"
+     ],
+     "explain": "take → took."
+    },
+    {
+     "type": "gap",
+     "prompt": "come → ___",
+     "answers": [
+      "came"
+     ],
+     "explain": "come → came."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the verb to its past form.",
+     "pairs": [
+      [
+       "write",
+       "wrote"
+      ],
+      [
+       "drink",
+       "drank"
+      ],
+      [
+       "sleep",
+       "slept"
+      ],
+      [
+       "meet",
+       "met"
+      ]
+     ],
+     "explain": "More irregular verbs."
+    },
+    {
+     "type": "mc",
+     "prompt": "Last summer we ___ to Greece.",
+     "options": [
+      "went",
+      "goed",
+      "go"
+     ],
+     "answer": 0,
+     "explain": "went."
+    }
+   ]
+  },
+  {
+   "id": "a2-t-someany",
+   "kind": "topic",
+   "topic": "Grammar",
+   "title": "Some and any",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "There's ___ milk in the fridge.",
+     "options": [
+      "some",
+      "any"
+     ],
+     "answer": 0,
+     "explain": "some in positive sentences."
+    },
+    {
+     "type": "mc",
+     "prompt": "There isn't ___ bread.",
+     "options": [
+      "any",
+      "some"
+     ],
+     "answer": 0,
+     "explain": "any in negative sentences."
+    },
+    {
+     "type": "mc",
+     "prompt": "Are there ___ eggs?",
+     "options": [
+      "any",
+      "some"
+     ],
+     "answer": 0,
+     "explain": "any in most questions."
+    },
+    {
+     "type": "mc",
+     "prompt": "Would you like ___ coffee?",
+     "options": [
+      "some",
+      "any"
+     ],
+     "answer": 0,
+     "explain": "some in offers (Would you like some…?)."
+    },
+    {
+     "type": "mc",
+     "prompt": "Can I have ___ water, please?",
+     "options": [
+      "some",
+      "any"
+     ],
+     "answer": 0,
+     "explain": "some in requests."
+    },
+    {
+     "type": "gap",
+     "prompt": "I don't have ___ money.",
+     "answers": [
+      "any"
+     ],
+     "explain": "Negative → any."
+    },
+    {
+     "type": "gap",
+     "prompt": "I bought ___ apples.",
+     "answers": [
+      "some"
+     ],
+     "explain": "Positive → some."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the sentence type to the word.",
+     "pairs": [
+      [
+       "positive",
+       "some"
+      ],
+      [
+       "negative",
+       "any"
+      ],
+      [
+       "question",
+       "any"
+      ],
+      [
+       "offer",
+       "some"
+      ]
+     ],
+     "explain": "The basic rule."
+    }
+   ]
+  },
+  {
+   "id": "a2-t-comp",
+   "kind": "topic",
+   "topic": "Grammar",
+   "title": "Comparatives: bigger, better",
+   "minutes": 5,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Rome is ___ than Florence.",
+     "options": [
+      "bigger",
+      "more big",
+      "biger"
+     ],
+     "answer": 0,
+     "explain": "Short adjective + -er; double the consonant: bigger."
+    },
+    {
+     "type": "mc",
+     "prompt": "This book is ___ than that one.",
+     "options": [
+      "more interesting",
+      "interestinger",
+      "more interestinger"
+     ],
+     "answer": 0,
+     "explain": "Long adjectives: more + adjective."
+    },
+    {
+     "type": "mc",
+     "prompt": "Today is ___ than yesterday.",
+     "options": [
+      "better",
+      "gooder",
+      "more good"
+     ],
+     "answer": 0,
+     "explain": "good → better (irregular)."
+    },
+    {
+     "type": "mc",
+     "prompt": "The weather is ___ today.",
+     "options": [
+      "worse",
+      "badder",
+      "more bad"
+     ],
+     "answer": 0,
+     "explain": "bad → worse (irregular)."
+    },
+    {
+     "type": "mc",
+     "prompt": "Milan is ___ from here than Bologna.",
+     "options": [
+      "farther / further",
+      "farer",
+      "more far"
+     ],
+     "answer": 0,
+     "explain": "far → farther/further."
+    },
+    {
+     "type": "gap",
+     "prompt": "My car is ___ (cheap) than yours.",
+     "answers": [
+      "cheaper"
+     ],
+     "explain": "cheap → cheaper."
+    },
+    {
+     "type": "gap",
+     "prompt": "This exercise is ___ (easy) than the last one.",
+     "answers": [
+      "easier"
+     ],
+     "explain": "easy → easier (y → ier)."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the adjective to the comparative.",
+     "pairs": [
+      [
+       "happy",
+       "happier"
+      ],
+      [
+       "hot",
+       "hotter"
+      ],
+      [
+       "expensive",
+       "more expensive"
+      ],
+      [
+       "good",
+       "better"
+      ]
+     ],
+     "explain": "Comparatives."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct?",
+     "options": [
+      "She is taller than me.",
+      "She is more tall than me.",
+      "She is taller that me."
+     ],
+     "answer": 0,
+     "explain": "taller THAN (not that)."
+    }
+   ]
+  }
+ ]
+}
