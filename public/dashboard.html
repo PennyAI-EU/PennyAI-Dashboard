@@ -839,6 +839,9 @@
   /* ==== PRACTICE (self-study, pilot) ==== */
   #section-selfstudy .pr-group { margin-bottom: 26px; }
   #section-selfstudy .pr-group h2 { font-size: 15px; font-weight: 700; margin-bottom: 10px; color: var(--text); }
+  .pr-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .pr-tab { padding: 7px 14px; border-radius: 999px; border: 1.5px solid #f3d2cb; background: #fff; font: inherit; font-size: 13px; font-weight: 600; color: #c2553f; cursor: pointer; }
+  .pr-tab.on { background: #e0735f; border-color: #e0735f; color: #fff; }
   .pr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
   .pr-card { background: #fff; border: 1px solid #f3d2cb; border-radius: 16px; padding: 16px 18px; cursor: pointer; text-align: left; font: inherit; color: inherit; transition: transform .12s, box-shadow .12s; }
   .pr-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(224,115,95,.15); }
@@ -887,6 +890,7 @@
 (function () {
   var D = {
     'nav.home': ['Home', 'Home'],
+    'nav.practice': ['Practice', 'Esercizi'],
     'nav.lessons': ['My Lessons', 'Le mie lezioni'],
     'nav.progress': ['Progress', 'Progressi'],
     'nav.messages': ['Messages', 'Messaggi'],
@@ -1085,9 +1089,9 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       <span data-i18n="nav.lessons">My Lessons</span>
     </div>
-    <div class="nav-item" id="nav-selfstudy" onclick="showSection('selfstudy'); PennyPractice.open();" style="display:none">
+    <div class="nav-item" id="nav-selfstudy" onclick="showSection('selfstudy'); PennyPractice.open();">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.25 4 3v15l8 3 8-3V3z"/><path d="M12 6.25V21"/></svg>
-      <span>Practice</span>
+      <span data-i18n="nav.practice">Practice</span>
     </div>
     <div class="nav-item is-soon" id="nav-practice" title="Coming soon" style="display:none">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/><path d="M19 11a7 7 0 0 1-14 0"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
@@ -1247,7 +1251,7 @@
     </div>
   </section>
 
-  <!-- PRACTICE SECTION (self-study pilot; hidden unless ?practice=1) -->
+  <!-- PRACTICE SECTION (self-study exercises) -->
   <section id="section-selfstudy" class="section">
     <div class="section-header">
       <h1>Practice</h1>
@@ -2447,47 +2451,44 @@ async function markMsgRead(token) {
 </script>
 
 <script>
-/* ===== PRACTICE (self-study pilot) =====
-   Content lives in /practice/<level>.json. Hidden unless the browser has opened
-   the dashboard once with ?practice=1 (?practice=0 hides it again).
-   Best scores are kept in this browser for the pilot. */
+/* ===== PRACTICE (self-study) =====
+   Content lives in /practice/<level>.json (a1 … c2). Opens on the student's own
+   level; the tabs let them try other levels. Best scores are kept in this browser. */
 window.PennyPractice = (function () {
-  const FLAG = 'pennyPractice';
+  const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
   const store = {
     get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
-    del(k) { try { localStorage.removeItem(k); } catch (e) {} },
   };
-  const q = new URLSearchParams(location.search).get('practice');
-  if (q === '1') store.set(FLAG, '1');
-  if (q === '0') store.del(FLAG);
-  if (store.get(FLAG) === '1') {
-    const nav = document.getElementById('nav-selfstudy');
-    if (nav) nav.style.display = '';
-  }
-
   const root = () => document.getElementById('practice-root');
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const norm = s => String(s || '').toLowerCase().replace(/[’']/g, "'").replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ').trim();
   const shuffle = a => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
   let data = null, set = null, idx = 0, correct = 0, state = {};
+  const cache = {};
+  let current = null;   // level being shown
 
-  async function load() {
-    if (data) return data;
-    const lvlText = (document.getElementById('profile-level') || {}).textContent || '';
-    const level = (lvlText.match(/\b([ABC][12])\b/) || [])[1] || 'B1';
-    for (const lv of [level, 'B1']) {
-      try { const r = await fetch('/practice/' + lv.toLowerCase() + '.json', { cache: 'no-cache' }); if (r.ok) { data = await r.json(); data._asked = level; return data; } } catch (e) {}
-    }
+  function myLevel() {
+    const t = (document.getElementById('profile-level') || {}).textContent || '';
+    return (t.match(/\b([ABC][12])\b/) || [])[1] || 'A1';
+  }
+  async function load(level) {
+    if (cache[level]) return cache[level];
+    try { const r = await fetch('/practice/' + level.toLowerCase() + '.json', { cache: 'no-cache' }); if (r.ok) return (cache[level] = await r.json()); } catch (e) {}
     return null;
   }
   const bestKey = id => 'pennyPracticeBest:' + id;
 
-  async function open() {
+  async function open(level) {
     const el = root(); if (!el) return;
+    if (typeof level === 'string') current = level;   // the student picked a tab
+    const mine = myLevel();
+    const lv = current || mine;
     el.innerHTML = '<p style="color:var(--muted)">Loading…</p>';
-    const d = await load();
-    if (!d) { el.innerHTML = '<p style="color:var(--muted)">Practice is not available yet.</p>'; return; }
+    const d = await load(lv);
+    data = d;
+    const tabs = `<div class="pr-tabs">${LEVELS.map(l => `<button class="pr-tab${l === lv ? ' on' : ''}" onclick="PennyPractice.open('${l}')">${l}${l === mine ? ' ★' : ''}</button>`).join('')}</div>`;
+    if (!d) { el.innerHTML = tabs + '<p style="color:var(--muted)">These exercises are not available yet.</p>'; return; }
     const card = s => {
       const best = store.get(bestKey(s.id));
       const tag = s.kind === 'lesson' ? (s.lesson_id || ('Lesson ' + s.lesson_number)) : (s.topic || 'Topic');
@@ -2497,8 +2498,8 @@ window.PennyPractice = (function () {
     };
     const lessons = d.sets.filter(s => s.kind === 'lesson');
     const topics = d.sets.filter(s => s.kind !== 'lesson');
-    const note = d._asked && d._asked.toUpperCase() !== d.level ? `<p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Pilot: showing ${esc(d.level)} exercises.</p>` : '';
-    el.innerHTML = note +
+    const note = lv !== mine ? `<p style="font-size:13px;color:var(--muted);margin:-6px 0 16px;">You're looking at ${esc(lv)} exercises. Your level is ${esc(mine)} ★.</p>` : '';
+    el.innerHTML = tabs + note +
       (lessons.length ? `<div class="pr-group"><h2>Practise your lessons · ${esc(d.level)}</h2><div class="pr-grid">${lessons.map(card).join('')}</div></div>` : '') +
       (topics.length ? `<div class="pr-group"><h2>Topic library · ${esc(d.level)}</h2><div class="pr-grid">${topics.map(card).join('')}</div></div>` : '');
   }

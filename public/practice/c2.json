@@ -1,0 +1,993 @@
+{
+ "level": "C2",
+ "sets": [
+  {
+   "id": "c2-l01",
+   "kind": "lesson",
+   "lesson_number": 1,
+   "lesson_id": "C2.01",
+   "title": "Adapting register and tone",
+   "minutes": 7,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Which version suits an email to a senior client?",
+     "options": [
+      "I'd be grateful if you could confirm the figures at your earliest convenience.",
+      "Send me the numbers ASAP.",
+      "Gimme the figures."
+     ],
+     "answer": 0,
+     "explain": "Formal register: indirect request, polite modals."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which version suits a quick message to a close colleague?",
+     "options": [
+      "Got a sec to look at the figures?",
+      "I should be most obliged were you to peruse the figures.",
+      "Kindly furnish the figures forthwith."
+     ],
+     "answer": 0,
+     "explain": "Informal register: short, direct, friendly."
+    },
+    {
+     "type": "mc",
+     "prompt": "“We regret to inform you that…” is…",
+     "options": [
+      "formal and distant",
+      "friendly and casual",
+      "rude"
+     ],
+     "answer": 0,
+     "explain": "Typical formal opener for bad news."
+    },
+    {
+     "type": "gap",
+     "prompt": "I was ___ if you might be available on Friday. (polite, indirect)",
+     "answers": [
+      "wondering"
+     ],
+     "explain": "I was wondering if… — softens a request."
+    },
+    {
+     "type": "gap",
+     "prompt": "Please do not ___ to contact me should you have any questions.",
+     "answers": [
+      "hesitate"
+     ],
+     "explain": "Do not hesitate to… — formal closing phrase."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the informal phrase to its formal equivalent.",
+     "pairs": [
+      [
+       "get",
+       "obtain"
+      ],
+      [
+       "ask for",
+       "request"
+      ],
+      [
+       "find out",
+       "ascertain"
+      ],
+      [
+       "help",
+       "assist"
+      ]
+     ],
+     "explain": "Formal registers often prefer single Latinate verbs over phrasal verbs."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which softens criticism most effectively?",
+     "options": [
+      "There may be scope to tighten the argument in section two.",
+      "Section two is bad.",
+      "Section two makes no sense at all."
+     ],
+     "answer": 0,
+     "explain": "Hedged, constructive phrasing."
+    },
+    {
+     "type": "mc",
+     "prompt": "“Cheers for that!” would be appropriate…",
+     "options": [
+      "with a friend or close colleague",
+      "in a legal letter",
+      "in a job application"
+     ],
+     "answer": 0,
+     "explain": "Informal British English."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "grateful",
+      "would",
+      "I",
+      "be",
+      "if",
+      "could",
+      "you",
+      "reply"
+     ],
+     "answers": [
+      "i would be grateful if you could reply"
+     ],
+     "explain": "I would be grateful if you could reply."
+    },
+    {
+     "type": "mc",
+     "prompt": "Tone is best described as…",
+     "options": [
+      "the attitude a text conveys",
+      "the length of a text",
+      "the grammar of a text"
+     ],
+     "answer": 0,
+     "explain": "Tone = attitude (warm, neutral, curt, ironic…)."
+    }
+   ]
+  },
+  {
+   "id": "c2-l02",
+   "kind": "lesson",
+   "lesson_number": 2,
+   "lesson_id": "C2.02",
+   "title": "Synthesising complex viewpoints",
+   "minutes": 7,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "___ together, these studies suggest a clear pattern.",
+     "options": [
+      "Taken",
+      "Taking",
+      "To take"
+     ],
+     "answer": 0,
+     "explain": "Taken together = considered as a whole."
+    },
+    {
+     "type": "mc",
+     "prompt": "These positions ___ on the need for transparency.",
+     "options": [
+      "converge",
+      "convert",
+      "converse"
+     ],
+     "answer": 0,
+     "explain": "Converge on = come together at the same point."
+    },
+    {
+     "type": "gap",
+     "prompt": "The apparent ___ can be resolved by distinguishing short- and long-term goals.",
+     "answers": [
+      "contradiction"
+     ],
+     "explain": "An apparent contradiction = seems contradictory but may not be."
+    },
+    {
+     "type": "gap",
+     "prompt": "A ___ distinction is between access and use.",
+     "answers": [
+      "crucial",
+      "key",
+      "critical"
+     ],
+     "explain": "A crucial distinction…"
+    },
+    {
+     "type": "mc",
+     "prompt": "With that ___, I'd broadly support the proposal.",
+     "options": [
+      "caveat",
+      "cave",
+      "caviar"
+     ],
+     "answer": 0,
+     "explain": "Caveat = a warning or limitation."
+    },
+    {
+     "type": "match",
+     "prompt": "Match each phrase to its function.",
+     "pairs": [
+      [
+       "Taken together…",
+       "summarising multiple sources"
+      ],
+      [
+       "These positions converge on…",
+       "showing agreement"
+      ],
+      [
+       "Where they diverge is…",
+       "showing difference"
+      ],
+      [
+       "With that caveat…",
+       "adding a limitation"
+      ]
+     ],
+     "explain": "Synthesis language for C2 discussion."
+    },
+    {
+     "type": "mc",
+     "prompt": "“Diverge” is the opposite of…",
+     "options": [
+      "converge",
+      "conceive",
+      "concede"
+     ],
+     "answer": 0,
+     "explain": "Diverge = move apart; converge = come together."
+    },
+    {
+     "type": "mc",
+     "prompt": "A neutral summary should…",
+     "options": [
+      "represent each view fairly without judging it",
+      "include your opinion first",
+      "only describe the view you agree with"
+     ],
+     "answer": 0,
+     "explain": "Neutral = fair, unbiased."
+    },
+    {
+     "type": "order",
+     "prompt": "Put the words in order.",
+     "words": [
+      "can",
+      "be",
+      "the",
+      "resolved",
+      "contradiction",
+      "apparent"
+     ],
+     "answers": [
+      "the apparent contradiction can be resolved"
+     ],
+     "explain": "The apparent contradiction can be resolved."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is an original synthesis?",
+     "options": [
+      "Both camps prize fairness; the disagreement is really about timescale, so a phased approach might satisfy both.",
+      "Camp A is right.",
+      "They all disagree."
+     ],
+     "answer": 0,
+     "explain": "Identifies shared value + real difference + proposes a resolution."
+    }
+   ]
+  },
+  {
+   "id": "c2-t-connotation",
+   "kind": "topic",
+   "topic": "Vocabulary",
+   "title": "Connotation and word choice",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Which word is the most positive?",
+     "options": [
+      "slim",
+      "skinny",
+      "scrawny"
+     ],
+     "answer": 0,
+     "explain": "Slim = positive; skinny = neutral/negative; scrawny = negative."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which word is the most positive?",
+     "options": [
+      "determined",
+      "stubborn",
+      "pig-headed"
+     ],
+     "answer": 0,
+     "explain": "Determined = positive; stubborn/pig-headed = negative."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which word is the most negative?",
+     "options": [
+      "notorious",
+      "famous",
+      "renowned"
+     ],
+     "answer": 0,
+     "explain": "Notorious = famous for something bad."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which word is the most neutral?",
+     "options": [
+      "inexpensive",
+      "cheap",
+      "tacky"
+     ],
+     "answer": 0,
+     "explain": "Inexpensive = neutral; cheap can imply low quality; tacky = negative."
+    },
+    {
+     "type": "mc",
+     "prompt": "“Thrifty” vs “stingy”: which is a compliment?",
+     "options": [
+      "thrifty",
+      "stingy"
+     ],
+     "answer": 0,
+     "explain": "Thrifty = careful with money (positive); stingy = mean."
+    },
+    {
+     "type": "gap",
+     "prompt": "She's not nosy, she's just ___. (positive word: curious/inquisitive)",
+     "answers": [
+      "curious",
+      "inquisitive"
+     ],
+     "explain": "Curious/inquisitive = positive."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the neutral word to its negative counterpart.",
+     "pairs": [
+      [
+       "confident",
+       "arrogant"
+      ],
+      [
+       "assertive",
+       "pushy"
+      ],
+      [
+       "relaxed",
+       "lazy"
+      ],
+      [
+       "frank",
+       "blunt"
+      ]
+     ],
+     "explain": "Same idea, different attitude."
+    },
+    {
+     "type": "mc",
+     "prompt": "A journalist calls protesters “a mob”. This suggests…",
+     "options": [
+      "a negative attitude",
+      "neutrality",
+      "admiration"
+     ],
+     "answer": 0,
+     "explain": "Word choice reveals stance."
+    }
+   ]
+  },
+  {
+   "id": "c2-t-subjunctive",
+   "kind": "topic",
+   "topic": "Grammar",
+   "title": "Subjunctive and formal structures",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "It is essential that every employee ___ the training.",
+     "options": [
+      "complete",
+      "completes",
+      "completed"
+     ],
+     "answer": 0,
+     "explain": "Mandative subjunctive: base form after essential/vital that…"
+    },
+    {
+     "type": "mc",
+     "prompt": "The committee recommended that he ___ suspended.",
+     "options": [
+      "be",
+      "is",
+      "was being"
+     ],
+     "answer": 0,
+     "explain": "Subjunctive: be."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ it not for your help, we would have failed.",
+     "options": [
+      "Were",
+      "Was",
+      "Had"
+     ],
+     "answer": 0,
+     "explain": "Were it not for… = If it weren't for…"
+    },
+    {
+     "type": "mc",
+     "prompt": "Be that as it ___, we must proceed.",
+     "options": [
+      "may",
+      "might",
+      "can"
+     ],
+     "answer": 0,
+     "explain": "Fixed expression: be that as it may = nevertheless."
+    },
+    {
+     "type": "gap",
+     "prompt": "I insist that she ___ (be) informed immediately.",
+     "answers": [
+      "be"
+     ],
+     "explain": "Insist that + subjunctive."
+    },
+    {
+     "type": "gap",
+     "prompt": "___ it be necessary, we will extend the deadline.",
+     "answers": [
+      "Should"
+     ],
+     "explain": "Should it be necessary = If it is necessary."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the formal structure to its meaning.",
+     "pairs": [
+      [
+       "Were it not for…",
+       "If it weren't for…"
+      ],
+      [
+       "Should you require…",
+       "If you require…"
+      ],
+      [
+       "Be that as it may…",
+       "Nevertheless…"
+      ],
+      [
+       "Come what may…",
+       "Whatever happens…"
+      ]
+     ],
+     "explain": "Formal fixed structures."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is correct (formal)?",
+     "options": [
+      "It is vital that he be present.",
+      "It is vital that he is being present.",
+      "It is vital that he to be present."
+     ],
+     "answer": 0,
+     "explain": "Subjunctive: be."
+    }
+   ]
+  },
+  {
+   "id": "c2-t-confused",
+   "kind": "topic",
+   "topic": "Vocabulary",
+   "title": "Commonly confused words",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "The new policy will ___ everyone.",
+     "options": [
+      "affect",
+      "effect"
+     ],
+     "answer": 0,
+     "explain": "Affect = verb (influence); effect = noun (result)."
+    },
+    {
+     "type": "mc",
+     "prompt": "Her advice had a strong ___ on me.",
+     "options": [
+      "effect",
+      "affect"
+     ],
+     "answer": 0,
+     "explain": "Effect = noun."
+    },
+    {
+     "type": "mc",
+     "prompt": "He was ___ about the decision — he had no strong feelings.",
+     "options": [
+      "disinterested",
+      "uninterested"
+     ],
+     "answer": 1,
+     "explain": "Uninterested = not interested; disinterested = impartial."
+    },
+    {
+     "type": "mc",
+     "prompt": "A judge must be ___.",
+     "options": [
+      "disinterested",
+      "uninterested"
+     ],
+     "answer": 0,
+     "explain": "Disinterested = impartial."
+    },
+    {
+     "type": "mc",
+     "prompt": "The speech was ___: it went on for hours.",
+     "options": [
+      "interminable",
+      "indeterminable"
+     ],
+     "answer": 0,
+     "explain": "Interminable = endless."
+    },
+    {
+     "type": "mc",
+     "prompt": "Fewer or less: ___ people came than expected.",
+     "options": [
+      "Fewer",
+      "Less"
+     ],
+     "answer": 0,
+     "explain": "Fewer + countable; less + uncountable."
+    },
+    {
+     "type": "gap",
+     "prompt": "The ___ of the story is that honesty pays. (morale / moral)",
+     "answers": [
+      "moral"
+     ],
+     "explain": "Moral = lesson; morale = team spirit."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the word to its meaning.",
+     "pairs": [
+      [
+       "complement",
+       "complete or go well with"
+      ],
+      [
+       "compliment",
+       "praise"
+      ],
+      [
+       "principal",
+       "main / head of school"
+      ],
+      [
+       "principle",
+       "rule or belief"
+      ]
+     ],
+     "explain": "Pairs that even native speakers confuse."
+    }
+   ]
+  },
+  {
+   "id": "c2-t-idioms",
+   "kind": "topic",
+   "topic": "Vocabulary",
+   "title": "Advanced idioms and fixed expressions",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "The decision is still ___ in the balance.",
+     "options": [
+      "hanging",
+      "sitting",
+      "standing"
+     ],
+     "answer": 0,
+     "explain": "Hang in the balance = be undecided."
+    },
+    {
+     "type": "mc",
+     "prompt": "He was caught ___-handed.",
+     "options": [
+      "red",
+      "black",
+      "white"
+     ],
+     "answer": 0,
+     "explain": "Red-handed = in the act."
+    },
+    {
+     "type": "mc",
+     "prompt": "Let's not split ___.",
+     "options": [
+      "hairs",
+      "ends",
+      "straws"
+     ],
+     "answer": 0,
+     "explain": "Split hairs = argue over tiny details."
+    },
+    {
+     "type": "mc",
+     "prompt": "She's always ___ the line between humour and offence.",
+     "options": [
+      "treading",
+      "walking on",
+      "sitting"
+     ],
+     "answer": 0,
+     "explain": "Tread a fine line."
+    },
+    {
+     "type": "mc",
+     "prompt": "To be honest, the plan is a bit of a ___ dream.",
+     "options": [
+      "pipe",
+      "sweet",
+      "day"
+     ],
+     "answer": 0,
+     "explain": "Pipe dream = unrealistic hope."
+    },
+    {
+     "type": "gap",
+     "prompt": "It goes without ___ that safety comes first.",
+     "answers": [
+      "saying"
+     ],
+     "explain": "It goes without saying = obviously."
+    },
+    {
+     "type": "gap",
+     "prompt": "By and ___, the feedback was positive.",
+     "answers": [
+      "large"
+     ],
+     "explain": "By and large = generally."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the idiom to its meaning.",
+     "pairs": [
+      [
+       "a moot point",
+       "debatable / no longer relevant"
+      ],
+      [
+       "to bite the bullet",
+       "accept something unpleasant"
+      ],
+      [
+       "the elephant in the room",
+       "an obvious problem nobody mentions"
+      ],
+      [
+       "to move the goalposts",
+       "change the rules unfairly"
+      ]
+     ],
+     "explain": "Idioms common in professional C2 English."
+    }
+   ]
+  },
+  {
+   "id": "c2-t-wordform",
+   "kind": "topic",
+   "topic": "Vocabulary",
+   "title": "Word formation",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "The ___ of the plan surprised everyone. (simple)",
+     "options": [
+      "simplicity",
+      "simpleness",
+      "simplification"
+     ],
+     "answer": 0,
+     "explain": "simple → simplicity."
+    },
+    {
+     "type": "mc",
+     "prompt": "His ___ to change was obvious. (resist)",
+     "options": [
+      "resistance",
+      "resistence",
+      "resisting"
+     ],
+     "answer": 0,
+     "explain": "resist → resistance."
+    },
+    {
+     "type": "mc",
+     "prompt": "The results were ___. (convince → negative adjective)",
+     "options": [
+      "unconvincing",
+      "inconvincing",
+      "disconvincing"
+     ],
+     "answer": 0,
+     "explain": "un- + convincing."
+    },
+    {
+     "type": "mc",
+     "prompt": "We need to ___ the process. (modern → verb)",
+     "options": [
+      "modernise",
+      "modernate",
+      "modernify"
+     ],
+     "answer": 0,
+     "explain": "modern → modernise (UK) / modernize (US)."
+    },
+    {
+     "type": "gap",
+     "prompt": "Her ___ was remarkable. (persist → noun)",
+     "answers": [
+      "persistence"
+     ],
+     "explain": "persist → persistence."
+    },
+    {
+     "type": "gap",
+     "prompt": "The decision was entirely ___. (justify → negative adjective)",
+     "answers": [
+      "unjustifiable",
+      "unjustified"
+     ],
+     "explain": "un- + justifiable/justified."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the prefix to its meaning.",
+     "pairs": [
+      [
+       "mis-",
+       "wrongly"
+      ],
+      [
+       "over-",
+       "too much"
+      ],
+      [
+       "counter-",
+       "against"
+      ],
+      [
+       "pre-",
+       "before"
+      ]
+     ],
+     "explain": "Common prefixes."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which is a real word?",
+     "options": [
+      "irreversible",
+      "unreversible",
+      "disreversible"
+     ],
+     "answer": 0,
+     "explain": "ir- + reversible."
+    }
+   ]
+  },
+  {
+   "id": "c2-t-discourse",
+   "kind": "topic",
+   "topic": "Style",
+   "title": "Discourse markers and cohesion",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "___, the experiment failed, but we learned a great deal.",
+     "options": [
+      "Admittedly",
+      "Consequently",
+      "Firstly"
+     ],
+     "answer": 0,
+     "explain": "Admittedly = I accept this point."
+    },
+    {
+     "type": "mc",
+     "prompt": "The figures are encouraging. ___, we should remain cautious.",
+     "options": [
+      "That said",
+      "As a result",
+      "For instance"
+     ],
+     "answer": 0,
+     "explain": "That said = however."
+    },
+    {
+     "type": "mc",
+     "prompt": "___ the budget is concerned, we're on track.",
+     "options": [
+      "As far as",
+      "As long as",
+      "As well as"
+     ],
+     "answer": 0,
+     "explain": "As far as X is concerned = regarding X."
+    },
+    {
+     "type": "mc",
+     "prompt": "He was tired; ___, he kept working.",
+     "options": [
+      "even so",
+      "so that",
+      "in order"
+     ],
+     "answer": 0,
+     "explain": "Even so = despite that."
+    },
+    {
+     "type": "gap",
+     "prompt": "___ to say, the plan was abandoned. (obviously)",
+     "answers": [
+      "Needless"
+     ],
+     "explain": "Needless to say = obviously."
+    },
+    {
+     "type": "gap",
+     "prompt": "All ___ considered, it was a success.",
+     "answers": [
+      "things"
+     ],
+     "explain": "All things considered = overall."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the marker to its function.",
+     "pairs": [
+      [
+       "incidentally",
+       "adding a side point"
+      ],
+      [
+       "by the same token",
+       "for the same reason"
+      ],
+      [
+       "to put it another way",
+       "rephrasing"
+      ],
+      [
+       "in a nutshell",
+       "summarising briefly"
+      ]
+     ],
+     "explain": "Markers guide the listener."
+    },
+    {
+     "type": "mc",
+     "prompt": "Which marker introduces a summary?",
+     "options": [
+      "In a nutshell",
+      "Incidentally",
+      "By contrast"
+     ],
+     "answer": 0,
+     "explain": "In a nutshell = to summarise."
+    }
+   ]
+  },
+  {
+   "id": "c2-t-phrasal",
+   "kind": "topic",
+   "topic": "Vocabulary",
+   "title": "Advanced phrasal verbs",
+   "minutes": 6,
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "We need to ___ out the details before Friday.",
+     "options": [
+      "iron",
+      "smooth",
+      "press"
+     ],
+     "answer": 0,
+     "explain": "Iron out = resolve problems."
+    },
+    {
+     "type": "mc",
+     "prompt": "The plan didn't ___ off.",
+     "options": [
+      "pay",
+      "take",
+      "come"
+     ],
+     "answer": 0,
+     "explain": "Pay off = be successful."
+    },
+    {
+     "type": "mc",
+     "prompt": "Don't ___ up on me now!",
+     "options": [
+      "give",
+      "put",
+      "take"
+     ],
+     "answer": 0,
+     "explain": "Give up on someone = stop believing in them."
+    },
+    {
+     "type": "mc",
+     "prompt": "The talks ___ down over pay.",
+     "options": [
+      "broke",
+      "fell",
+      "went"
+     ],
+     "answer": 0,
+     "explain": "Break down = fail."
+    },
+    {
+     "type": "mc",
+     "prompt": "She ___ for her colleague while he was ill.",
+     "options": [
+      "covered",
+      "filled",
+      "made"
+     ],
+     "answer": 0,
+     "explain": "Cover for = do someone's job temporarily."
+    },
+    {
+     "type": "gap",
+     "prompt": "I can't ___ up with this noise any longer.",
+     "answers": [
+      "put"
+     ],
+     "explain": "Put up with = tolerate."
+    },
+    {
+     "type": "gap",
+     "prompt": "The new rules will be phased ___ over two years.",
+     "answers": [
+      "in"
+     ],
+     "explain": "Phase in = introduce gradually."
+    },
+    {
+     "type": "match",
+     "prompt": "Match the phrasal verb to its meaning.",
+     "pairs": [
+      [
+       "come across",
+       "find by chance / seem"
+      ],
+      [
+       "bring about",
+       "cause"
+      ],
+      [
+       "play down",
+       "make seem less important"
+      ],
+      [
+       "weigh up",
+       "consider carefully"
+      ]
+     ],
+     "explain": "Phrasal verbs common at C2."
+    }
+   ]
+  }
+ ]
+}
