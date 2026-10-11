@@ -815,8 +815,91 @@ app.get("/api/config", (req, res) => {
 });
 
 // Register a new user: creates Supabase Auth account + inserts call_triggers row
+// ─── Sign-up welcome email (website sign-ups) ───────────────────────────────
+// Two versions: a personal note from Max for people who came through his
+// invitation link (signup.html?invite=max), and a standard one from Penny.
+// Students always receive English.
+function escapeHtmlEmail(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function welcomeCallWhenText(callAt, timezone, isNow) {
+  if (isNow) return 'in the next minute or two';
+  let tz = 'Europe/Rome';
+  try { new Intl.DateTimeFormat('en-GB', { timeZone: timezone }); tz = timezone || tz; } catch (e) { /* keep Rome */ }
+  const d = new Date(callAt);
+  const day = d.toLocaleDateString('en-GB', { timeZone: tz, weekday: 'long', day: 'numeric', month: 'long' });
+  const time = d.toLocaleTimeString('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit' });
+  return `on ${day} at ${time}`;
+}
+async function sendSignupWelcomeEmail({ email, firstName, invited, whenText }) {
+  const loginUrl = process.env.APP_URL || 'https://www.pennyai.eu';
+  const name = firstName || 'there';
+  const subject = invited ? `Welcome to Penny, ${name} — from Max` : `Welcome to Penny AI, ${name}!`;
+  const steps = invited
+    ? [
+        `<b>Penny will call you ${whenText}</b> from <b>+39 0965 196 0070</b> for a short welcome chat (about 15 minutes). Please save the number so you recognise it.`,
+        `She'll find your level and confirm your lesson days and times.`,
+        `After that, she'll call you at your lesson times. You can also call her yourself whenever you like.`,
+      ]
+    : [
+        `<b>I'll call you ${whenText}</b> from <b>+39 0965 196 0070</b> for a short welcome chat (about 15 minutes). Please save the number so you recognise it.`,
+        `We'll find your level together and confirm your lesson days and times.`,
+        `After that, I'll call you at your lesson times. You can also call me whenever you like.`,
+      ];
+  const intro = invited
+    ? [`It's Max here. Thank you for accepting my invitation and joining Penny AI — I'm really happy to have you on board.`,
+       `As you know, I've spent many years teaching English, and Penny is the tutor I always wished my students could have: someone to practise speaking with, at any time, without pressure.`]
+    : [`Welcome to Penny AI! I'm Penny, your AI English tutor, and I'm here to help you speak English with more confidence — one short conversation at a time.`];
+  const dashLine = invited
+    ? `You can see your lessons, scores and Penny's feedback at <a href="${loginUrl}" style="color:#2563eb;">pennyai.eu</a>. Sign in with your email and the password you chose.`
+    : `You can see your lessons, scores and feedback at <a href="${loginUrl}" style="color:#2563eb;">pennyai.eu</a>. Sign in with your email and the password you chose.`;
+  const help = invited
+    ? `If anything isn't clear, just reply to this email — it comes straight to me.`
+    : `Questions? Just reply to this email and the Penny team will help.`;
+  const sign = invited ? ['Speak soon,', 'Max', 'Founder, Penny AI'] : ['Speak soon,', 'Penny', 'Your AI English tutor'];
+
+  const p = t => `<p style="font-size:15px;color:#333;line-height:1.6;margin:0 0 16px;">${t}</p>`;
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/></head>
+<body style="margin:0;padding:0;background:#f7f6f3;font-family:'Helvetica Neue',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f6f3;padding:32px 16px;"><tr><td align="center">
+<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;">
+<tr><td bgcolor="#1e3a8a" style="background-color:#1e3a8a;padding:28px 36px;text-align:center;">
+<div style="font-size:24px;font-weight:700;color:#ffffff;">Penny<span style="color:#93c5fd;">AI</span></div>
+<div style="font-size:13px;color:#c7d2fe;margin-top:4px;">Your AI English tutor</div></td></tr>
+<tr><td style="padding:32px 36px 28px;">
+${p('Hi ' + escapeHtmlEmail(name) + ',')}
+${intro.map(p).join('')}
+<p style="font-size:15px;color:#111;font-weight:700;margin:8px 0 8px;">What happens next</p>
+<ol style="font-size:15px;color:#333;line-height:1.6;margin:0 0 16px;padding-left:20px;">${steps.map(s => `<li style="margin-bottom:6px;">${s}</li>`).join('')}</ol>
+${p(dashLine)}
+${p(help)}
+<p style="font-size:15px;color:#333;line-height:1.6;margin:0;">${sign.join('<br>')}</p>
+</td></tr></table></td></tr></table></body></html>`;
+  const strip = t => t.replace(/<[^>]+>/g, '');
+  const text = [
+    `Hi ${name},`, '',
+    ...intro.flatMap(t => [t, '']),
+    'What happens next:',
+    ...steps.map((t, i) => `${i + 1}. ${strip(t)}`), '',
+    strip(dashLine).replace('pennyai.eu', loginUrl), '',
+    help, '',
+    ...sign,
+  ].join('\n');
+  return sendViaResendApi({ to: email, subject, html, text });
+}
+
 app.post("/api/register", async (req, res) => {
-  const { name, email, phone, password, recording_consent, improve_consent } = req.body;
+  const { name, email, phone, password, recording_consent, improve_consent, call_when, call_at, timezone, invite } = req.body;
+  // When the student wants their welcome call: now, in 1 hour, or a day/time they picked (up to 8 days ahead).
+  const nowMs = Date.now();
+  let callAtMs = nowMs;
+  if (call_when === 'hour') callAtMs = nowMs + 60 * 60 * 1000;
+  else if (call_when === 'custom') {
+    const t = Date.parse(call_at);
+    if (Number.isFinite(t) && t > nowMs - 5 * 60 * 1000 && t < nowMs + 8 * 24 * 60 * 60 * 1000) callAtMs = Math.max(t, nowMs);
+  }
+  const callIsNow = callAtMs - nowMs < 2 * 60 * 1000;
+  const invited = typeof invite === 'string' && invite.trim().toLowerCase() === 'max';
   console.log("Registration attempt:", { name, email, phone });
   if (!name || !email || !phone || !password) {
     return res.status(400).json({ error: "name, email, phone, and password are required" });
@@ -840,6 +923,8 @@ app.post("/api/register", async (req, res) => {
       consent_improve: improve_consent === true,
       consent_improve_at: improve_consent === true ? consentAt : null,
       privacy_version: "2026-10-07",
+      invited_by: invited ? "max" : null,
+      welcome_call_at: new Date(callAtMs).toISOString(),
     },
   });
 
@@ -881,14 +966,31 @@ app.post("/api/register", async (req, res) => {
       email,
       call_status: "pending",
       call_purpose: "onboarding",
-      scheduled_time: new Date().toISOString(),
+      scheduled_time: new Date(callAtMs).toISOString(),
     });
 
     if (triggerError) {
       console.error("call_triggers insert error:", triggerError);
     }
 
-  res.json({ success: true });
+    // Welcome email (never blocks or fails the sign-up)
+    let emailSent = false;
+    try {
+      await Promise.race([
+        sendSignupWelcomeEmail({
+          email,
+          firstName: String(name || '').trim().split(/\s+/)[0],
+          invited,
+          whenText: welcomeCallWhenText(callAtMs, timezone, callIsNow),
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('email timeout after 8s')), 8000)),
+      ]);
+      emailSent = true;
+    } catch (err) {
+      console.error(`[register] welcome email FAILED for ${email} — ${err.message}`);
+    }
+
+  res.json({ success: true, call_at: new Date(callAtMs).toISOString(), call_now: callIsNow, emailSent });
 });
 
 // Check whether a signed-in user has completed phone onboarding
