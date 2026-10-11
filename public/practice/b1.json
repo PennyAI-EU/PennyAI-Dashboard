@@ -1,0 +1,126 @@
+{
+  "level": "B1",
+  "sets": [
+    {
+      "id": "b1-l01", "kind": "lesson", "lesson_number": 1, "lesson_id": "B1.01",
+      "title": "Personal updates and recent changes", "minutes": 5,
+      "questions": [
+        { "type": "mc", "prompt": "I ___ a new job last month.", "options": ["have started", "started", "have been starting"], "answer": 1,
+          "explain": "“Last month” is a finished time, so we use the past simple: started." },
+        { "type": "mc", "prompt": "Since January, I ___ English twice a week.", "options": ["study", "have been studying", "studied"], "answer": 1,
+          "explain": "“Since” + something that is still happening → present perfect continuous: have been studying." },
+        { "type": "gap", "prompt": "Recently, I've ___ (move) to a new flat.", "answers": ["moved"],
+          "explain": "After I've (I have) we use the past participle: moved." },
+        { "type": "gap", "prompt": "How have things ___ for you?", "answers": ["been"],
+          "explain": "“How have things been?” is a friendly way to ask for someone's news." },
+        { "type": "match", "prompt": "Match each phrase to what it does.",
+          "pairs": [["One thing that has changed is…", "introducing a change"], ["It has been hard because…", "giving a reason"], ["Since March, I've been…", "saying when it started"], ["What has changed for you recently?", "asking a follow-up"]],
+          "explain": "These are the four key moves of a personal update: the change, the reason, when it started, and a question back." },
+        { "type": "order", "prompt": "Put the words in order.", "words": ["been", "I've", "more", "since", "walking", "summer"],
+          "answers": ["since summer i've been walking more", "i've been walking more since summer"],
+          "explain": "Since summer, I've been walking more. (I've been walking more since summer is also correct.)" },
+        { "type": "mc", "prompt": "Your friend says: “I've just changed jobs.” What's the best reply?", "options": ["What job?", "Oh really? How are you finding it so far?", "Why you change?"], "answer": 1,
+          "explain": "A friendly reaction plus a follow-up question keeps the conversation going." },
+        { "type": "mc", "passage": "Hi Sara! Lots of news. I've moved to Milan for work, and since May I've been learning to cook because I live alone now. It's been tiring, but I'm enjoying it.",
+          "prompt": "Why has she been learning to cook?", "options": ["For her job", "Because she lives alone now", "Because she moved in May"], "answer": 1,
+          "explain": "“…I've been learning to cook because I live alone now.”" }
+      ]
+    },
+    {
+      "id": "b1-l02", "kind": "lesson", "lesson_number": 2, "lesson_id": "B1.02",
+      "title": "Life experiences and achievements", "minutes": 5,
+      "questions": [
+        { "type": "mc", "prompt": "Have you ever ___ a marathon?", "options": ["run", "ran", "running"], "answer": 0,
+          "explain": "“Have you ever…?” + past participle. Run → ran → run." },
+        { "type": "mc", "prompt": "I ___ to Japan twice.", "options": ["have been", "went", "have gone"], "answer": 0,
+          "explain": "“Have been” means you went and came back — a life experience. “Have gone” means you are still there." },
+        { "type": "gap", "prompt": "It ___ me three months to finish the course.", "answers": ["took"],
+          "explain": "“It took me + time + to…” says how long something needed." },
+        { "type": "gap", "prompt": "One achievement I'm proud ___ is learning to swim.", "answers": ["of"],
+          "explain": "We say “proud of something”." },
+        { "type": "match", "prompt": "Match each phrase to what it does.",
+          "pairs": [["I've had the chance to…", "talking about an opportunity"], ["It took me a year to…", "saying how long"], ["I learned that…", "explaining what you learned"], ["What are you most proud of?", "asking about achievements"]],
+          "explain": "Use these to tell the story of an achievement: the chance, the effort, the lesson — and ask about theirs." },
+        { "type": "order", "prompt": "Put the words in order to make a question.", "words": ["ever", "you", "have", "a", "cake", "baked"],
+          "answers": ["have you ever baked a cake"],
+          "explain": "Have you ever baked a cake?" },
+        { "type": "mc", "prompt": "Your friend says: “I finally passed my driving test!” What's the best reply?", "options": ["Why?", "Congratulations! How many times did you try?", "I have a car."], "answer": 1,
+          "explain": "Show you're happy for them, then ask a follow-up question." },
+        { "type": "mc", "passage": "Last year Marco decided to learn the guitar. It took him six months to play his first full song. He says he learned that a little practice every day works better than long sessions at the weekend.",
+          "prompt": "What did Marco learn?", "options": ["The guitar is easy", "Short daily practice works better", "Weekend sessions are best"], "answer": 1,
+          "explain": "“…a little practice every day works better than long sessions at the weekend.”" }
+      ]
+    },
+    {
+      "id": "b1-l03", "kind": "lesson", "lesson_number": 3, "lesson_id": "B1.03",
+      "title": "Telling a story with detail", "minutes": 5,
+      "questions": [
+        { "type": "mc", "prompt": "___, we got lost, but then a kind man helped us.", "options": ["At first", "In the end", "After that"], "answer": 0,
+          "explain": "“At first” introduces the beginning of the story." },
+        { "type": "mc", "prompt": "Which phrase tells the listener how the story finished?", "options": ["Then", "In the end", "At first"], "answer": 1,
+          "explain": "“In the end” introduces the final result." },
+        { "type": "gap", "prompt": "It happened ___ I was on holiday in Sicily.", "answers": ["when"],
+          "explain": "“It happened when…” sets the scene: where and when." },
+        { "type": "gap", "prompt": "After ___, we went for a pizza.", "answers": ["that"],
+          "explain": "“After that” moves the story to the next event." },
+        { "type": "match", "prompt": "Match each question to what it asks about.",
+          "pairs": [["What happened next?", "the next event"], ["How did you feel?", "feelings"], ["Where were you?", "the setting"], ["How did it end?", "the result"]],
+          "explain": "Good listeners ask about the setting, the events, the feelings and the result." },
+        { "type": "order", "prompt": "Put the words in order.", "words": ["felt", "I", "when", "nervous", "it", "started"],
+          "answers": ["i felt nervous when it started", "when it started i felt nervous"],
+          "explain": "I felt nervous when it started. (When it started, I felt nervous is also correct.)" },
+        { "type": "mc", "prompt": "I ___ home when it started to rain.", "options": ["was walking", "walked", "am walking"], "answer": 0,
+          "explain": "Past continuous (was walking) for the background action; past simple (started) for the event." },
+        { "type": "mc", "passage": "It happened when I was at the airport. At first, everything was fine. Then they announced that my flight was cancelled. After that, I waited for six hours. In the end, I got a seat on a later flight and arrived at midnight.",
+          "prompt": "What happened in the end?", "options": ["The flight was cancelled", "She waited at home", "She took a later flight and arrived at midnight"], "answer": 2,
+          "explain": "“In the end, I got a seat on a later flight and arrived at midnight.”" }
+      ]
+    },
+    {
+      "id": "b1-t-ppps", "kind": "topic", "topic": "Grammar",
+      "title": "Present perfect or past simple?", "minutes": 5,
+      "questions": [
+        { "type": "mc", "prompt": "I ___ my keys. Can you help me look for them?", "options": ["have lost", "lost"], "answer": 0,
+          "explain": "The result matters now (I still can't find them) → present perfect." },
+        { "type": "mc", "prompt": "We ___ to Paris in 2019.", "options": ["have gone", "went"], "answer": 1,
+          "explain": "A finished time (in 2019) → past simple." },
+        { "type": "mc", "prompt": "She ___ here since 2020.", "options": ["has worked", "worked"], "answer": 0,
+          "explain": "“Since” + still true now → present perfect." },
+        { "type": "gap", "prompt": "Did you ___ (see) the match last night?", "answers": ["see"],
+          "explain": "After “did” we use the base form: see." },
+        { "type": "gap", "prompt": "I've ___ (know) him for ten years.", "answers": ["known"],
+          "explain": "Know → knew → known. After I've we need the past participle." },
+        { "type": "mc", "prompt": "When ___ you start learning English?", "options": ["have", "did"], "answer": 1,
+          "explain": "Questions with “when” ask about a finished time → past simple." },
+        { "type": "order", "prompt": "Put the words in order.", "words": ["already", "I've", "lunch", "had"],
+          "answers": ["i've already had lunch"],
+          "explain": "I've already had lunch. “Already” goes between have and the past participle." },
+        { "type": "mc", "prompt": "Which sentence is correct?", "options": ["I have seen him yesterday.", "I saw him yesterday.", "I have see him yesterday."], "answer": 1,
+          "explain": "“Yesterday” is a finished time, so we can't use the present perfect." }
+      ]
+    },
+    {
+      "id": "b1-t-pv-life", "kind": "topic", "topic": "Phrasal verbs",
+      "title": "Phrasal verbs for life changes", "minutes": 5,
+      "questions": [
+        { "type": "mc", "prompt": "I ___ up smoking two years ago.", "options": ["gave", "took", "made"], "answer": 0,
+          "explain": "Give up = stop doing something." },
+        { "type": "mc", "prompt": "We ___ out of our old flat last month.", "options": ["moved", "went", "got"], "answer": 0,
+          "explain": "Move out = leave the place where you live." },
+        { "type": "mc", "prompt": "She ___ up yoga during lockdown.", "options": ["took", "gave", "put"], "answer": 0,
+          "explain": "Take up = start a new hobby or activity." },
+        { "type": "mc", "prompt": "It took me weeks to ___ over the flu.", "options": ["get", "go", "come"], "answer": 0,
+          "explain": "Get over = recover from an illness or a difficult experience." },
+        { "type": "match", "prompt": "Match each phrasal verb to its meaning.",
+          "pairs": [["give up", "stop doing something"], ["take up", "start a new hobby"], ["settle in", "get used to a new place"], ["look forward to", "feel happy about something in the future"]],
+          "explain": "Four very useful phrasal verbs for talking about changes in your life." },
+        { "type": "gap", "prompt": "I'm really looking forward ___ my holiday.", "answers": ["to"],
+          "explain": "Look forward to + noun or -ing: I'm looking forward to seeing you." },
+        { "type": "gap", "prompt": "Have you settled ___ your new job yet?", "answers": ["in", "into"],
+          "explain": "Settle in / settle into = become comfortable in a new place or job." },
+        { "type": "mc", "prompt": "I need to ___ up with my old friends — I haven't seen them for ages.", "options": ["catch", "keep", "look"], "answer": 0,
+          "explain": "Catch up with someone = talk and share news after some time apart." }
+      ]
+    }
+  ]
+}

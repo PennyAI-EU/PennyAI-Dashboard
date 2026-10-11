@@ -731,6 +731,7 @@
   body #nav-history.active  { background: #3d86c6 !important; color: #fff !important; }
   body #nav-profile.active  { background: #d1568f !important; color: #fff !important; }
   body #nav-messages.active { background: #5aa03c !important; color: #fff !important; }
+  body #nav-selfstudy.active { background: #e0735f !important; color: #fff !important; }
   body .nav-item.active svg { color: #fff !important; }
 
   /* --- TOP BAR: deep lilac --- */
@@ -834,6 +835,50 @@
   .avatar-status[hidden] { display: none; }
   .avatar-status.is-error { color: #b42318; }
   @media (max-width: 800px) { .account-caret { display: none; } }
+
+  /* ==== PRACTICE (self-study, pilot) ==== */
+  #section-selfstudy .pr-group { margin-bottom: 26px; }
+  #section-selfstudy .pr-group h2 { font-size: 15px; font-weight: 700; margin-bottom: 10px; color: var(--text); }
+  .pr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+  .pr-card { background: #fff; border: 1px solid #f3d2cb; border-radius: 16px; padding: 16px 18px; cursor: pointer; text-align: left; font: inherit; color: inherit; transition: transform .12s, box-shadow .12s; }
+  .pr-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(224,115,95,.15); }
+  .pr-card .pr-tag { font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: #c2553f; }
+  .pr-card h3 { font-size: 15px; font-weight: 600; margin: 6px 0 8px; line-height: 1.35; }
+  .pr-card .pr-meta { font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+  .pr-card .pr-best { color: #2f9e83; font-weight: 700; }
+  .pr-player { background: #fff; border-radius: 20px; padding: 26px 28px; max-width: 720px; border: 1px solid #f3d2cb; }
+  .pr-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; font-size: 13px; color: var(--muted); }
+  .pr-back { background: none; border: none; color: #c2553f; font: inherit; font-weight: 600; cursor: pointer; padding: 0; }
+  .pr-bar { height: 6px; background: #fbe3de; border-radius: 6px; overflow: hidden; margin-bottom: 22px; }
+  .pr-bar > div { height: 100%; background: #e0735f; transition: width .25s; }
+  .pr-passage { background: #fff7f5; border-left: 3px solid #e0735f; padding: 12px 14px; border-radius: 8px; font-size: 15px; line-height: 1.6; margin-bottom: 14px; }
+  .pr-prompt { font-size: 18px; font-weight: 600; line-height: 1.45; margin-bottom: 16px; color: var(--text); }
+  .pr-opts { display: grid; gap: 10px; }
+  .pr-opt { text-align: left; padding: 13px 15px; border: 1.5px solid #e8e6e0; border-radius: 12px; background: #fff; font: inherit; font-size: 15px; cursor: pointer; color: var(--text); }
+  .pr-opt:hover:not(:disabled) { border-color: #e0735f; }
+  .pr-opt.sel { border-color: #e0735f; background: #fff3f0; }
+  .pr-opt.ok { border-color: #2f9e83; background: #e6f6f1; }
+  .pr-opt.bad { border-color: #d64545; background: #fdecec; }
+  .pr-input { width: 100%; padding: 12px 14px; border: 1.5px solid #e8e6e0; border-radius: 12px; font: inherit; font-size: 16px; }
+  .pr-input:focus { outline: none; border-color: #e0735f; }
+  .pr-match { display: grid; gap: 10px; }
+  .pr-match-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: center; }
+  .pr-match-row select { padding: 10px 12px; border: 1.5px solid #e8e6e0; border-radius: 10px; font: inherit; font-size: 14px; background: #fff; }
+  .pr-match-row .pr-left { font-size: 15px; font-weight: 500; }
+  .pr-chips { display: flex; flex-wrap: wrap; gap: 8px; min-height: 46px; padding: 10px; border: 1.5px dashed #e8e6e0; border-radius: 12px; margin-bottom: 10px; }
+  .pr-chip { padding: 8px 12px; border-radius: 999px; border: 1.5px solid #e0735f; background: #fff; font: inherit; font-size: 15px; cursor: pointer; }
+  .pr-chip.used { opacity: .3; pointer-events: none; }
+  .pr-built .pr-chip { background: #fff3f0; }
+  .pr-feedback { margin-top: 16px; padding: 12px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; display: none; }
+  .pr-feedback.ok { display: block; background: #e6f6f1; color: #1f6f5b; }
+  .pr-feedback.bad { display: block; background: #fdecec; color: #9b2c2c; }
+  .pr-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  .pr-btn { padding: 11px 22px; border-radius: 10px; border: none; background: #e0735f; color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+  .pr-btn:disabled { opacity: .45; cursor: default; }
+  .pr-btn.ghost { background: #fff; color: #c2553f; border: 1.5px solid #e0735f; }
+  .pr-done { text-align: center; padding: 10px 0; }
+  .pr-done .pr-score { font-size: 44px; font-weight: 700; color: #e0735f; margin: 6px 0; }
+  @media (max-width: 600px) { .pr-player { padding: 20px 16px; } .pr-match-row { grid-template-columns: 1fr; gap: 4px; } }
 </style>
 <script src="/account-menu.js"></script>
 <script>
@@ -1040,9 +1085,9 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       <span data-i18n="nav.lessons">My Lessons</span>
     </div>
-    <div class="nav-item is-soon" id="nav-selfstudy" title="Coming soon" style="display:none">
+    <div class="nav-item" id="nav-selfstudy" onclick="showSection('selfstudy'); PennyPractice.open();" style="display:none">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.25 4 3v15l8 3 8-3V3z"/><path d="M12 6.25V21"/></svg>
-      <span>Self-Study</span>
+      <span>Practice</span>
     </div>
     <div class="nav-item is-soon" id="nav-practice" title="Coming soon" style="display:none">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/><path d="M19 11a7 7 0 0 1-14 0"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
@@ -1200,6 +1245,15 @@
         <p data-i18n="hist.noneSub">Your practice history will appear here once you complete your first lesson.</p>
       </div>
     </div>
+  </section>
+
+  <!-- PRACTICE SECTION (self-study pilot; hidden unless ?practice=1) -->
+  <section id="section-selfstudy" class="section">
+    <div class="section-header">
+      <h1>Practice</h1>
+      <p>Short exercises to practise on your own — no call needed. Try them as often as you like.</p>
+    </div>
+    <div id="practice-root"></div>
   </section>
 
   <!-- PROFILE SECTION -->
@@ -2389,6 +2443,182 @@ async function markMsgRead(token) {
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') document.getElementById('callMobileModal').classList.remove('active');
   });
+})();
+</script>
+
+<script>
+/* ===== PRACTICE (self-study pilot) =====
+   Content lives in /practice/<level>.json. Hidden unless the browser has opened
+   the dashboard once with ?practice=1 (?practice=0 hides it again).
+   Best scores are kept in this browser for the pilot. */
+window.PennyPractice = (function () {
+  const FLAG = 'pennyPractice';
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+    del(k) { try { localStorage.removeItem(k); } catch (e) {} },
+  };
+  const q = new URLSearchParams(location.search).get('practice');
+  if (q === '1') store.set(FLAG, '1');
+  if (q === '0') store.del(FLAG);
+  if (store.get(FLAG) === '1') {
+    const nav = document.getElementById('nav-selfstudy');
+    if (nav) nav.style.display = '';
+  }
+
+  const root = () => document.getElementById('practice-root');
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const norm = s => String(s || '').toLowerCase().replace(/[’']/g, "'").replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const shuffle = a => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+  let data = null, set = null, idx = 0, correct = 0, state = {};
+
+  async function load() {
+    if (data) return data;
+    const lvlText = (document.getElementById('profile-level') || {}).textContent || '';
+    const level = (lvlText.match(/\b([ABC][12])\b/) || [])[1] || 'B1';
+    for (const lv of [level, 'B1']) {
+      try { const r = await fetch('/practice/' + lv.toLowerCase() + '.json', { cache: 'no-cache' }); if (r.ok) { data = await r.json(); data._asked = level; return data; } } catch (e) {}
+    }
+    return null;
+  }
+  const bestKey = id => 'pennyPracticeBest:' + id;
+
+  async function open() {
+    const el = root(); if (!el) return;
+    el.innerHTML = '<p style="color:var(--muted)">Loading…</p>';
+    const d = await load();
+    if (!d) { el.innerHTML = '<p style="color:var(--muted)">Practice is not available yet.</p>'; return; }
+    const card = s => {
+      const best = store.get(bestKey(s.id));
+      const tag = s.kind === 'lesson' ? (s.lesson_id || ('Lesson ' + s.lesson_number)) : (s.topic || 'Topic');
+      return `<button class="pr-card" onclick="PennyPractice.start('${esc(s.id)}')">
+        <div class="pr-tag">${esc(tag)}</div><h3>${esc(s.title)}</h3>
+        <div class="pr-meta"><span>${s.questions.length} questions · ~${s.minutes || 5} min</span>${best ? `<span class="pr-best">Best ${esc(best)}</span>` : ''}</div></button>`;
+    };
+    const lessons = d.sets.filter(s => s.kind === 'lesson');
+    const topics = d.sets.filter(s => s.kind !== 'lesson');
+    const note = d._asked && d._asked.toUpperCase() !== d.level ? `<p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Pilot: showing ${esc(d.level)} exercises.</p>` : '';
+    el.innerHTML = note +
+      (lessons.length ? `<div class="pr-group"><h2>Practise your lessons · ${esc(d.level)}</h2><div class="pr-grid">${lessons.map(card).join('')}</div></div>` : '') +
+      (topics.length ? `<div class="pr-group"><h2>Topic library · ${esc(d.level)}</h2><div class="pr-grid">${topics.map(card).join('')}</div></div>` : '');
+  }
+
+  function start(id) {
+    set = data.sets.find(s => s.id === id); if (!set) return;
+    idx = 0; correct = 0; render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function render() {
+    const el = root();
+    if (idx >= set.questions.length) return finish();
+    const qn = set.questions[idx];
+    state = { answered: false, choice: null, built: [] };
+    let body = '';
+    if (qn.passage) body += `<div class="pr-passage">${esc(qn.passage)}</div>`;
+    body += `<div class="pr-prompt">${esc(qn.prompt).replace('___', '<span style="display:inline-block;border-bottom:2px solid #e0735f;width:48px;margin:0 4px;"></span>')}</div>`;
+    if (qn.type === 'mc') {
+      body += `<div class="pr-opts">${qn.options.map((o, i) => `<button class="pr-opt" data-i="${i}" onclick="PennyPractice.pick(${i})">${esc(o)}</button>`).join('')}</div>`;
+    } else if (qn.type === 'gap') {
+      body += `<input class="pr-input" id="pr-gap" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type the missing word" oninput="PennyPractice.ready(this.value.trim().length>0)" onkeydown="if(event.key==='Enter'&&this.value.trim()){PennyPractice.check()}">`;
+    } else if (qn.type === 'match') {
+      const rights = shuffle(qn.pairs.map(p => p[1]));
+      body += `<div class="pr-match">${qn.pairs.map((p, i) => `<div class="pr-match-row"><div class="pr-left">${esc(p[0])}</div>
+        <select data-i="${i}" onchange="PennyPractice.ready([...document.querySelectorAll('.pr-match select')].every(s=>s.value))"><option value="">Choose…</option>${rights.map(r => `<option>${esc(r)}</option>`).join('')}</select></div>`).join('')}</div>`;
+    } else if (qn.type === 'order') {
+      state.words = shuffle(qn.words.map((w, i) => ({ w, i })));
+      body += `<div class="pr-chips pr-built" id="pr-built"></div><div class="pr-chips" id="pr-pool" style="border-style:solid;border-color:transparent;padding:0;">${state.words.map((x, k) => `<button class="pr-chip" data-k="${k}" onclick="PennyPractice.chip(${k})">${esc(x.w)}</button>`).join('')}</div>
+        <button class="pr-back" onclick="PennyPractice.resetChips()">↺ Start again</button>`;
+    }
+    el.innerHTML = `<div class="pr-player">
+      <div class="pr-top"><button class="pr-back" onclick="PennyPractice.open()">← All exercises</button><span>${esc(set.title)} · ${idx + 1} of ${set.questions.length}</span></div>
+      <div class="pr-bar"><div style="width:${(idx / set.questions.length) * 100}%"></div></div>
+      ${body}
+      <div class="pr-feedback" id="pr-fb"></div>
+      <div class="pr-actions"><button class="pr-btn" id="pr-go" disabled onclick="PennyPractice.check()">Check</button></div>
+    </div>`;
+    const g = document.getElementById('pr-gap'); if (g) g.focus();
+  }
+
+  function ready(ok) { const b = document.getElementById('pr-go'); if (b && !state.answered) b.disabled = !ok; }
+  function pick(i) {
+    if (state.answered) return;
+    state.choice = i;
+    document.querySelectorAll('.pr-opt').forEach(b => b.classList.toggle('sel', Number(b.dataset.i) === i));
+    ready(true);
+  }
+  function chip(k) {
+    if (state.answered) return;
+    state.built.push(k);
+    document.querySelector(`#pr-pool [data-k="${k}"]`).classList.add('used');
+    document.getElementById('pr-built').innerHTML = state.built.map(j => `<span class="pr-chip">${esc(state.words[j].w)}</span>`).join('');
+    ready(state.built.length === state.words.length);
+  }
+  function resetChips() {
+    if (state.answered) return;
+    state.built = [];
+    document.querySelectorAll('#pr-pool .pr-chip').forEach(b => b.classList.remove('used'));
+    document.getElementById('pr-built').innerHTML = '';
+    ready(false);
+  }
+
+  function check() {
+    const btn = document.getElementById('pr-go');
+    if (state.answered) { idx++; return render(); }
+    const qn = set.questions[idx];
+    let ok = false, shown = '';
+    if (qn.type === 'mc') {
+      ok = state.choice === qn.answer;
+      document.querySelectorAll('.pr-opt').forEach(b => {
+        const i = Number(b.dataset.i); b.disabled = true;
+        if (i === qn.answer) b.classList.add('ok'); else if (i === state.choice) b.classList.add('bad');
+      });
+    } else if (qn.type === 'gap') {
+      const v = document.getElementById('pr-gap').value;
+      ok = qn.answers.some(a => norm(a) === norm(v));
+      document.getElementById('pr-gap').disabled = true;
+      if (!ok) shown = 'Answer: <b>' + esc(qn.answers[0]) + '</b>. ';
+    } else if (qn.type === 'match') {
+      const sels = [...document.querySelectorAll('.pr-match select')];
+      let all = true;
+      sels.forEach(sel => {
+        const right = qn.pairs[Number(sel.dataset.i)][1];
+        const good = sel.value === right; all = all && good;
+        sel.disabled = true; sel.style.borderColor = good ? '#2f9e83' : '#d64545';
+        if (!good) sel.insertAdjacentHTML('afterend', `<div style="grid-column:2;font-size:13px;color:#1f6f5b;">→ ${esc(right)}</div>`);
+      });
+      ok = all;
+    } else if (qn.type === 'order') {
+      const sentence = state.built.map(j => state.words[j].w).join(' ');
+      ok = qn.answers.some(a => norm(a) === norm(sentence));
+    }
+    if (ok) correct++;
+    state.answered = true;
+    const fb = document.getElementById('pr-fb');
+    fb.className = 'pr-feedback ' + (ok ? 'ok' : 'bad');
+    fb.innerHTML = '<b>' + (ok ? 'Correct!' : 'Not quite.') + '</b> ' + shown + esc(qn.explain || '');
+    btn.disabled = false;
+    btn.textContent = idx + 1 < set.questions.length ? 'Next →' : 'See my score';
+  }
+
+  function finish() {
+    const n = set.questions.length;
+    const score = correct + '/' + n;
+    const prev = store.get(bestKey(set.id));
+    const prevN = prev ? Number(prev.split('/')[0]) : -1;
+    if (correct > prevN) store.set(bestKey(set.id), score);
+    const msg = correct === n ? 'Perfect score — brilliant!' : correct >= n * 0.75 ? 'Great work!' : correct >= n * 0.5 ? 'Good effort — try again to beat your score.' : 'Keep practising — you\'ll get there.';
+    root().innerHTML = `<div class="pr-player"><div class="pr-done">
+      <div style="font-size:14px;color:var(--muted)">${esc(set.title)}</div>
+      <div class="pr-score">${score}</div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:20px;">${msg}</div>
+      <div class="pr-actions" style="justify-content:center;">
+        <button class="pr-btn ghost" onclick="PennyPractice.start('${esc(set.id)}')">Try again</button>
+        <button class="pr-btn" onclick="PennyPractice.open()">All exercises</button>
+      </div></div></div>`;
+  }
+
+  return { open, start, pick, chip, resetChips, check, ready };
 })();
 </script>
 
