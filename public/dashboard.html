@@ -2514,7 +2514,7 @@ window.PennyPractice = (function () {
 
   function start(id) {
     set = data.sets.find(s => s.id === id); if (!set) return;
-    idx = 0; correct = 0; render();
+    idx = 0; correct = 0; slowOn = false; rate = SPEEDS(data && data.level).normal; render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -2527,7 +2527,7 @@ window.PennyPractice = (function () {
     if (set.audio) body += `<div class="pr-audio">
         <audio id="pr-audio" src="${esc(set.audio)}" preload="auto"></audio>
         <button class="pr-play" onclick="PennyPractice.play()" id="pr-play-btn">▶ Play</button>
-        <button class="pr-speed" onclick="PennyPractice.speed()" id="pr-speed-btn">Speed 1×</button>
+        <button class="pr-speed" onclick="PennyPractice.speed()" id="pr-speed-btn">${speedLabel()}</button>
         <span class="pr-audio-hint">Listen as many times as you like.</span>
       </div>`;
     if (qn.passage) body += `<div class="pr-passage">${esc(qn.passage)}</div>`;
@@ -2557,7 +2557,10 @@ window.PennyPractice = (function () {
     const g = document.getElementById('pr-gap'); if (g) g.focus();
   }
 
-  let rate = 1;
+  // Listening speed: A1/A2 clips start at 80% speed; the second button slows them further.
+  const SPEEDS = lv => (lv === 'A1' || lv === 'A2') ? { normal: 0.8, slow: 0.65 } : { normal: 1, slow: 0.75 };
+  let rate = 1, slowOn = false;
+  const speedLabel = () => slowOn ? 'Slower ' + Math.round(rate * 100) + '%' : 'Speed ' + Math.round(rate * 100) + '%';
   function play() {
     const a = document.getElementById('pr-audio'); const b = document.getElementById('pr-play-btn'); if (!a) return;
     a.playbackRate = rate;
@@ -2566,9 +2569,11 @@ window.PennyPractice = (function () {
     a.onended = () => { b.textContent = '↺ Play again'; };
   }
   function speed() {
-    rate = rate === 1 ? 0.75 : 1;
-    const a = document.getElementById('pr-audio'); if (a) a.playbackRate = rate;
-    const b = document.getElementById('pr-speed-btn'); if (b) b.textContent = rate === 1 ? 'Speed 1×' : 'Slower 0.75×';
+    const sp = SPEEDS(data && data.level);
+    slowOn = !slowOn;
+    rate = slowOn ? sp.slow : sp.normal;
+    const a = document.getElementById('pr-audio'); if (a) { a.preservesPitch = true; a.playbackRate = rate; }
+    const b = document.getElementById('pr-speed-btn'); if (b) b.textContent = speedLabel();
   }
   function ready(ok) { const b = document.getElementById('pr-go'); if (b && !state.answered) b.disabled = !ok; }
   function pick(i) {
