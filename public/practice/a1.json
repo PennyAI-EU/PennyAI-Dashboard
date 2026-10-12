@@ -2298,6 +2298,80 @@
      "explain": "forty — no “u”."
     }
    ]
+  },
+  {
+   "id": "a1-listen-01",
+   "kind": "listening",
+   "topic": "Listening",
+   "title": "Meet Laura",
+   "minutes": 4,
+   "audio": "/practice/audio/a1-listen-01.mp3",
+   "transcript": "Hi! My name is Laura. I'm from Naples, but I live in Rome. I'm a nurse. I work in a big hospital, and I like my job very much. My brother Marco is a student. He studies engineering at university. On Saturdays, we have lunch together with our parents.",
+   "questions": [
+    {
+     "type": "mc",
+     "prompt": "Where is Laura from?",
+     "options": [
+      "Naples",
+      "Rome",
+      "Milan"
+     ],
+     "answer": 0,
+     "explain": "“I'm from Naples, but I live in Rome.” (È di Napoli.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "Where does Laura live now?",
+     "options": [
+      "Rome",
+      "Naples",
+      "Turin"
+     ],
+     "answer": 0,
+     "explain": "“…but I live in Rome.” (Abita a Roma.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "What is Laura's job?",
+     "options": [
+      "She's a nurse.",
+      "She's a teacher.",
+      "She's a student."
+     ],
+     "answer": 0,
+     "explain": "“I'm a nurse. I work in a big hospital.” (È un'infermiera.)"
+    },
+    {
+     "type": "gap",
+     "prompt": "Marco is Laura's ___.",
+     "answers": [
+      "brother"
+     ],
+     "explain": "“My brother Marco is a student.” (Suo fratello.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "What does Marco study?",
+     "options": [
+      "Engineering",
+      "Medicine",
+      "English"
+     ],
+     "answer": 0,
+     "explain": "“He studies engineering at university.” (Ingegneria.)"
+    },
+    {
+     "type": "mc",
+     "prompt": "When do they have lunch with their parents?",
+     "options": [
+      "On Saturdays",
+      "On Sundays",
+      "Every day"
+     ],
+     "answer": 0,
+     "explain": "“On Saturdays, we have lunch together with our parents.” (Il sabato.)"
+    }
+   ]
   }
  ]
 }
