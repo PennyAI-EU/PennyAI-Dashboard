@@ -4,3 +4,7 @@ node_modules/
 WORK_LOG.md
 DOCUMENTATION.md
 GAP_ANALYSIS.md
+# Listening audio must be published (overrides any computer-wide ignore of mp3 files)
+!public/practice/Audio/
+!public/practice/Audio/*.mp3
+!*.mp3
