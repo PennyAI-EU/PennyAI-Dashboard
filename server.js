@@ -889,7 +889,10 @@ ${p(help)}
 }
 
 app.post("/api/register", async (req, res) => {
-  const { name, email, phone, password, recording_consent, improve_consent, call_when, call_at, timezone, invite } = req.body;
+  const { name, email, phone, password, recording_consent, improve_consent, call_when, call_at, timezone, invite, demo } = req.body;
+  // Demo sign-ups (signup.html?demo=CODE): the one-time code is claimed up front so it can't be
+  // reused. A demo account gets the welcome email and onboarding call only; the database guard
+  // stops lessons and next-day retries, and the nightly demo wipe deletes everything at 23:30.
   // When the student wants their welcome call: now, in 1 hour, or a day/time they picked (up to 8 days ahead).
   const nowMs = Date.now();
   let callAtMs = nowMs;
@@ -909,6 +912,16 @@ app.post("/api/register", async (req, res) => {
     return res.status(400).json({ error: "Please agree to the Privacy Policy and lesson recording to create an account." });
   }
   const consentAt = new Date().toISOString();
+  const demoCode = typeof demo === 'string' && demo.trim() ? demo.trim().toUpperCase() : null;
+  let isDemo = false;
+  if (demoCode) {
+    const { data: claimed, error: claimErr } = await supabase.rpc("claim_demo_code", { p_code: demoCode });
+    if (claimErr || claimed !== true) {
+      return res.status(403).json({ error: "This demo link has expired or was already used. Please ask for a new one." });
+    }
+    isDemo = true;
+  }
+  const releaseDemo = async () => { if (isDemo) { try { await supabase.rpc("release_demo_code", { p_code: demoCode }); } catch (_) {} } };
 
   // Create auth user with email pre-confirmed so they can sign in immediately
   const { data: authData, error: authError } = await supabase.auth.admin.createUser({
@@ -924,11 +937,13 @@ app.post("/api/register", async (req, res) => {
       consent_improve_at: improve_consent === true ? consentAt : null,
       privacy_version: "2026-10-07",
       invited_by: invited ? "max" : null,
+      demo_account: isDemo || null,
       welcome_call_at: new Date(callAtMs).toISOString(),
     },
   });
 
   if (authError) {
+    await releaseDemo();
     console.error("[register] Supabase auth error:", authError.message, authError.code);
     const msg = authError.message?.toLowerCase() || "";
     if (msg.includes("email") && msg.includes("already")) {
@@ -953,10 +968,22 @@ app.post("/api/register", async (req, res) => {
       name: name,
       email: email,
       consent_given: true,
+      ...(isDemo ? { is_demo: true } : {}),
     });
 
     if (usersError) {
       console.error("users insert error:", usersError);
+    }
+    // A demo account must be marked before its welcome call is queued, otherwise the
+    // database guard can't recognise it — so if marking failed, undo the sign-up.
+    if (isDemo && usersError) {
+      try { await supabase.auth.admin.deleteUser(authUserId); } catch (_) {}
+      await releaseDemo();
+      return res.status(500).json({ error: "The demo account could not be created. Please try again." });
+    }
+    if (isDemo) {
+      try { await supabase.rpc("attach_demo_code", { p_code: demoCode, p_user: authUserId }); } catch (_) {}
+      console.log("[register] demo account created:", authUserId);
     }
 
     console.log("Inserting into call_triggers with phone:", phone);
@@ -2563,6 +2590,42 @@ const SA_EDITABLE = [
   "conversation_lesson", "approved_for_outbound", "consent_given",
   "teacher_id", "school_id",
 ];
+
+// ---- demo mode: one-time demo sign-up links ---------------------------------
+// Each code works once and expires after 2 hours; the daily cap and the on/off switch
+// live in production_controls.demo_mode_enabled (numeric_value = demos per day).
+const SITE_URL = "https://www.pennyai.eu";
+
+app.get("/api/superadmin/demo", requireSuperAdmin, async (req, res) => {
+  const { data, error } = await supabase.rpc("demo_status");
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.post("/api/superadmin/demo/codes", requireSuperAdmin, async (req, res) => {
+  const { data, error } = await supabase.rpc("create_demo_code", { p_created_by: req.superAdmin.id });
+  if (error) return res.status(500).json({ error: error.message });
+  if (!data?.ok) {
+    const msg = data?.reason === "off"
+      ? "Demo mode is switched off."
+      : `Today's demo limit is reached (${data?.cap} a day). Unused links still open count towards it.`;
+    return res.status(409).json({ error: msg, ...data });
+  }
+  res.json({ ...data, link: `${SITE_URL}/signup.html?demo=${encodeURIComponent(data.code)}` });
+});
+
+app.put("/api/superadmin/demo", requireSuperAdmin, async (req, res) => {
+  const patch = {};
+  if (typeof req.body?.enabled === "boolean") patch.enabled = req.body.enabled;
+  const cap = Number(req.body?.cap);
+  if (Number.isInteger(cap) && cap >= 0 && cap <= 50) patch.numeric_value = cap;
+  if (!Object.keys(patch).length) return res.status(400).json({ error: "Nothing to change" });
+  patch.updated_at = new Date().toISOString();
+  const { error } = await supabase.from("production_controls").update(patch).eq("control_key", "demo_mode_enabled");
+  if (error) return res.status(500).json({ error: error.message });
+  const { data } = await supabase.rpc("demo_status");
+  res.json(data);
+});
 
 // ---- list every student with their next pending call ------------------------
 app.get("/api/superadmin/students", requireSuperAdmin, async (req, res) => {

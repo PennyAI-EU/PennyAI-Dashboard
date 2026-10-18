@@ -370,6 +370,9 @@
         <h1>Create your account</h1>
         <p>Already have one? <a href="/signin.html">Sign in →</a></p>
       </div>
+      <div id="demo-banner" hidden style="background:#f4effe;border:1px solid #dcd0fb;color:#3c2a86;border-radius:12px;padding:12px 14px;margin:0 0 16px;font-size:14px;line-height:1.5;">
+        <strong>Demo account.</strong> Try Penny for real today. This demo account and everything in it are deleted automatically tonight.
+      </div>
 
       <form id="signup-form">
         <div class="form-row">
@@ -493,6 +496,9 @@
   const successSection = document.getElementById('success-section');
   const successPhone = document.getElementById('success-phone');
   const inviteCode = new URLSearchParams(location.search).get('invite') || null;
+  // One-time demo code from the super admin "Start a demo" button (signup.html?demo=CODE)
+  const demoCode = (new URLSearchParams(location.search).get('demo') || '').trim() || null;
+  if (demoCode) { const b = document.getElementById('demo-banner'); if (b) b.hidden = false; }
   let browserTz = 'Europe/Rome';
   try { browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone || browserTz; } catch (e) {}
 
@@ -588,7 +594,7 @@
       const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, phone: fullPhone, password, recording_consent: recordingConsent, improve_consent: improveConsent, call_when: callWhen, call_at: callAt, timezone: browserTz, invite: inviteCode }),
+        body: JSON.stringify({ name, email, phone: fullPhone, password, recording_consent: recordingConsent, improve_consent: improveConsent, call_when: callWhen, call_at: callAt, timezone: browserTz, invite: inviteCode, demo: demoCode }),
       });
       const data = await res.json();
 

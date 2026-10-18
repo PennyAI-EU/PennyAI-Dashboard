@@ -1015,6 +1015,8 @@
     'tz.Europe/London': ['UK time', 'ora UK'],
     'tz.Europe/Athens': ['Eastern Europe time', "ora dell'Europa dell'Est"],
     'hist.title': ['Progress', 'Progressi'],
+    'demo.title': ['Demo account.', 'Account demo.'],
+    'demo.body': ['This account and everything in it are deleted automatically tonight at 23:30.', 'Questo account e tutti i suoi dati vengono cancellati automaticamente stasera alle 23:30.'],
     'prog.title': ['Your progress', 'I tuoi progressi'],
     'prog.last10': ['Last 10', 'Ultime 10'],
     'prog.all': ['All lessons', 'Tutte le lezioni'],
@@ -1202,6 +1204,9 @@
 
   <!-- HOME SECTION -->
   <section id="section-overview" class="section active">
+    <div id="demo-account-banner" hidden style="background:#f4effe;border:1px solid #dcd0fb;color:#3c2a86;border-radius:14px;padding:12px 16px;margin-bottom:18px;font-size:14px;line-height:1.5;">
+      <strong data-i18n="demo.title">Demo account.</strong> <span data-i18n="demo.body">This account and everything in it are deleted automatically tonight at 23:30.</span>
+    </div>
 
     <div class="journey-hero">
       <div>
@@ -1955,6 +1960,7 @@ async function getDashboardData(userId, userPhone, userEmail, authMeta) {
         englishLevel: user?.english_level || 'Pending...',
         allocatedLessons: user?.allocated_lesson_count || 0,
         avatarUrl: user?.avatar_url || null,
+        is_demo: user?.is_demo === true,
         preferences: {
           frequency: user?.lesson_frequency,
           duration: user?.lesson_duration,
@@ -2167,6 +2173,10 @@ function updateUI(data) {
   } else {
     upcomingEl.innerHTML = '<div style="padding:20px; color:var(--muted); font-size:14px;">' + t('les.noUpcoming') + '</div>';
   }
+
+  // Demo accounts (made with a one-time demo link) are wiped nightly — say so on Home
+  const demoBanner = document.getElementById('demo-account-banner');
+  if (demoBanner) demoBanner.hidden = !(data.profile && data.profile.is_demo);
 
   // Home progress charts (skills trend, overall per lesson, totals)
   try { if (window.renderProgressPanel) window.renderProgressPanel(data.history || []); }
