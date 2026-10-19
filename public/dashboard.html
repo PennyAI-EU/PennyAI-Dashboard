@@ -6,8 +6,52 @@
 <title>Dashboard — Penny AI</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
 <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* HOME — PROGRESS CHARTS (skills trend, overall score per lesson, totals) */
+  .prog-wrap { margin-top:22px; }
+  .prog-head { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+  .prog-head .home-h2 { margin:0; }
+  .prog-switch { display:inline-flex; background:#ece8f5; border-radius:999px; padding:3px; gap:2px; }
+  .prog-switch button { border:none; background:transparent; font:inherit; font-size:13px; font-weight:600; color:#4b36a8; padding:7px 14px; border-radius:999px; cursor:pointer; }
+  .prog-switch button.active { background:#5b5ce2; color:#fff; }
+  .prog-grid { display:grid; grid-template-columns: 3fr 2fr; gap:18px; }
+  .prog-card { border-radius:20px; padding:18px 20px; min-width:0; }
+  .prog-card.skills { background:#f4effe; }
+  .prog-card.overall { background:#fff6d9; }
+  .prog-title { display:flex; align-items:center; gap:10px; }
+  .prog-title h3 { font-size:16px; font-weight:700; margin:0; }
+  .prog-icon { width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .prog-icon svg { width:17px; height:17px; }
+  .prog-sub { font-size:13px; margin:4px 0 10px 40px; }
+  .prog-card.skills h3 { color:#2b1f5c; } .prog-card.skills .prog-sub { color:#5a4a8c; }
+  .prog-card.overall h3 { color:#412402; } .prog-card.overall .prog-sub { color:#7a5a12; }
+  .prog-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+  .prog-chip { display:inline-flex; align-items:center; gap:6px; background:#fff; border:1px solid transparent; border-radius:999px; padding:4px 11px; font:inherit; font-size:12px; font-weight:600; color:#2b1f5c; }
+  button.prog-chip { cursor:pointer; }
+  button.prog-chip:hover { border-color:#d9d2ee; }
+  .prog-chip.off { opacity:.45; text-decoration:line-through; }
+  .prog-swatch-line { width:16px; height:0; border-top:3px solid currentColor; }
+  .prog-swatch-box { width:10px; height:10px; border-radius:2px; }
+  .prog-latest { background:#ffbf00; color:#181b30; font-size:12px; font-weight:700; padding:4px 11px; border-radius:999px; white-space:nowrap; }
+  .prog-canvas-box { background:#fff; border-radius:12px; padding:8px; }
+  .prog-canvas { position:relative; width:100%; }
+  .prog-tiles { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:14px; margin-top:18px; }
+  .prog-tile { border-radius:16px; padding:14px 16px; }
+  .prog-tile svg { width:22px; height:22px; }
+  .prog-tile .lbl { font-size:13px; font-weight:600; margin-top:6px; }
+  .prog-tile .num { font-size:28px; font-weight:700; line-height:1.15; }
+  .prog-tile.lilac { background:#dcd0fb; color:#3c2a86; } .prog-tile.lilac .num { color:#26195c; }
+  .prog-tile.mint  { background:#c9efe4; color:#0f6e56; } .prog-tile.mint .num  { color:#04342c; }
+  .prog-tile.peach { background:#ffdcd6; color:#993c1d; } .prog-tile.peach .num { color:#4a1b0c; }
+  .prog-tile.sky   { background:#cfe6fb; color:#185fa5; } .prog-tile.sky .num   { color:#042c53; }
+  .prog-empty { background:#f4effe; border-radius:20px; padding:22px; color:#5a4a8c; font-size:14px; line-height:1.5; }
+  @media (max-width: 980px) {
+    .prog-grid { grid-template-columns: 1fr; }
+    .prog-tiles { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  }
   :root {
     /* Figma: Penny AI Learner portal */
     --white: #ffffff;
@@ -971,6 +1015,29 @@
     'tz.Europe/London': ['UK time', 'ora UK'],
     'tz.Europe/Athens': ['Eastern Europe time', "ora dell'Europa dell'Est"],
     'hist.title': ['Progress', 'Progressi'],
+    'demo.title': ['Demo account.', 'Account demo.'],
+    'demo.body': ['This account and everything in it are deleted automatically tonight at 23:30.', 'Questo account e tutti i suoi dati vengono cancellati automaticamente stasera alle 23:30.'],
+    'prog.title': ['Your progress', 'I tuoi progressi'],
+    'prog.last10': ['Last 10', 'Ultime 10'],
+    'prog.all': ['All lessons', 'Tutte le lezioni'],
+    'prog.skills': ['Your skills over time', 'Le tue abilità nel tempo'],
+    'prog.subLast': ['Last {n} lessons', 'Ultime {n} lezioni'],
+    'prog.subAll': ['All {n} lessons', 'Tutte le {n} lezioni'],
+    'prog.subOne': ['Your first lesson', 'La tua prima lezione'],
+    'prog.fluency': ['Fluency', 'Scorrevolezza'],
+    'prog.grammar': ['Grammar', 'Grammatica'],
+    'prog.vocab': ['Vocabulary', 'Vocabolario'],
+    'prog.overall': ['Overall score per lesson', 'Punteggio complessivo per lezione'],
+    'prog.latest': ['Latest {n}', 'Ultimo {n}'],
+    'prog.passed': ['Passed (70+)', 'Superata (70+)'],
+    'prog.notYet': ['Not yet passed', 'Non ancora superata'],
+    'prog.avg': ['Average {n}', 'Media {n}'],
+    'prog.taken': ['Lessons taken', 'Lezioni fatte'],
+    'prog.minutes': ['Minutes with Penny', 'Minuti con Penny'],
+    'prog.streak': ['Weeks in a row', 'Settimane di fila'],
+    'prog.passedCount': ['Lessons passed', 'Lezioni superate'],
+    'prog.empty': ['Your progress charts will appear here after your first lesson with Penny.', 'I grafici dei tuoi progressi appariranno qui dopo la tua prima lezione con Penny.'],
+    'prog.tapHint': ['Tap a label to hide or show it.', 'Tocca un\'etichetta per nasconderla o mostrarla.'],
     'hist.sub': ['Your past sessions, recordings, transcripts and feedback.', 'Le tue lezioni passate, registrazioni, trascrizioni e consigli.'],
     'hist.none': ['No sessions yet', 'Ancora nessuna lezione'],
     'hist.noneSub': ['Your lesson history will appear here after your first session.', 'Lo storico delle tue lezioni apparirà qui dopo la prima lezione.'],
@@ -1137,6 +1204,9 @@
 
   <!-- HOME SECTION -->
   <section id="section-overview" class="section active">
+    <div id="demo-account-banner" hidden style="background:#f4effe;border:1px solid #dcd0fb;color:#3c2a86;border-radius:14px;padding:12px 16px;margin-bottom:18px;font-size:14px;line-height:1.5;">
+      <strong data-i18n="demo.title">Demo account.</strong> <span data-i18n="demo.body">This account and everything in it are deleted automatically tonight at 23:30.</span>
+    </div>
 
     <div class="journey-hero">
       <div>
@@ -1181,6 +1251,9 @@
         <div class="goal-note" id="goal-note">Set a weekly frequency to track your goal.</div>
       </div>
     </div>
+
+    <!-- Progress charts — filled in by renderProgressPanel() from /api/history -->
+    <div class="prog-wrap" id="progress-panel"></div>
   </section>
 
   <!-- LESSONS SECTION -->
@@ -1445,6 +1518,198 @@
   </div>
 </div>
 
+<script>
+/* HOME — progress charts.
+   Uses the lesson list the dashboard already loads from /api/history (newest first).
+   A lesson counts only if it really happened: some of it was completed and Penny gave
+   at least one skill score. Dropped or empty calls (all zeros) are left out everywhere. */
+(function () {
+  var COLORS = { fluency: '#5b5ce2', grammar: '#e0a100', vocab: '#1baf7a', passed: '#FFBF00', notYet: '#f5a3b8', avg: '#5b5ce2' };
+  var PASS = 70;
+  var view = 'last';
+  try { if (localStorage.getItem('pennyProgView') === 'all') view = 'all'; } catch (e) {}
+  var hidden = { fluency: false, grammar: false, vocab: false, avg: false };
+  var charts = [];
+  var lastHistory = [];
+
+  function tr(k, v) { return window.PennyI18N ? PennyI18N.t(k, v) : k; }
+  function num(v) { var n = Number(v); return isFinite(n) ? n : null; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
+
+  function realLessons(history) {
+    return (history || []).filter(function (a) {
+      if (!(num(a.completion_percentage) > 0)) return false;
+      return (num(a.fluency_score) || 0) > 0 || (num(a.grammar_score) || 0) > 0 || (num(a.vocabulary_score) || 0) > 0;
+    }).sort(function (a, b) { return new Date(a.attempt_time) - new Date(b.attempt_time); });
+  }
+
+  /* Monday-to-Sunday weeks in Rome time, counted back from this week. If this week has no
+     lesson yet, counting starts from last week, so a student isn't marked down mid-week. */
+  function romeWeek(dateStr) {
+    var p = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(dateStr)).split('-');
+    var days = Math.floor(Date.UTC(+p[0], +p[1] - 1, +p[2]) / 86400000);
+    return Math.floor((days - 4) / 7); /* 1 Jan 1970 was a Thursday; day 4 is Monday 5 Jan */
+  }
+  function weeksInARow(lessons) {
+    var weeks = {};
+    lessons.forEach(function (a) { weeks[romeWeek(a.attempt_time)] = true; });
+    var w = romeWeek(new Date().toISOString());
+    if (!weeks[w]) w -= 1;
+    var n = 0;
+    while (weeks[w]) { n++; w--; }
+    return n;
+  }
+
+  function icon(path) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + path + '</svg>'; }
+  var ICONS = {
+    trend: '<polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/>',
+    bars: '<line x1="4" y1="20" x2="20" y2="20"/><rect x="5" y="11" width="3" height="7"/><rect x="10.5" y="7" width="3" height="11"/><rect x="16" y="4" width="3" height="14"/>',
+    headphones: '<path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3z"/><path d="M3 19a2 2 0 0 0 2 2h1v-6H3z"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/>',
+    flame: '<path d="M12 3c1 3 4 4.5 4 9a4 4 0 0 1-8 0c0-2 1-3 1-3 0 1.5 1 2 1 2 0-3 1-5.5 2-8z"/>',
+    award: '<circle cx="12" cy="9" r="6"/><polyline points="8.5 14 7 22 12 19 17 22 15.5 14"/>'
+  };
+
+  function lineChip(key, label, value, color, dash) {
+    return '<button type="button" class="prog-chip' + (hidden[key] ? ' off' : '') + '" data-prog-toggle="' + key + '" aria-pressed="' + (!hidden[key]) + '">' +
+      '<span class="prog-swatch-line" style="color:' + color + ';border-top-style:' + dash + ';"></span>' + esc(label) + (value != null ? ' ' + value : '') + '</button>';
+  }
+
+  function render(history) {
+    lastHistory = history || [];
+    var box = document.getElementById('progress-panel');
+    if (!box) return;
+    charts.forEach(function (c) { try { c.destroy(); } catch (e) {} });
+    charts = [];
+
+    var all = realLessons(lastHistory);
+    if (!all.length) {
+      box.innerHTML = '<h2 class="home-h2">' + esc(tr('prog.title')) + '</h2><div class="prog-empty">' + esc(tr('prog.empty')) + '</div>';
+      return;
+    }
+
+    var shown = view === 'all' ? all : all.slice(-10);
+    var latest = all[all.length - 1];
+    var r = function (v) { return v == null ? null : Math.round(v); };
+    var overallOf = function (a) { return r(num(a.overall_score) != null ? num(a.overall_score) : num(a.score)); };
+    var latestF = r(num(latest.fluency_score)), latestG = r(num(latest.grammar_score)), latestV = r(num(latest.vocabulary_score));
+    var ov = shown.map(overallOf);
+    var ovVals = ov.filter(function (v) { return v != null; });
+    var avg = ovVals.length ? Math.round(ovVals.reduce(function (s, v) { return s + v; }, 0) / ovVals.length) : null;
+
+    var minutes = Math.round(all.reduce(function (s, a) { return s + (num(a.duration_sec) || num(a.lesson_duration_seconds) || 0); }, 0) / 60);
+    var passedCount = all.filter(function (a) { return a.pass_status === 'passed'; }).length;
+    var sub = all.length === 1 ? tr('prog.subOne') : (view === 'all' ? tr('prog.subAll', { n: shown.length }) : tr('prog.subLast', { n: shown.length }));
+
+    var html = '' +
+      '<div class="prog-head"><h2 class="home-h2">' + esc(tr('prog.title')) + '</h2>' +
+        '<div class="prog-switch" role="group" aria-label="' + esc(tr('prog.title')) + '">' +
+          '<button type="button" data-prog-view="last" class="' + (view === 'last' ? 'active' : '') + '" aria-pressed="' + (view === 'last') + '">' + esc(tr('prog.last10')) + '</button>' +
+          '<button type="button" data-prog-view="all" class="' + (view === 'all' ? 'active' : '') + '" aria-pressed="' + (view === 'all') + '">' + esc(tr('prog.all')) + '</button>' +
+        '</div></div>' +
+      '<div class="prog-grid">' +
+        '<div class="prog-card skills">' +
+          '<div class="prog-title"><span class="prog-icon" style="background:#5b5ce2;color:#fff;">' + icon(ICONS.trend) + '</span><h3>' + esc(tr('prog.skills')) + '</h3></div>' +
+          '<div class="prog-sub">' + esc(sub) + ' · ' + esc(tr('prog.tapHint')) + '</div>' +
+          '<div class="prog-chips">' +
+            lineChip('fluency', tr('prog.fluency'), latestF, COLORS.fluency, 'solid') +
+            lineChip('grammar', tr('prog.grammar'), latestG, COLORS.grammar, 'dashed') +
+            lineChip('vocab', tr('prog.vocab'), latestV, COLORS.vocab, 'dotted') +
+          '</div>' +
+          '<div class="prog-canvas-box"><div class="prog-canvas" style="height:210px;"><canvas id="prog-skills-chart" role="img" aria-label="' + esc(tr('prog.skills')) + '"></canvas></div></div>' +
+        '</div>' +
+        '<div class="prog-card overall">' +
+          '<div class="prog-title" style="justify-content:space-between;"><div class="prog-title"><span class="prog-icon" style="background:#ffbf00;color:#181b30;">' + icon(ICONS.bars) + '</span><h3>' + esc(tr('prog.overall')) + '</h3></div>' +
+            (overallOf(latest) != null ? '<span class="prog-latest">' + esc(tr('prog.latest', { n: overallOf(latest) })) + '</span>' : '') + '</div>' +
+          '<div class="prog-sub">' + esc(sub) + '</div>' +
+          '<div class="prog-chips">' +
+            '<span class="prog-chip" style="color:#412402;"><span class="prog-swatch-box" style="background:' + COLORS.passed + ';"></span>' + esc(tr('prog.passed')) + '</span>' +
+            '<span class="prog-chip" style="color:#412402;"><span class="prog-swatch-box" style="background:' + COLORS.notYet + ';"></span>' + esc(tr('prog.notYet')) + '</span>' +
+            (avg != null ? lineChip('avg', tr('prog.avg', { n: avg }), null, COLORS.avg, 'dashed') : '') +
+          '</div>' +
+          '<div class="prog-canvas-box"><div class="prog-canvas" style="height:210px;"><canvas id="prog-overall-chart" role="img" aria-label="' + esc(tr('prog.overall')) + '"></canvas></div></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="prog-tiles">' +
+        '<div class="prog-tile lilac">' + icon(ICONS.headphones) + '<div class="lbl">' + esc(tr('prog.taken')) + '</div><div class="num">' + all.length + '</div></div>' +
+        '<div class="prog-tile mint">' + icon(ICONS.clock) + '<div class="lbl">' + esc(tr('prog.minutes')) + '</div><div class="num">' + minutes + '</div></div>' +
+        '<div class="prog-tile peach">' + icon(ICONS.flame) + '<div class="lbl">' + esc(tr('prog.streak')) + '</div><div class="num">' + weeksInARow(all) + '</div></div>' +
+        '<div class="prog-tile sky">' + icon(ICONS.award) + '<div class="lbl">' + esc(tr('prog.passedCount')) + '</div><div class="num">' + passedCount + '</div></div>' +
+      '</div>';
+    box.innerHTML = html;
+
+    box.querySelectorAll('[data-prog-view]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        view = b.getAttribute('data-prog-view');
+        try { localStorage.setItem('pennyProgView', view); } catch (e) {}
+        render(lastHistory);
+      });
+    });
+    box.querySelectorAll('[data-prog-toggle]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var key = b.getAttribute('data-prog-toggle');
+        if (key !== 'avg' && !hidden[key]) {
+          var onCount = ['fluency', 'grammar', 'vocab'].filter(function (k) { return !hidden[k]; }).length;
+          if (onCount <= 1) return; /* always keep at least one skill line on */
+        }
+        hidden[key] = !hidden[key];
+        b.classList.toggle('off', hidden[key]);
+        b.setAttribute('aria-pressed', String(!hidden[key]));
+        charts.forEach(function (c) {
+          c.data.datasets.forEach(function (d, i) { if (d.progKey === key) c.setDatasetVisibility(i, !hidden[key]); });
+          c.update();
+        });
+      });
+    });
+
+    if (typeof window.Chart === 'undefined') return; /* chart library didn't load — totals still show */
+
+    var loc = window.PennyI18N ? PennyI18N.locale() : 'en-GB';
+    var labels = shown.map(function (a) { return new Date(a.attempt_time).toLocaleDateString(loc, { day: 'numeric', month: 'short', timeZone: 'Europe/Rome' }); });
+    var titles = shown.map(function (a) { return (a.lessons && a.lessons.title) || a.lesson_title || ''; });
+    var tick = '#7a7590', grid = '#ece8f5';
+    var tooltip = { callbacks: { title: function (items) { var i = items[0].dataIndex; return labels[i] + (titles[i] ? ' · ' + titles[i] : ''); } } };
+    var xAxis = { ticks: { color: tick, maxRotation: 0, autoSkip: true, maxTicksLimit: 5 }, grid: { display: false } };
+
+    function line(key, label, color, dash, field) {
+      return { progKey: key, label: label, data: shown.map(function (a) { return r(num(a[field])); }), hidden: hidden[key],
+        borderColor: color, backgroundColor: color, borderWidth: 2.5, borderDash: dash, pointRadius: shown.length > 25 ? 2 : 3.5,
+        pointBorderColor: '#fff', pointBorderWidth: 1.5, tension: 0.35, spanGaps: true };
+    }
+    /* Start the skills axis a little below the lowest score so small changes are visible */
+    var skillVals = [];
+    shown.forEach(function (a) { ['fluency_score', 'grammar_score', 'vocabulary_score'].forEach(function (f) { var v = num(a[f]); if (v != null) skillVals.push(v); }); });
+    var skillMin = skillVals.length ? Math.max(0, Math.min(50, Math.floor((Math.min.apply(null, skillVals) - 10) / 10) * 10)) : 0;
+
+    charts.push(new Chart(document.getElementById('prog-skills-chart'), {
+      type: 'line',
+      data: { labels: labels, datasets: [
+        line('fluency', tr('prog.fluency'), COLORS.fluency, [], 'fluency_score'),
+        line('grammar', tr('prog.grammar'), COLORS.grammar, [6, 4], 'grammar_score'),
+        line('vocab', tr('prog.vocab'), COLORS.vocab, [2, 3], 'vocabulary_score')
+      ] },
+      options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { display: false }, tooltip: tooltip },
+        scales: { y: { min: skillMin, max: 100, ticks: { color: tick, stepSize: 10 }, grid: { color: grid }, border: { display: false } }, x: xAxis } }
+    }));
+
+    charts.push(new Chart(document.getElementById('prog-overall-chart'), {
+      data: { labels: labels, datasets: [
+        { progKey: 'avg', type: 'line', label: tr('prog.avg', { n: avg }), data: ov.map(function () { return avg; }), hidden: hidden.avg,
+          borderColor: COLORS.avg, borderWidth: 2, borderDash: [5, 4], pointRadius: 0, pointHoverRadius: 0, order: 0 },
+        { type: 'bar', label: tr('prog.overall'), data: ov, backgroundColor: ov.map(function (v) { return v != null && v >= PASS ? COLORS.passed : COLORS.notYet; }),
+          borderRadius: 5, borderSkipped: 'bottom', maxBarThickness: 22, order: 1 }
+      ] },
+      options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { display: false }, tooltip: tooltip },
+        scales: { y: { min: 0, max: 100, ticks: { color: tick, stepSize: 25 }, grid: { color: grid }, border: { display: false } }, x: xAxis } }
+    }));
+  }
+
+  window.renderProgressPanel = render;
+})();
+</script>
+
 <script type="module">
 import { RetellWebClient } from "https://esm.sh/retell-client-js-sdk";
 
@@ -1695,6 +1960,7 @@ async function getDashboardData(userId, userPhone, userEmail, authMeta) {
         englishLevel: user?.english_level || 'Pending...',
         allocatedLessons: user?.allocated_lesson_count || 0,
         avatarUrl: user?.avatar_url || null,
+        is_demo: user?.is_demo === true,
         preferences: {
           frequency: user?.lesson_frequency,
           duration: user?.lesson_duration,
@@ -1907,6 +2173,14 @@ function updateUI(data) {
   } else {
     upcomingEl.innerHTML = '<div style="padding:20px; color:var(--muted); font-size:14px;">' + t('les.noUpcoming') + '</div>';
   }
+
+  // Demo accounts (made with a one-time demo link) are wiped nightly — say so on Home
+  const demoBanner = document.getElementById('demo-account-banner');
+  if (demoBanner) demoBanner.hidden = !(data.profile && data.profile.is_demo);
+
+  // Home progress charts (skills trend, overall per lesson, totals)
+  try { if (window.renderProgressPanel) window.renderProgressPanel(data.history || []); }
+  catch (e) { console.error('Progress panel error:', e); }
 
   // History
   const historyContainer = document.getElementById('history-list');
@@ -2478,10 +2752,35 @@ window.PennyPractice = (function () {
     const t = (document.getElementById('profile-level') || {}).textContent || '';
     return (t.match(/\b([ABC][12])\b/) || [])[1] || 'A1';
   }
+  // Extra listening sets live in Supabase (table practice_listening, audio in the
+  // practice-audio bucket). Students see status 'live'; add ?practicepreview=1 to
+  // the dashboard URL to also see sets still waiting for review.
+  const PREVIEW = /[?&]practicepreview=1\b/.test(location.search);
+  async function loadExtra(level) {
+    try {
+      if (typeof supabase === 'undefined' || !supabase) return [];
+      const statuses = PREVIEW ? ['live', 'review'] : ['live'];
+      const { data: rows, error } = await supabase.from('practice_listening')
+        .select('id, audio_path, status, data').eq('level', level).in('status', statuses).order('id');
+      if (error || !rows) return [];
+      return rows.map(r => {
+        const s = Object.assign({}, r.data, { id: r.id, kind: 'listening' });
+        s.audio = supabase.storage.from('practice-audio').getPublicUrl(r.audio_path).data.publicUrl;
+        if (r.status === 'review') s.title = s.title + ' (review)';
+        return s;
+      });
+    } catch (e) { return []; }
+  }
   async function load(level) {
     if (cache[level]) return cache[level];
-    try { const r = await fetch('/practice/' + level.toLowerCase() + '.json', { cache: 'no-cache' }); if (r.ok) return (cache[level] = await r.json()); } catch (e) {}
-    return null;
+    let d = null;
+    try { const r = await fetch('/practice/' + level.toLowerCase() + '.json', { cache: 'no-cache' }); if (r.ok) d = await r.json(); } catch (e) {}
+    const extra = await loadExtra(level);
+    if (!d && !extra.length) return null;
+    d = d || { level, sets: [] };
+    const have = new Set(d.sets.map(s => s.id));
+    d.sets = d.sets.concat(extra.filter(s => !have.has(s.id)));
+    return (cache[level] = d);
   }
   const bestKey = id => 'pennyPracticeBest:' + id;
 
