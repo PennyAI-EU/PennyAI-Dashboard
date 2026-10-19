@@ -425,6 +425,21 @@
     body .main-content { padding: 0 12px 40px !important; }
     .topbar { margin-left: -12px !important; margin-right: -12px !important; }
   }
+  /* Start a demo (super admin) */
+  .demo-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px; }
+  .demo-card { background:#fff; border-radius:20px; padding:22px; }
+  .demo-label { font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:#5b5ce2; margin-bottom:12px; }
+  .demo-qr { display:flex; justify-content:center; padding:10px; background:#f4effe; border-radius:16px; margin-bottom:14px; }
+  .demo-qr img, .demo-qr canvas { width:200px !important; height:200px !important; }
+  .demo-code { font-size:34px; font-weight:700; letter-spacing:.18em; text-align:center; color:#181b30; }
+  .demo-link { font-size:13px; color:#636b82; text-align:center; word-break:break-all; margin:6px 0 14px; }
+  .demo-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .demo-note { font-size:13px; color:#636b82; line-height:1.5; margin-top:12px; }
+  .demo-stats { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px; margin-bottom:14px; }
+  .demo-stats div { background:#f7f8fc; border-radius:12px; padding:12px; }
+  .demo-stats b { display:block; font-size:24px; color:#181b30; }
+  .demo-stats span { font-size:12px; color:#636b82; }
+  .demo-switch { display:flex; align-items:center; gap:8px; font-weight:600; font-size:14px; cursor:pointer; }
 </style>
 <script src="/account-menu.js"></script>
 </head>
@@ -462,6 +477,10 @@
     </div>
     <div id="nav-platform" hidden>
       <div class="nav-section-label">Platform</div>
+      <div class="nav-item" id="nav-demo" onclick="showSection('demo')" style="background:#c9efe4">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+        <span>Start a demo</span>
+      </div>
       <a class="nav-item" id="nav-schools" href="/superadmin.html#schools" style="text-decoration:none;color:inherit;background:#fbd6ea">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M10 21v-6h4v6"/></svg>
         <span>Schools</span>
@@ -515,6 +534,42 @@
           <tr><td colspan="5" style="text-align:center; padding:30px;">Loading students...</td></tr>
         </tbody>
       </table>
+    </div>
+  </section>
+
+  <!-- DEMO SECTION (super admin only) — one-time demo sign-up links -->
+  <section id="section-demo" class="section">
+    <div class="section-header">
+      <div>
+        <h1>Start a demo</h1>
+        <p>Make a one-time sign-up link for a prospect. It works once, expires after 2 hours, and the demo account is wiped tonight at 23:30.</p>
+      </div>
+      <button class="btn-primary" id="demo-new-btn" onclick="createDemoLink()">+ New demo link</button>
+    </div>
+    <div class="demo-grid">
+      <div class="demo-card" id="demo-result" hidden>
+        <div class="demo-label">Demo link — show this to the prospect</div>
+        <div class="demo-qr" id="demo-qr"></div>
+        <div class="demo-code" id="demo-code">——</div>
+        <div class="demo-link" id="demo-link"></div>
+        <div class="demo-actions">
+          <button class="btn-primary" onclick="copyDemoLink()" id="demo-copy-btn">Copy link</button>
+          <a class="btn-secondary" id="demo-open" href="#" target="_blank" rel="noopener" style="text-decoration:none;">Open sign-up</a>
+        </div>
+        <div class="demo-note" id="demo-expiry"></div>
+      </div>
+      <div class="demo-card">
+        <div class="demo-label">Today</div>
+        <div class="demo-stats">
+          <div><b id="demo-used">–</b><span>demos used</span></div>
+          <div><b id="demo-cap">–</b><span>daily limit</span></div>
+          <div><b id="demo-open-n">–</b><span>links still open</span></div>
+          <div><b id="demo-accounts">–</b><span>demo accounts to wipe</span></div>
+        </div>
+        <label class="demo-switch"><input type="checkbox" id="demo-enabled" onchange="toggleDemoMode(this.checked)"> Demo mode on</label>
+        <div class="demo-note" id="demo-msg"></div>
+        <div class="demo-note">Demo accounts get the welcome email and Penny's welcome call. If they miss it, Penny emails them and tries once more an hour later. No lessons are booked, and they're left out of your daily summary.</div>
+      </div>
     </div>
   </section>
 
@@ -1128,6 +1183,7 @@
 
   let prospectsPoller = null;
 
+  window.__adminToken = async () => { const { data: { session } } = await supabase.auth.getSession(); return session ? session.access_token : null; };
   window.showSection = function(sectionId) {
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     document.getElementById('nav-' + sectionId).classList.add('active');
@@ -1135,6 +1191,7 @@
     document.getElementById('section-' + sectionId).classList.add('active');
     location.hash = sectionId;
 
+    if (sectionId === 'demo') { if (window.loadDemoPanel) window.loadDemoPanel(); return; }
     if (sectionId === 'messages') { loadMsgConvList(); return; }
     if (sectionId === 'prospects') {
       if (!prospectsPoller) {
@@ -2336,5 +2393,57 @@ async function markMsgRead(token) {
 }
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* Start a demo — super admin only. The server refuses these calls for anyone else. */
+(function () {
+  var current = null;
+  function el(id) { return document.getElementById(id); }
+  async function call(method, path, body) {
+    var token = window.__adminToken ? await window.__adminToken() : null;
+    var res = await fetch(path, { method: method, headers: Object.assign({ 'Authorization': 'Bearer ' + token }, body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined });
+    var data = await res.json().catch(function () { return {}; });
+    if (!res.ok) throw new Error(data.error || 'Something went wrong');
+    return data;
+  }
+  function showStatus(st) {
+    el('demo-used').textContent = st.used_today;
+    el('demo-cap').textContent = st.cap;
+    el('demo-open-n').textContent = st.open_codes;
+    el('demo-accounts').textContent = st.demo_accounts;
+    el('demo-enabled').checked = !!st.enabled;
+    el('demo-new-btn').disabled = !st.enabled;
+  }
+  window.loadDemoPanel = async function () {
+    try { showStatus(await call('GET', '/api/superadmin/demo')); el('demo-msg').textContent = ''; }
+    catch (e) { el('demo-msg').textContent = e.message; }
+  };
+  window.createDemoLink = async function () {
+    var btn = el('demo-new-btn'); btn.disabled = true;
+    try {
+      var d = await call('POST', '/api/superadmin/demo/codes');
+      current = d;
+      el('demo-result').hidden = false;
+      el('demo-code').textContent = d.code;
+      el('demo-link').textContent = d.link;
+      el('demo-open').href = d.link;
+      el('demo-qr').innerHTML = '';
+      if (window.QRCode) new QRCode(el('demo-qr'), { text: d.link, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
+      el('demo-expiry').textContent = 'Works once. Expires at ' + new Date(d.expires_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' }) + ' Rome time.';
+      el('demo-msg').textContent = '';
+    } catch (e) { el('demo-msg').textContent = e.message; }
+    window.loadDemoPanel();
+  };
+  window.copyDemoLink = async function () {
+    if (!current) return;
+    try { await navigator.clipboard.writeText(current.link); el('demo-copy-btn').textContent = 'Copied'; setTimeout(function () { el('demo-copy-btn').textContent = 'Copy link'; }, 1500); }
+    catch (e) { el('demo-msg').textContent = 'Copy failed — press and hold the link to copy it.'; }
+  };
+  window.toggleDemoMode = async function (on) {
+    try { showStatus(await call('PUT', '/api/superadmin/demo', { enabled: on })); }
+    catch (e) { el('demo-msg').textContent = e.message; window.loadDemoPanel(); }
+  };
+})();
+</script>
 </body>
 </html>
