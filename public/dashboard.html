@@ -2477,6 +2477,7 @@ endBtn.addEventListener('click', () => {
     const cfg = await fetch('/api/config').then(r => r.json());
     const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
     supabase = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    window.pennySupabase = supabase;   // shared with the Practice area (separate script)
 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
@@ -2758,14 +2759,15 @@ window.PennyPractice = (function () {
   const PREVIEW = /[?&]practicepreview=1\b/.test(location.search);
   async function loadExtra(level) {
     try {
-      if (typeof supabase === 'undefined' || !supabase) return [];
+      const sb = window.pennySupabase;
+      if (!sb) return [];
       const statuses = PREVIEW ? ['live', 'review'] : ['live'];
-      const { data: rows, error } = await supabase.from('practice_listening')
+      const { data: rows, error } = await sb.from('practice_listening')
         .select('id, audio_path, status, data').eq('level', level).in('status', statuses).order('id');
       if (error || !rows) return [];
       return rows.map(r => {
         const s = Object.assign({}, r.data, { id: r.id, kind: 'listening' });
-        s.audio = supabase.storage.from('practice-audio').getPublicUrl(r.audio_path).data.publicUrl;
+        s.audio = sb.storage.from('practice-audio').getPublicUrl(r.audio_path).data.publicUrl;
         if (r.status === 'review') s.title = s.title + ' (review)';
         return s;
       });
@@ -2780,19 +2782,22 @@ window.PennyPractice = (function () {
     d = d || { level, sets: [] };
     const have = new Set(d.sets.map(s => s.id));
     d.sets = d.sets.concat(extra.filter(s => !have.has(s.id)));
-    return (cache[level] = d);
+    if (window.pennySupabase) cache[level] = d;   // don't cache before the connection is ready
+    return d;
   }
   const bestKey = id => 'pennyPracticeBest:' + id;
 
   async function open(level) {
     const el = root(); if (!el) return;
-    if (typeof level === 'string') current = level;   // the student picked a tab
+    // Students only ever see their own level. The level tabs appear only in
+    // review mode (?practicepreview=1), so Max can check every level.
+    if (PREVIEW && typeof level === 'string') current = level;
     const mine = myLevel();
-    const lv = current || mine;
+    const lv = PREVIEW ? (current || mine) : mine;
     el.innerHTML = '<p style="color:var(--muted)">Loading…</p>';
     const d = await load(lv);
     data = d;
-    const tabs = `<div class="pr-tabs">${LEVELS.map(l => `<button class="pr-tab${l === lv ? ' on' : ''}" onclick="PennyPractice.open('${l}')">${l}${l === mine ? ' ★' : ''}</button>`).join('')}</div>`;
+    const tabs = !PREVIEW ? '' : `<div class="pr-tabs">${LEVELS.map(l => `<button class="pr-tab${l === lv ? ' on' : ''}" onclick="PennyPractice.open('${l}')">${l}${l === mine ? ' ★' : ''}</button>`).join('')}</div>`;
     if (!d) { el.innerHTML = tabs + '<p style="color:var(--muted)">These exercises are not available yet.</p>'; return; }
     const card = s => {
       const best = store.get(bestKey(s.id));
