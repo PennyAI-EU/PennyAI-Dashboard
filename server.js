@@ -1232,6 +1232,10 @@ app.post("/api/trial/send-code", async (req, res) => {
   }
 
   try {
+    if (await isPausedStudentContact(cleanEmail, cleanPhone)) {
+      return res.status(403).json({ error: "This Penny AI account is paused, so the free trial is not available. Please contact Max to reactivate it." });
+    }
+
     // One free trial call per email, ever.
     const { data: usedRow, error: usedErr } = await supabase
       .from("trial_leads")
@@ -1657,6 +1661,147 @@ async function teacherStudent(req, id, columns = "id, role, teacher_id, school_i
   if (req.teacherRole === "system_admin") return student;
   if (req.teacherRole === "school_admin" && req.teacherSchoolId && student.school_id === req.teacherSchoolId) return student;
   return null;
+}
+
+// ─── PRACTICE (self-study area of the student dashboard) ─────────────────────
+// Exercises are served only through these routes, never as public files:
+//   • the student must be signed in;
+//   • a paused account (account_suspended) or one waiting for activation
+//     (awaiting_activation, e.g. free time finished) is refused, and the attempt
+//     is recorded as 'blocked';
+//   • listening audio comes as short-lived signed links, so links can't be shared.
+// Every exercise a student opens or finishes is recorded in practice_activity,
+// which the super admin console summarises (Practice usage).
+const fs = require("fs");
+const PRACTICE_DIR = path.join(__dirname, "practice-content");
+const PRACTICE_LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
+const PRACTICE_STAFF = ["teacher", "school_admin", "system_admin"];
+const PRACTICE_AUDIO_TTL = 3 * 60 * 60; // signed audio links last 3 hours
+const PAUSED_MESSAGE = "Your Penny AI account is paused, so Practice is not available right now. Please contact Max to reactivate it.";
+const practiceFileCache = {};
+
+function practiceStaticSets(level) {
+  if (practiceFileCache[level]) return practiceFileCache[level];
+  try {
+    const raw = fs.readFileSync(path.join(PRACTICE_DIR, level.toLowerCase() + ".json"), "utf8");
+    practiceFileCache[level] = JSON.parse(raw);
+  } catch (e) {
+    practiceFileCache[level] = null;
+  }
+  return practiceFileCache[level];
+}
+
+const isPracticeBlocked = row =>
+  !!row && row.role === "student" && (row.account_suspended === true || row.awaiting_activation === true);
+
+// Resolve the signed-in user and decide whether they may use Practice.
+// Sends the 401/403 response itself and returns null when they may not.
+async function practiceGate(req, res) {
+  const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
+  if (!token) { res.status(401).json({ error: "Please sign in to use Practice." }); return null; }
+  const { data: { user }, error: userError } = await getUserFromToken(token);
+  if (userError || !user) { res.status(401).json({ error: "Please sign in again to use Practice." }); return null; }
+  const { data: row, error } = await findUserRow(user, "id, role, english_level, account_suspended, awaiting_activation");
+  if (error) { res.status(500).json({ error: "Could not check your account. Please try again." }); return null; }
+  if (!row) { res.status(403).json({ blocked: true, reason: "no_account", error: PAUSED_MESSAGE }); return null; }
+  if (isPracticeBlocked(row)) {
+    // Record the attempt, at most once every 30 minutes per student.
+    try {
+      const since = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+      const { data: recent } = await supabase.from("practice_activity").select("id")
+        .eq("user_id", row.id).eq("event", "blocked").gte("created_at", since).limit(1);
+      if (!recent || !recent.length) {
+        await supabase.from("practice_activity").insert({ user_id: row.id, event: "blocked" });
+      }
+    } catch (e) { console.error("[practice] could not log blocked attempt:", e.message || e); }
+    res.status(403).json({
+      blocked: true,
+      reason: row.account_suspended ? "suspended" : "awaiting_activation",
+      error: PAUSED_MESSAGE,
+    });
+    return null;
+  }
+  return row;
+}
+
+// GET /api/practice/:level  → { level, sets: [...] }  (add ?preview=1 as staff to include sets in review)
+app.get("/api/practice/:level", async (req, res) => {
+  const row = await practiceGate(req, res);
+  if (!row) return;
+  const requested = String(req.params.level || "").toUpperCase();
+  if (!PRACTICE_LEVELS.includes(requested)) return res.status(400).json({ error: "Unknown level" });
+  const isStaff = PRACTICE_STAFF.includes(row.role);
+  // Students only get their own level; staff can look at any level.
+  const own = String(row.english_level || "").toUpperCase();
+  const level = !isStaff && PRACTICE_LEVELS.includes(own) ? own : requested;
+  const preview = isStaff && req.query.preview === "1";
+
+  try {
+    const base = practiceStaticSets(level);
+    const sets = base && Array.isArray(base.sets) ? base.sets.slice() : [];
+    const statuses = preview ? ["live", "review"] : ["live"];
+    const { data: rows, error } = await supabase.from("practice_listening")
+      .select("id, audio_path, status, data").eq("level", level).in("status", statuses).order("id");
+    if (error) throw error;
+    const listening = rows || [];
+    let signed = {};
+    if (listening.length) {
+      const { data: links, error: signErr } = await supabase.storage.from("practice-audio")
+        .createSignedUrls(listening.map(r => r.audio_path), PRACTICE_AUDIO_TTL);
+      if (signErr) throw signErr;
+      (links || []).forEach(l => { if (l && l.path && l.signedUrl) signed[l.path] = l.signedUrl; });
+    }
+    const have = new Set(sets.map(s => s.id));
+    listening.forEach(r => {
+      if (have.has(r.id) || !signed[r.audio_path]) return;
+      const s = Object.assign({}, r.data, { id: r.id, kind: "listening", audio: signed[r.audio_path] });
+      if (r.status === "review") s.title = s.title + " (review)";
+      sets.push(s);
+    });
+    if (!sets.length) return res.status(404).json({ error: "These exercises are not available yet." });
+    res.set("Cache-Control", "private, no-store");
+    res.json({ level, sets });
+  } catch (err) {
+    console.error("[practice] load error:", err.message || err);
+    res.status(500).json({ error: "Could not load the exercises. Please try again." });
+  }
+});
+
+// POST /api/practice/event  { event: 'open'|'finish', set_id, level, kind, score, total, seconds }
+app.post("/api/practice/event", async (req, res) => {
+  const row = await practiceGate(req, res);
+  if (!row) return;
+  const b = req.body || {};
+  if (!["open", "finish"].includes(b.event)) return res.status(400).json({ error: "Unknown event" });
+  const int = (v, max) => { const n = Math.round(Number(v)); return Number.isFinite(n) && n >= 0 && n <= max ? n : null; };
+  const lv = String(b.level || "").toUpperCase();
+  const record = {
+    user_id: row.id,
+    event: b.event,
+    set_id: String(b.set_id || "").slice(0, 80) || null,
+    level: PRACTICE_LEVELS.includes(lv) ? lv : null,
+    kind: String(b.kind || "").slice(0, 20) || null,
+    score: b.event === "finish" ? int(b.score, 200) : null,
+    total: b.event === "finish" ? int(b.total, 200) : null,
+    seconds: b.event === "finish" ? int(b.seconds, 4 * 3600) : null,
+  };
+  const { error } = await supabase.from("practice_activity").insert(record);
+  if (error) { console.error("[practice] event error:", error.message); return res.status(500).json({ error: "Not recorded" }); }
+  res.json({ ok: true });
+});
+
+// Is this email or phone a student whose account is paused? Used to stop paused
+// students from taking the landing-page free trial instead.
+async function isPausedStudentContact(email, phone) {
+  const digits = String(phone || "").replace(/\D/g, "");
+  const ors = [];
+  if (email) ors.push(`email.ilike.${String(email).replace(/[,()]/g, "")}`);
+  if (digits.length >= 8) ors.push(`phone.eq.${digits}`);
+  if (!ors.length) return false;
+  const { data, error } = await supabase.from("users")
+    .select("id, role, account_suspended, awaiting_activation").or(ors.join(",")).limit(5);
+  if (error || !data) return false;
+  return data.some(isPracticeBlocked);
 }
 
 const digitsOnly = v => String(v || "").replace(/\D/g, "");
@@ -2595,6 +2740,14 @@ const SA_EDITABLE = [
 // Each code works once and expires after 2 hours; the daily cap and the on/off switch
 // live in production_controls.demo_mode_enabled (numeric_value = demos per day).
 const SITE_URL = "https://www.pennyai.eu";
+
+// Practice usage per student over the last N days (default 30).
+app.get("/api/superadmin/practice-usage", requireSuperAdmin, async (req, res) => {
+  const days = Math.min(365, Math.max(1, parseInt(req.query.days, 10) || 30));
+  const { data, error } = await supabase.rpc("practice_usage_summary", { p_days: days });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ days, students: data || [] });
+});
 
 app.get("/api/superadmin/demo", requireSuperAdmin, async (req, res) => {
   const { data, error } = await supabase.rpc("demo_status");

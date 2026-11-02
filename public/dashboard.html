@@ -2753,37 +2753,44 @@ window.PennyPractice = (function () {
     const t = (document.getElementById('profile-level') || {}).textContent || '';
     return (t.match(/\b([ABC][12])\b/) || [])[1] || 'A1';
   }
-  // Extra listening sets live in Supabase (table practice_listening, audio in the
-  // practice-audio bucket). Students see status 'live'; add ?practicepreview=1 to
-  // the dashboard URL to also see sets still waiting for review.
+  // Exercises come from the server (/api/practice/<level>), which checks the account:
+  // paused accounts and accounts waiting for activation get a message instead.
+  // Listening audio arrives as short-lived signed links. Add ?practicepreview=1 to the
+  // dashboard URL (staff only) to also see listening sets still waiting for review.
   const PREVIEW = /[?&]practicepreview=1\b/.test(location.search);
-  async function loadExtra(level) {
+  const FRESH_MS = 2 * 60 * 60 * 1000;   // reload after 2 hours so audio links stay valid
+  let blockedMsg = null, startedAt = 0;
+  async function authHeader() {
     try {
-      const sb = window.pennySupabase;
-      if (!sb) return [];
-      const statuses = PREVIEW ? ['live', 'review'] : ['live'];
-      const { data: rows, error } = await sb.from('practice_listening')
-        .select('id, audio_path, status, data').eq('level', level).in('status', statuses).order('id');
-      if (error || !rows) return [];
-      return rows.map(r => {
-        const s = Object.assign({}, r.data, { id: r.id, kind: 'listening' });
-        s.audio = sb.storage.from('practice-audio').getPublicUrl(r.audio_path).data.publicUrl;
-        if (r.status === 'review') s.title = s.title + ' (review)';
-        return s;
-      });
-    } catch (e) { return []; }
+      const sb = window.pennySupabase; if (!sb) return null;
+      const { data: { session } } = await sb.auth.getSession();
+      return session ? { 'Authorization': 'Bearer ' + session.access_token } : null;
+    } catch (e) { return null; }
   }
   async function load(level) {
-    if (cache[level]) return cache[level];
-    let d = null;
-    try { const r = await fetch('/practice/' + level.toLowerCase() + '.json', { cache: 'no-cache' }); if (r.ok) d = await r.json(); } catch (e) {}
-    const extra = await loadExtra(level);
-    if (!d && !extra.length) return null;
-    d = d || { level, sets: [] };
-    const have = new Set(d.sets.map(s => s.id));
-    d.sets = d.sets.concat(extra.filter(s => !have.has(s.id)));
-    if (window.pennySupabase) cache[level] = d;   // don't cache before the connection is ready
-    return d;
+    const hit = cache[level];
+    if (hit && Date.now() - hit.at < FRESH_MS) return hit.d;
+    const h = await authHeader(); if (!h) return null;
+    try {
+      const r = await fetch('/api/practice/' + level.toLowerCase() + (PREVIEW ? '?preview=1' : ''), { headers: h, cache: 'no-store' });
+      if (r.status === 403) {
+        const b = await r.json().catch(() => ({}));
+        if (b && b.blocked) blockedMsg = b.error || 'Practice is not available for your account right now. Please contact Max.';
+        return null;
+      }
+      if (!r.ok) return null;
+      const d = await r.json();
+      cache[level] = { d, at: Date.now() };
+      return d;
+    } catch (e) { return null; }
+  }
+  // Record what the student does (fire and forget).
+  async function track(ev) {
+    const h = await authHeader(); if (!h) return;
+    try {
+      fetch('/api/practice/event', { method: 'POST', keepalive: true,
+        headers: Object.assign({ 'Content-Type': 'application/json' }, h), body: JSON.stringify(ev) }).catch(() => {});
+    } catch (e) {}
   }
   const bestKey = id => 'pennyPracticeBest:' + id;
 
@@ -2798,6 +2805,13 @@ window.PennyPractice = (function () {
     const d = await load(lv);
     data = d;
     const tabs = !PREVIEW ? '' : `<div class="pr-tabs">${LEVELS.map(l => `<button class="pr-tab${l === lv ? ' on' : ''}" onclick="PennyPractice.open('${l}')">${l}${l === mine ? ' ★' : ''}</button>`).join('')}</div>`;
+    if (blockedMsg) {
+      el.innerHTML = `<div class="pr-player"><div class="pr-done">
+        <div style="font-size:40px;margin-bottom:8px;">⏸</div>
+        <div style="font-size:18px;font-weight:700;margin-bottom:8px;">Practice is paused</div>
+        <p style="color:var(--muted);max-width:420px;margin:0 auto;line-height:1.5;">${esc(blockedMsg)}</p></div></div>`;
+      return;
+    }
     if (!d) { el.innerHTML = tabs + '<p style="color:var(--muted)">These exercises are not available yet.</p>'; return; }
     const card = s => {
       const best = store.get(bestKey(s.id));
@@ -2818,7 +2832,10 @@ window.PennyPractice = (function () {
 
   function start(id) {
     set = data.sets.find(s => s.id === id); if (!set) return;
-    idx = 0; correct = 0; slowOn = false; rate = SPEEDS(data && data.level).normal; render();
+    idx = 0; correct = 0; slowOn = false; rate = SPEEDS(data && data.level).normal;
+    startedAt = Date.now();
+    track({ event: 'open', set_id: set.id, level: data && data.level, kind: set.kind || 'topic' });
+    render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -2943,6 +2960,8 @@ window.PennyPractice = (function () {
   function finish() {
     const n = set.questions.length;
     const score = correct + '/' + n;
+    track({ event: 'finish', set_id: set.id, level: data && data.level, kind: set.kind || 'topic',
+            score: correct, total: n, seconds: startedAt ? Math.round((Date.now() - startedAt) / 1000) : null });
     const prev = store.get(bestKey(set.id));
     const prevN = prev ? Number(prev.split('/')[0]) : -1;
     if (correct > prevN) store.set(bestKey(set.id), score);

@@ -191,6 +191,7 @@
   <div class="nav-item" onclick="location.href='/admin.html'">Admin panel</div>
   <div class="nav-item active" id="nav-students" onclick="showView('students')">Students</div>
   <div class="nav-item" id="nav-schools" onclick="showView('schools')">Schools</div>
+  <div class="nav-item" id="nav-practice" onclick="showView('practice')">Practice usage</div>
   
   
   
@@ -231,6 +232,26 @@
         </table>
       </div>
     </div>
+  </div>
+
+  <div id="view-practice" hidden>
+    <div class="toolbar">
+      <div class="filters" id="pu-days">
+        <button class="filter" data-d="7" onclick="loadPractice(7)">Last 7 days</button>
+        <button class="filter active" data-d="30" onclick="loadPractice(30)">Last 30 days</button>
+        <button class="filter" data-d="90" onclick="loadPractice(90)">Last 90 days</button>
+      </div>
+    </div>
+    <div class="stats" id="pu-stats"></div>
+    <div class="table-wrap">
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>Student</th><th>Level</th><th>Account</th><th>Opened</th><th>Finished</th><th>Avg score</th><th>Minutes</th><th>Blocked tries</th><th>Last activity</th></tr></thead>
+          <tbody id="pu-rows"><tr><td colspan="9" style="color:var(--muted)">Loading practice usage…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:10px">Counts exercises in the free Practice area of the student dashboard. Paused and not-yet-activated students cannot open exercises; each try they make shows under “Blocked tries”.</p>
   </div>
 
   <div id="view-students">
@@ -505,6 +526,7 @@ async function boot(){
 
   await Promise.all([loadStudents(), loadTeachers(), loadSchools()]);
   if (location.hash === '#schools') showView('schools');
+  if (location.hash === '#practice') showView('practice');
 }
 
 async function token(){
@@ -577,19 +599,58 @@ const warnings = s=>health(s).filter(h=>!h.ok&&h.warn).length;
 /* ---------------- schools view ---------------- */
 let editingSchool=null;
 window.showView=function(v){
-  const isSchools=v==='schools';
-  document.getElementById('view-schools').hidden=!isSchools;
-  document.getElementById('view-students').hidden=isSchools;
-  document.getElementById('btn-add-school').hidden=!isSchools;
-  document.getElementById('btn-add-student').hidden=isSchools;
-  document.getElementById('nav-schools').classList.toggle('active',isSchools);
-  document.getElementById('nav-students').classList.toggle('active',!isSchools);
-  document.getElementById('view-title').textContent=isSchools?'Schools':'Students';
-  document.getElementById('view-sub').textContent=isSchools
-    ?'Every school on Penny AI, with its students, teachers and admins.'
-    :'Manage profiles, scheduled calls and lesson minutes.';
-  if(isSchools) loadSchools().catch(e=>toast(e.message,'bad'));
+  const titles={students:['Students','Manage profiles, scheduled calls and lesson minutes.'],
+    schools:['Schools','Every school on Penny AI, with its students, teachers and admins.'],
+    practice:['Practice usage','How much each student uses the free Practice area (exercises and listening).']};
+  if(!titles[v]) v='students';
+  ['students','schools','practice'].forEach(k=>{
+    document.getElementById('view-'+k).hidden=k!==v;
+    document.getElementById('nav-'+k).classList.toggle('active',k===v);
+  });
+  document.getElementById('btn-add-school').hidden=v!=='schools';
+  document.getElementById('btn-add-student').hidden=v!=='students';
+  document.getElementById('view-title').textContent=titles[v][0];
+  document.getElementById('view-sub').textContent=titles[v][1];
+  if(v==='schools') loadSchools().catch(e=>toast(e.message,'bad'));
+  if(v==='practice') loadPractice(practiceDays).catch(e=>toast(e.message,'bad'));
 };
+let practiceDays=30;
+async function loadPractice(days){
+  practiceDays=days;
+  document.querySelectorAll('#pu-days .filter').forEach(b=>b.classList.toggle('active',Number(b.dataset.d)===days));
+  const body=document.getElementById('pu-rows');
+  const res=await api('/api/superadmin/practice-usage?days='+days);
+  const list=(res.students||[]).slice().sort((a,b)=>
+    (Number(b.exercises_finished)-Number(a.exercises_finished))||(Number(b.exercises_opened)-Number(a.exercises_opened))||
+    String(a.name||'').localeCompare(String(b.name||'')));
+  const active=list.filter(r=>Number(r.exercises_opened)>0).length;
+  const fin=list.reduce((t,r)=>t+Number(r.exercises_finished||0),0);
+  const mins=list.reduce((t,r)=>t+Number(r.minutes_practised||0),0);
+  const blocked=list.reduce((t,r)=>t+Number(r.blocked_attempts||0),0);
+  document.getElementById('pu-stats').innerHTML=[
+    ['Students practising',active+' of '+list.length,'opened at least one exercise'],
+    ['Exercises finished',fin,'all students together'],
+    ['Minutes practised',Math.round(mins),'time spent on finished exercises'],
+    ['Blocked tries',blocked,'paused accounts trying to practise',blocked?'bad':'']
+  ].map(([l,v,f,c])=>`<div class="card"><div class="card-label">${esc(l)}</div><div class="card-value ${c||''}">${esc(String(v))}</div><div class="card-foot">${esc(f)}</div></div>`).join('');
+  if(!list.length){ body.innerHTML='<tr><td colspan="9" style="color:var(--muted)">No students yet.</td></tr>'; return; }
+  const fmt=d=>d?new Date(d).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+  body.innerHTML=list.map(r=>{
+    const acct=r.account_suspended?'<span class="badge bad">Suspended</span>'
+      :r.awaiting_activation?'<span class="badge warn">Awaiting activation</span>'
+      :'<span class="badge ok">Active</span>';
+    const b=Number(r.blocked_attempts||0);
+    return `<tr>
+      <td><div class="name-cell">${esc(r.name||'(no name)')}</div><div class="sub">${esc(r.email||'')}</div></td>
+      <td>${esc(r.english_level||'—')}</td><td>${acct}</td>
+      <td>${Number(r.exercises_opened||0)}</td><td>${Number(r.exercises_finished||0)}</td>
+      <td>${r.avg_score_pct==null?'—':esc(String(r.avg_score_pct))+'%'}</td>
+      <td>${Number(r.minutes_practised||0)}</td>
+      <td>${b?`<span class="badge bad">${b}</span>`:'0'}</td>
+      <td>${fmt(r.last_activity)}</td></tr>`;
+  }).join('');
+}
+window.loadPractice=loadPractice;
 function renderSchools(){
   const body=document.getElementById('school-rows'); if(!body) return;
   if(!schools.length){ body.innerHTML='<tr><td colspan="6" style="color:var(--muted)">No schools yet.</td></tr>'; return; }
