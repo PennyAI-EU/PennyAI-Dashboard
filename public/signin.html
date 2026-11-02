@@ -381,6 +381,8 @@
   const formSection = document.getElementById('form-section');
   const pendingSection = document.getElementById('pending-section');
 
+  const PAUSED_TEXT = "Your Penny AI account is paused, so you can't sign in right now. Please contact Max to reactivate it.";
+  if (/[?&]paused=1\b/.test(location.search)) setTimeout(() => showError(PAUSED_TEXT), 0);
   function showError(msg) {
     errorEl.textContent = msg;
     errorEl.classList.add('visible');
@@ -428,6 +430,10 @@
 
       const status = await checkOnboarding(accessToken);
 
+      if (status === 'paused') {
+        await supabase.auth.signOut();
+        throw new Error(PAUSED_TEXT);
+      }
       if (status === 'admin') {
         window.location.href = '/admin.html';
       } else if (status === 'teacher') {
@@ -491,6 +497,7 @@
 
       modal.classList.remove('visible');
       const status = await checkOnboarding(signInData.session.access_token);
+      if (status === 'paused') { modal.classList.remove('visible'); await sb.auth.signOut(); showError(PAUSED_TEXT); return; }
       if (status === 'admin') window.location.href = '/admin.html';
       else if (status === 'teacher') window.location.href = '/teacher.html';
       else if (status === 'complete') window.location.href = '/dashboard.html';

@@ -102,6 +102,13 @@ async function findUserRow(user, columns = "*") {
   return { data: rows.find(r => String(r.email || "").toLowerCase() === email) || null, error: null };
 }
 
+// Paused accounts: a student who is suspended (account_suspended) or whose free
+// time has finished and is waiting to be activated (awaiting_activation) cannot
+// sign in or use the website. Max reactivates them by clearing those two flags.
+const ACCOUNT_PAUSED_MESSAGE = "Your Penny AI account is paused, so you can't sign in right now. Please contact Max to reactivate it.";
+const isAccountPaused = row =>
+  !!row && row.role === "student" && (row.account_suspended === true || row.awaiting_activation === true);
+
 const DEFAULT_PASSWORD = 'Penny2026!';
 
 // Normalize phone to E164 (+digits). If already has +, keep it; otherwise prepend +.
@@ -1033,7 +1040,12 @@ app.post("/api/check-onboarding", async (req, res) => {
   }
 
   const phone = user.user_metadata?.phone || user.phone;
-  const { data, error } = await findUserRow(user, "english_level, role");
+  const { data, error } = await findUserRow(user, "english_level, role, account_suspended, awaiting_activation");
+
+  if (!error && isAccountPaused(data)) {
+    console.log("[check-onboarding] PAUSED — user:", user.id);
+    return res.json({ status: "paused", message: ACCOUNT_PAUSED_MESSAGE });
+  }
 
   if (error) {
     console.error("[check-onboarding] DB error for phone", phone, ":", error.message);
@@ -1080,6 +1092,7 @@ app.get("/api/me", async (req, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
   if (!data) return res.status(404).json({ error: "User not found" });
+  if (isAccountPaused(data)) return res.status(403).json({ paused: true, error: ACCOUNT_PAUSED_MESSAGE });
 
   res.json(data);
 });
@@ -1691,8 +1704,7 @@ function practiceStaticSets(level) {
   return practiceFileCache[level];
 }
 
-const isPracticeBlocked = row =>
-  !!row && row.role === "student" && (row.account_suspended === true || row.awaiting_activation === true);
+const isPracticeBlocked = isAccountPaused;
 
 // Resolve the signed-in user and decide whether they may use Practice.
 // Sends the 401/403 response itself and returns null when they may not.

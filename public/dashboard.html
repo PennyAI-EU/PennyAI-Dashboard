@@ -1946,6 +1946,14 @@ async function getDashboardData(userId, userPhone, userEmail, authMeta) {
     let user = null;
     try {
       const meRes = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + session.access_token } });
+      if (meRes.status === 403) {
+        const b = await meRes.json().catch(() => ({}));
+        if (b && b.paused) {   // paused account: sign out and back to the sign-in page
+          await supabase.auth.signOut();
+          window.location.replace('/signin.html?paused=1');
+          return null;
+        }
+      }
       if (meRes.ok) user = await meRes.json();
     } catch (_) {}
 
@@ -2503,7 +2511,12 @@ endBtn.addEventListener('click', () => {
       getDashboardData(userId, userPhone, userEmail, authMeta),
     ]);
 
-    if (status !== 'complete') {
+    if (status === 'paused') {   // paused account: sign out, show the reason on the sign-in page
+      await supabase.auth.signOut();
+      window.location.replace('/signin.html?paused=1');
+      return;
+    }
+    if (status !== 'complete' || !dashData) {
       window.location.href = '/signin.html';
       return;
     }
